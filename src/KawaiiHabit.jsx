@@ -2980,7 +2980,7 @@ function NekoChanTab({habits,todos,challenges}) {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   },[messages,loading]);
 
-  function send(overrideMsg) {
+  async function send(overrideMsg) {
     const msg = overrideMsg || input.trim();
     if(!msg||loading) return;
     if (!overrideMsg) setInput("");
@@ -2988,11 +2988,46 @@ function NekoChanTab({habits,todos,challenges}) {
     setMessages(newMsgs);
     setLoading(true);
 
-    setTimeout(()=>{
+    // Detect name in message for local memory
+    const lower = msg.toLowerCase();
+    const nameMatch = lower.match(/(?:my name is|i'm|im|i am|call me|name's|names)\s+([a-zA-Z]{2,20})/);
+    if (nameMatch) {
+      nekoMemory.userName = nameMatch[1].charAt(0).toUpperCase() + nameMatch[1].slice(1);
+      saveNekoMemory();
+    }
+
+    try {
+      const todayStr = today();
+      const doneCount = habits.filter(h=>h.completedDates.includes(todayStr)).length;
+      const context = {
+        doneCount,
+        totalHabits: habits.length,
+        pendingTodos: todos.filter(t=>!t.done).length,
+        activeChallenges: challenges.map(c => ({
+          emoji: c.emoji, name: c.name,
+          elapsed: daysBetween(c.startDate, todayStr)+1,
+          targetDays: c.targetDays
+        })),
+        userName: nekoMemory.userName
+      };
+
+      const resp = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMsgs, context })
+      });
+
+      if (!resp.ok) throw new Error("api");
+      const data = await resp.json();
+      if (!data.reply) throw new Error("empty");
+      setMessages(p=>[...p,{role:"assistant",content:data.reply}]);
+    } catch {
+      // Offline fallback — use local pattern matching
       const reply = getNekoResponse(msg, habits, todos, challenges);
       setMessages(p=>[...p,{role:"assistant",content:reply}]);
+    } finally {
       setLoading(false);
-    }, 600 + Math.random()*800);
+    }
   }
 
   const QUICK_ACTIONS = [
