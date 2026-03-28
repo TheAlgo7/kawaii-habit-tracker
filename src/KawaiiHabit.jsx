@@ -23,12 +23,69 @@ const seedChallenges = [
 ];
 
 /* ─── localStorage persistence ───────────────────────────── */
-const STORAGE_KEYS = { habits:'kw_habits', todos:'kw_todos', challenges:'kw_challenges', nekoName:'kw_nekoName', lastActive:'kw_lastActive', personality:'kw_personality', milestones:'kw_milestones', worldName:'kw_worldName', memories:'kw_memories', onboarded:'kw_onboarded' };
+const STORAGE_KEYS = { habits:'kw_habits', todos:'kw_todos', challenges:'kw_challenges', nekoName:'kw_nekoName', lastActive:'kw_lastActive', personality:'kw_personality', milestones:'kw_milestones', worldName:'kw_worldName', memories:'kw_memories', onboarded:'kw_onboarded', nekoMessages:'kw_nekoMessages', theme:'kw_theme' };
 function loadState(key, fallback) {
   try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch { return fallback; }
 }
 function saveState(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+}
+
+/* ─── Theme Definitions ──────────────────────────────────── */
+const THEMES = {
+  kawaii: { label:'🌸 Kawaii', vars: null }, // default — uses :root values
+  dark: { label:'🌙 Dark', vars: {
+    '--bg-app':'#1a1a2e','--bg-surface':'#16213e','--bg-card':'#0f3460',
+    '--bg-nav':'#0f3460','--bg-input':'#16213e','--bg-hover':'#1a1a4e',
+    '--text-primary':'#e0e0ff','--text-secondary':'#a0a0c0','--text-muted':'#707090',
+    '--accent':'#e94560','--accent-light':'#ff6b81','--accent-pale':'#2a1a2e',
+    '--border':'#1a1a4e','--border-light':'#252550','--shadow-soft':'rgba(0,0,0,.4)',
+    '--shadow-card':'rgba(0,0,0,.5)','--gradient-warm':'linear-gradient(135deg,#e94560,#ff6b81)',
+    '--gradient-cool':'linear-gradient(135deg,#0f3460,#16213e)',
+    '--tag-bg':'#1a1a4e','--tag-text':'#e0e0ff',
+  }},
+  sakura: { label:'🌸 Sakura', vars: {
+    '--bg-app':'#fff0f5','--bg-surface':'#ffe4ed','--bg-card':'#fff5f8',
+    '--bg-nav':'#ffccd5','--bg-input':'#fff0f5','--bg-hover':'#ffd6e0',
+    '--text-primary':'#5c2434','--text-secondary':'#8b4560','--text-muted':'#c0809a',
+    '--accent':'#e84393','--accent-light':'#fd79a8','--accent-pale':'#ffe8f0',
+    '--border':'#ffb6c1','--border-light':'#ffd6e0','--shadow-soft':'rgba(232,67,147,.08)',
+    '--shadow-card':'rgba(232,67,147,.12)','--gradient-warm':'linear-gradient(135deg,#e84393,#fd79a8)',
+    '--gradient-cool':'linear-gradient(135deg,#ffb6c1,#ffd6e0)',
+    '--tag-bg':'#ffe4ed','--tag-text':'#e84393',
+  }},
+  matcha: { label:'🍵 Matcha', vars: {
+    '--bg-app':'#f0f5e8','--bg-surface':'#e4edda','--bg-card':'#f5f8f0',
+    '--bg-nav':'#c5d5a5','--bg-input':'#f0f5e8','--bg-hover':'#d6e0c8',
+    '--text-primary':'#2d3a1f','--text-secondary':'#4a6030','--text-muted':'#80a060',
+    '--accent':'#6b8e23','--accent-light':'#8fbc3c','--accent-pale':'#e8f0d8',
+    '--border':'#b0c890','--border-light':'#d0e0b8','--shadow-soft':'rgba(107,142,35,.08)',
+    '--shadow-card':'rgba(107,142,35,.12)','--gradient-warm':'linear-gradient(135deg,#6b8e23,#8fbc3c)',
+    '--gradient-cool':'linear-gradient(135deg,#b0c890,#d0e0b8)',
+    '--tag-bg':'#e4edda','--tag-text':'#6b8e23',
+  }},
+  midnight: { label:'🌊 Midnight', vars: {
+    '--bg-app':'#0d1b2a','--bg-surface':'#1b2838','--bg-card':'#1b3a4b',
+    '--bg-nav':'#1b3a4b','--bg-input':'#1b2838','--bg-hover':'#243b53',
+    '--text-primary':'#d4e4f7','--text-secondary':'#8baac4','--text-muted':'#5a7a94',
+    '--accent':'#48bfe3','--accent-light':'#72d1eb','--accent-pale':'#102a3a',
+    '--border':'#243b53','--border-light':'#2a4a63','--shadow-soft':'rgba(0,0,0,.4)',
+    '--shadow-card':'rgba(0,0,0,.5)','--gradient-warm':'linear-gradient(135deg,#48bfe3,#72d1eb)',
+    '--gradient-cool':'linear-gradient(135deg,#1b3a4b,#0d1b2a)',
+    '--tag-bg':'#1b3a4b','--tag-text':'#48bfe3',
+  }},
+};
+
+function applyTheme(name) {
+  const root = document.documentElement;
+  // reset all custom properties set by themes
+  Object.values(THEMES).forEach(t => {
+    if (t.vars) Object.keys(t.vars).forEach(k => root.style.removeProperty(k));
+  });
+  const theme = THEMES[name];
+  if (theme && theme.vars) {
+    Object.entries(theme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
+  }
 }
 
 /* ─── missed-days dependency calc ────────────────────────── */
@@ -631,11 +688,6 @@ const STYLE = `
   /* ── easing tokens ── */
   --ease-spring:cubic-bezier(.16,1,.3,1);
   --ease-smooth:cubic-bezier(0.4,0,0.2,1);
-  /* ── shadow tokens (colored, never black) ── */
-  --shadow-soft:0 4px 24px rgba(255,143,171,0.10);
-  --shadow-pink:0 6px 28px rgba(255,143,171,0.15);
-  --shadow-deep:0 8px 32px rgba(255,143,171,0.18);
-  --shadow-card:0 8px 24px rgba(255,143,171,0.12);
   /* ── radius tokens ── */
   --radius-xl:28px;
   --radius-lg:22px;
@@ -650,23 +702,76 @@ const STYLE = `
   --space-md:16px;
   --space-lg:20px;
   --space-xl:28px;
-  /* ── palette tokens ── */
-  --pink-primary:#FF8FAB;
-  --pink-blush:#FFC2D1;
+  /* ── theme color tokens (defaults = kawaii) ── */
+  --bg-base:#FFF4F7;
+  --bg-surface:#ffffff;
+  --bg-surface-alt:#FFF8FA;
+  --bg-nav:rgba(255,255,255,0.85);
+  --bg-nav-btn:rgba(255,240,245,0.35);
+  --accent-dark:#FF6B95;
+  --accent:#FF85A2;
+  --accent-light:#FFB7C5;
+  --accent-soft:#FFE8F0;
+  --accent-softer:#FFF0F5;
+  --accent-blush:#FFE0EC;
+  --accent-border:#FFD6E0;
+  --accent-heading:#E8779A;
+  --accent-rgb:232,119,153;
+  --accent-dark-rgb:255,107,149;
+  --text-dark:#3D2C5E;
+  --text-muted:#8B7DA0;
+  --text-soft:#D4A0B0;
+  --text-placeholder:#E8C4B8;
+  --text-done:#C4B5D4;
+  --text-streak:#FFB07C;
+  --green-1:#6BAF8D;
+  --green-2:#8FD4B4;
+  --green-3:#A0C8B0;
+  --green-done-1:#8FD4B4;
+  --green-done-2:#7CC4A0;
+  --green-glow:rgba(107,175,141,0.35);
+  --challenge-1:#FF9AA2;
+  --challenge-2:#FFB7C5;
+  --challenge-glow:rgba(255,154,162,0.35);
+  --overlay-rgb:62,35,55;
+  --gold:#FFD700;
+  --sticker-bg-1:#FFF8FA;
+  --sticker-bg-2:#FFE8F0;
+  --sticker-green-1:#F0FFF4;
+  --sticker-green-2:#E8FAF0;
+  --sticker-purple-1:#FFF0F5;
+  --sticker-purple-2:#F8E8FF;
+  --sticker-neko-1:#FFF8FA;
+  --sticker-neko-2:#F0E6FF;
+  --cat-body:#ffffff;
+  --cat-outline:#FFB7C5;
+  --cat-blush:#FFE0EC;
+  --cat-eyes:#3D2C5E;
+  --cat-mouth:#FFB7C5;
+  --cat-whiskers:#E8C4B8;
+  --cat-ear-inner:#FFE0EC;
+  --cat-tear:#8ED4F0;
+  --lavender-btn-1:#FFB7C5;
+  --lavender-btn-2:#CDB4DB;
+  --accent-softer-rgb:255,240,245;
+  --green-text-soft:#A0C8B0;
+  /* ── legacy aliases ── */
+  --pink-primary:var(--accent);
+  --pink-blush:var(--accent-light);
   --lavender:#CDB4DB;
   --blue-soft:#BDE0FE;
   --green-soft:#A8E6CF;
   --warn-soft:#FFD6A5;
-  --text-primary:#2E2E3A;
-  --text-muted:#8B7DA0;
-  --text-soft:#D4A0B0;
-  --bg-warm:#FFF4F7;
-  --white-soft:rgba(255,255,255,0.85);
+  --text-primary:var(--text-dark);
+  --bg-warm:var(--bg-base);
+  --white-soft:var(--bg-nav);
+  --text-on-accent:#fff;
+  --gold:#FFD700;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body,#root{
   height:100%;margin:0;padding:0;
-  background:#FFF4F7;
+  background:var(--bg-base);
   overflow-x:hidden;
 }
 #root{
@@ -704,16 +809,30 @@ body{
 .kw-title{
   font-family:'Fredoka',sans-serif;
   font-size:28px;font-weight:700;
-  color:#E8779A;
+  color:var(--accent-heading);
   letter-spacing:.5px;
 }
 .kw-date{
-  font-size:13px;color:#D4A0B0;font-weight:600;margin-top:2px;
+  font-size:13px;color:var(--text-soft);font-weight:600;margin-top:2px;
+}
+.theme-picker{
+  display:flex;gap:4px;align-items:center;
+}
+.theme-btn{
+  background:var(--bg-card);border:2px solid var(--border-light);
+  border-radius:var(--r-full);width:32px;height:32px;
+  font-size:14px;cursor:pointer;transition:all .2s var(--ease-bounce);
+  display:flex;align-items:center;justify-content:center;padding:0;
+}
+.theme-btn:hover{transform:scale(1.15);border-color:var(--accent);}
+.theme-btn.active{
+  border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);
+  transform:scale(1.1);
 }
 .cat-mascot{
   width:52px;height:52px;
   animation:catBounce 3s ease-in-out infinite;
-  filter:drop-shadow(0 4px 8px rgba(232,119,153,0.2));
+  filter:drop-shadow(0 4px 8px rgba(var(--accent-rgb),0.2));
   transition:filter .5s ease;
 }
 @keyframes catBounce{
@@ -743,11 +862,11 @@ body{
   left:0;right:0;
   width:calc(100% - 32px);max-width:388px;
   height:68px;
-  background:rgba(255,255,255,0.85);
+  background:var(--bg-nav);
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
   border-radius:var(--radius-nav);
-  box-shadow:0 4px 28px rgba(232,119,153,0.15);
+  box-shadow:0 4px 28px rgba(var(--accent-rgb),0.15);
   padding:0 8px;
   display:flex;align-items:center;
   z-index:1000;
@@ -757,7 +876,7 @@ body{
 }
 .kw-nav button{
   flex:1 1 0%;border:none;
-  background:rgba(255,240,245,0.35);
+  background:var(--bg-nav-btn);
   min-width:0;width:0;overflow:hidden;
   height:52px;
   padding:0 4px;border-radius:22px;
@@ -765,13 +884,13 @@ body{
   align-items:center;justify-content:center;gap:3px;
   font-family:'Quicksand',sans-serif;
   font-size:10px;font-weight:700;
-  color:#E8C4B8;
+  color:var(--text-placeholder);
   transition:background .3s cubic-bezier(.16,1,.3,1), color .3s;
   position:relative;
 }
 .kw-nav button.active{
-  background:linear-gradient(135deg,#FFF0F5,#FFE0EC);
-  color:#FF85A2;
+  background:linear-gradient(135deg,var(--accent-softer),var(--accent-blush));
+  color:var(--accent);
 }
 .kw-nav button .ico{
   font-size:22px;line-height:1;
@@ -780,37 +899,37 @@ body{
 
 /* ── cards ── */
 .card{
-  background:#fff;
+  background:var(--bg-surface);
   border-radius:30px;
   padding:18px 16px;
   margin-bottom:14px;
-  box-shadow:0 4px 24px rgba(232,119,153,0.10);
+  box-shadow:0 4px 24px rgba(var(--accent-rgb),0.10);
   transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s;
 }
 .card:hover{
   transform:translateY(-2px);
-  box-shadow:0 8px 32px rgba(232,119,153,0.16);
+  box-shadow:0 8px 32px rgba(var(--accent-rgb),0.16);
 }
 .card-sm{
-  background:#fff;
+  background:var(--bg-surface);
   border-radius:26px;
   padding:14px 16px;
   margin-bottom:10px;
-  box-shadow:0 3px 18px rgba(232,119,153,0.08);
+  box-shadow:0 3px 18px rgba(var(--accent-rgb),0.08);
   transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s;
 }
 .card-sm:hover{
   transform:translateY(-1px);
-  box-shadow:0 6px 24px rgba(232,119,153,0.14);
+  box-shadow:0 6px 24px rgba(var(--accent-rgb),0.14);
 }
 
 /* ── sticker card (progress) ── */
 .sticker-card{
-  background:linear-gradient(145deg,#FFF8FA,#FFE8F0);
+  background:linear-gradient(145deg,var(--sticker-bg-1),var(--sticker-bg-2));
   border-radius:30px;
   padding:20px 16px;
   margin-bottom:16px;
-  box-shadow:0 6px 28px rgba(232,119,153,0.14),inset 0 1px 0 rgba(255,255,255,0.8);
+  box-shadow:0 6px 28px rgba(var(--accent-rgb),0.14),inset 0 1px 0 rgba(255,255,255,0.8);
   position:relative;
   overflow:hidden;
 }
@@ -833,7 +952,7 @@ body{
 /* ── progress bar ── */
 .prog-bar{
   height:12px;
-  background:#FFE8F0;
+  background:var(--accent-soft);
   border-radius:12px;
   overflow:hidden;
   margin-top:10px;
@@ -841,21 +960,21 @@ body{
 .prog-fill{
   height:100%;border-radius:12px;
   transition:width .5s cubic-bezier(.16,1,.3,1);
-  background:linear-gradient(90deg,#FF85A2,#FFB7C5);
-  box-shadow:0 2px 8px rgba(255,133,162,0.3);
+  background:linear-gradient(90deg,var(--accent),var(--accent-light));
+  box-shadow:0 2px 8px rgba(var(--accent-rgb),0.3);
 }
 
 /* ── habit row ── */
 .habit-row{display:flex;align-items:center;gap:14px;}
 .habit-check{
   width:42px;height:42px;
-  border-radius:50%;border:3px solid #FFD6E0;
+  border-radius:50%;border:3px solid var(--accent-border);
   cursor:pointer;font-size:18px;
   display:flex;align-items:center;justify-content:center;
   transition:all .3s cubic-bezier(.16,1,.3,1);
-  flex-shrink:0;background:#FFF8FA;
+  flex-shrink:0;background:var(--bg-surface-alt);
 }
-.habit-check:hover{transform:scale(1.12);border-color:#FFB7C5;}
+.habit-check:hover{transform:scale(1.12);border-color:var(--accent-light);}
 .habit-check.checked{
   border-color:transparent;
   animation:checkPop .4s cubic-bezier(.16,1,.3,1);
@@ -867,12 +986,12 @@ body{
 }
 .habit-info{flex:1;}
 .habit-name{
-  font-size:15px;font-weight:700;color:#3D2C5E;
+  font-size:15px;font-weight:700;color:var(--text-dark);
   transition:opacity .3s;
 }
 .habit-name.done{opacity:.5;text-decoration:line-through;}
 .habit-streak{
-  font-size:12px;color:#FFB07C;font-weight:700;margin-top:2px;
+  font-size:12px;color:var(--text-streak);font-weight:700;margin-top:2px;
 }
 
 /* ── section ── */
@@ -882,23 +1001,23 @@ body{
 }
 .section-title{
   font-family:'Fredoka',sans-serif;
-  font-size:20px;font-weight:600;color:#E8779A;
+  font-size:20px;font-weight:600;color:var(--accent-heading);
 }
 
 /* ── FAB ── */
 .fab{
   width:54px;height:54px;
   border-radius:50%;border:none;
-  background:linear-gradient(135deg,#FF6B95,#FF85A2);
-  color:#fff;font-size:28px;font-weight:300;
+  background:linear-gradient(135deg,var(--accent-dark),var(--accent));
+  color:var(--text-on-accent);font-size:28px;font-weight:300;
   cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 28px rgba(255,107,149,0.45);
+  box-shadow:0 6px 28px rgba(var(--accent-dark-rgb),0.45);
   transition:all .3s cubic-bezier(.16,1,.3,1);
 }
 .fab:hover{
   transform:scale(1.12);
-  box-shadow:0 8px 36px rgba(255,107,149,0.55);
+  box-shadow:0 8px 36px rgba(var(--accent-dark-rgb),0.55);
 }
 .fab:active{transform:scale(0.95);}
 
@@ -913,32 +1032,32 @@ body{
 .todo-check{
   width:24px;height:24px;
   border-radius:50%;
-  border:2.5px solid #FFB7C5;
+  border:2.5px solid var(--accent-light);
   cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
   transition:all .3s cubic-bezier(.16,1,.3,1);
-  background:#FFF8FA;
+  background:var(--bg-surface-alt);
 }
-.todo-check:hover{transform:scale(1.15);border-color:#FF85A2;}
+.todo-check:hover{transform:scale(1.15);border-color:var(--accent);}
 .todo-check.done{
-  background:linear-gradient(135deg,#8FD4B4,#7CC4A0);
+  background:linear-gradient(135deg,var(--green-done-1),var(--green-done-2));
   border-color:transparent;
   animation:checkPop .4s cubic-bezier(.16,1,.3,1);
 }
-.todo-name{flex:1;font-size:15px;font-weight:700;color:#3D2C5E;}
-.todo-name.done{text-decoration:line-through;color:#C4B5D4;opacity:.6;}
+.todo-name{flex:1;font-size:15px;font-weight:700;color:var(--text-dark);}
+.todo-name.done{text-decoration:line-through;color:var(--text-done);opacity:.6;}
 .todo-cat{
   font-size:10px;padding:3px 10px;border-radius:20px;
-  background:#FFE8F0;color:#E8779A;font-weight:700;
+  background:var(--accent-soft);color:var(--accent-heading);font-weight:700;
 }
 .todo-delete{
   background:none;border:none;cursor:pointer;
-  font-size:18px;color:#FFB7C5;
+  font-size:18px;color:var(--accent-light);
   transition:all .2s;
   opacity:.6;
 }
-.todo-delete:hover{opacity:1;transform:scale(1.2);color:#FF6B95;}
+.todo-delete:hover{opacity:1;transform:scale(1.2);color:var(--accent-dark);}
 
 /* ── challenge ── */
 .chal-card{
@@ -961,8 +1080,8 @@ body{
 }
 .chal-btn:hover{transform:scale(1.05);}
 .chal-stat{text-align:center;}
-.chal-stat-num{font-size:26px;font-weight:800;color:#3D2C5E;}
-.chal-stat-label{font-size:11px;color:#8B7DA0;font-weight:700;}
+.chal-stat-num{font-size:26px;font-weight:800;color:var(--text-dark);}
+.chal-stat-label{font-size:11px;color:var(--text-muted);font-weight:700;}
 
 /* ── ai / neko chat (self-contained layout) ── */
 .neko-container{
@@ -991,14 +1110,14 @@ body{
 }
 .bubble.user{
   align-self:flex-end;
-  background:linear-gradient(135deg,#FF85A2,#FFB7C5);
-  color:#fff;border-bottom-right-radius:6px;
-  box-shadow:0 3px 16px rgba(255,133,162,0.2);
+  background:linear-gradient(135deg,var(--accent),var(--accent-light));
+  color:var(--text-on-accent);border-bottom-right-radius:6px;
+  box-shadow:0 3px 16px rgba(var(--accent-rgb),0.2);
 }
 .bubble.ai{
   align-self:flex-start;
-  background:#fff;color:#3D2C5E;
-  box-shadow:0 3px 16px rgba(232,119,153,0.1);
+  background:var(--bg-surface);color:var(--text-dark);
+  box-shadow:0 3px 16px rgba(var(--accent-rgb),0.1);
   border-bottom-left-radius:6px;
 }
 .chat-input-bar{
@@ -1007,23 +1126,23 @@ body{
 }
 .chat-input-inner{
   display:flex;gap:10px;
-  background:#fff;border-radius:30px;
+  background:var(--bg-surface);border-radius:30px;
   padding:6px 6px 6px 18px;
-  box-shadow:0 4px 20px rgba(232,119,153,0.12);
+  box-shadow:0 4px 20px rgba(var(--accent-rgb),0.12);
 }
 .chat-input-inner input{
   flex:1;border:none;outline:none;
   font-family:'Quicksand',sans-serif;
-  font-size:14px;font-weight:600;color:#3D2C5E;
+  font-size:14px;font-weight:600;color:var(--text-dark);
   background:none;
 }
-.chat-input-inner input::placeholder{color:#E8C4B8;}
+.chat-input-inner input::placeholder{color:var(--text-placeholder);}
 .chat-send{
   width:40px;height:40px;border-radius:50%;border:none;
-  background:linear-gradient(135deg,#FF6B95,#FF85A2);
-  cursor:pointer;font-size:16px;color:#fff;
+  background:linear-gradient(135deg,var(--accent-dark),var(--accent));
+  cursor:pointer;font-size:16px;color:var(--text-on-accent);
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 16px rgba(255,107,149,0.35);
+  box-shadow:0 4px 16px rgba(var(--accent-dark-rgb),0.35);
   transition:all .3s cubic-bezier(.16,1,.3,1);
 }
 .chat-send:hover{transform:scale(1.1);}
@@ -1033,7 +1152,7 @@ body{
 .typing{display:flex;gap:5px;align-items:center;padding:8px 0;}
 .dot{
   width:8px;height:8px;border-radius:50%;
-  background:#FFB7C5;
+  background:var(--accent-light);
   animation:dotBounce .6s ease infinite alternate;
 }
 .dot:nth-child(2){animation-delay:.15s;}
@@ -1046,7 +1165,7 @@ body{
 /* ── modal ── */
 .modal-overlay{
   position:fixed;inset:0;
-  background:rgba(62,35,55,0.35);
+  background:rgba(var(--overlay-rgb),0.35);
   backdrop-filter:blur(4px);
   z-index:1500;display:flex;
   align-items:flex-end;justify-content:center;
@@ -1054,7 +1173,7 @@ body{
 }
 @keyframes overlayIn{from{opacity:0}to{opacity:1}}
 .modal{
-  background:#fff;border-radius:34px 34px 0 0;
+  background:var(--bg-surface);border-radius:34px 34px 0 0;
   padding:28px 22px 30px;
   width:100%;max-width:420px;
   animation:modalSlideUp .35s cubic-bezier(.16,1,.3,1);
@@ -1062,48 +1181,48 @@ body{
 @keyframes modalSlideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal h3{
   font-family:'Fredoka',sans-serif;
-  font-size:22px;font-weight:600;color:#E8779A;
+  font-size:22px;font-weight:600;color:var(--accent-heading);
   margin-bottom:18px;
 }
 .modal input,.modal select{
   width:100%;
-  border:2.5px solid #FFE0EC;
+  border:2.5px solid var(--accent-blush);
   border-radius:18px;
   padding:12px 16px;
   font-family:'Quicksand',sans-serif;
-  font-size:15px;font-weight:600;color:#3D2C5E;
+  font-size:15px;font-weight:600;color:var(--text-dark);
   outline:none;margin-bottom:12px;
-  background:#FFF8FA;
+  background:var(--bg-surface-alt);
   transition:border-color .25s;
 }
-.modal input:focus,.modal select:focus{border-color:#FF85A2;}
-.modal input::placeholder{color:#E8C4B8;}
+.modal input:focus,.modal select:focus{border-color:var(--accent);}
+.modal input::placeholder{color:var(--text-placeholder);}
 .emoji-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;}
 .emoji-btn{
   width:40px;height:40px;border-radius:14px;
-  border:2.5px solid #FFE0EC;background:#FFF8FA;
+  border:2.5px solid var(--accent-blush);background:var(--bg-surface-alt);
   font-size:18px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:all .2s cubic-bezier(.16,1,.3,1);
 }
-.emoji-btn:hover{transform:scale(1.1);border-color:#FFB7C5;}
-.emoji-btn.sel{border-color:#FF85A2;background:#FFE8F0;transform:scale(1.1);}
+.emoji-btn:hover{transform:scale(1.1);border-color:var(--accent-light);}
+.emoji-btn.sel{border-color:var(--accent);background:var(--accent-soft);transform:scale(1.1);}
 .custom-emoji-row{
   display:flex;gap:8px;align-items:center;margin-bottom:14px;
 }
 .custom-emoji-input{
   flex:1;
-  border:2.5px dashed #FFE0EC;border-radius:14px;
+  border:2.5px dashed var(--accent-blush);border-radius:14px;
   padding:8px 14px;
   font-size:22px;text-align:center;
   font-family:'Quicksand',sans-serif;
-  outline:none;background:#FFF8FA;
+  outline:none;background:var(--bg-surface-alt);
   transition:border-color .25s;
   width:60px;max-width:60px;
 }
-.custom-emoji-input:focus{border-color:#FF85A2;}
+.custom-emoji-input:focus{border-color:var(--accent);}
 .custom-emoji-hint{
-  font-size:11px;color:#D4A0B0;font-weight:600;
+  font-size:11px;color:var(--text-soft);font-weight:600;
   flex:1;
 }
 .color-grid{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
@@ -1114,28 +1233,28 @@ body{
   box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
 .color-dot:hover{transform:scale(1.15);}
-.color-dot.sel{border-color:#3D2C5E;transform:scale(1.15);}
+.color-dot.sel{border-color:var(--text-dark);transform:scale(1.15);}
 .btn-pri{
   width:100%;padding:14px;
   border-radius:22px;border:none;
-  background:linear-gradient(135deg,#FF6B95,#FF85A2);
-  color:#fff;
+  background:linear-gradient(135deg,var(--accent-dark),var(--accent));
+  color:var(--text-on-accent);
   font-family:'Fredoka',sans-serif;
   font-size:18px;font-weight:600;
   cursor:pointer;letter-spacing:.5px;
-  box-shadow:0 6px 24px rgba(255,107,149,0.35);
+  box-shadow:0 6px 24px rgba(var(--accent-dark-rgb),0.35);
   transition:all .3s cubic-bezier(.16,1,.3,1);
 }
-.btn-pri:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(255,107,149,0.45);}
+.btn-pri:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(var(--accent-dark-rgb),0.45);}
 .btn-pri:active{transform:translateY(0);}
 .label-text{
-  font-size:13px;font-weight:700;color:#D4A0B0;margin-bottom:8px;
+  font-size:13px;font-weight:700;color:var(--text-soft);margin-bottom:8px;
 }
 
 /* ── empty state ── */
 .empty-state{
   text-align:center;padding:32px 0;
-  color:#E8C4B8;font-size:15px;font-weight:700;
+  color:var(--text-placeholder);font-size:15px;font-weight:700;
 }
 
 /* ── Neko world section ── */
@@ -1145,8 +1264,8 @@ body{
   margin-bottom:16px;
   text-align:center;
   position:relative;
-  background:#FFF8FA;
-  box-shadow:0 6px 28px rgba(232,119,153,0.10);
+  background:var(--bg-surface-alt);
+  box-shadow:0 6px 28px rgba(var(--accent-rgb),0.10);
   overflow:hidden;
 }
 .neko-world-inner{
@@ -1156,12 +1275,12 @@ body{
 }
 .neko-speech{margin-top:6px;}
 .speech-bubble{
-  background:#fff;
+  background:var(--bg-surface);
   border-radius:20px;
   padding:10px 18px;
-  font-size:13px;font-weight:600;color:#3D2C5E;
+  font-size:13px;font-weight:600;color:var(--text-dark);
   max-width:260px;margin:0 auto;
-  box-shadow:0 2px 12px rgba(232,119,153,0.1);
+  box-shadow:0 2px 12px rgba(var(--accent-rgb),0.1);
   position:relative;line-height:1.5;
   animation:fadeSlideIn .5s cubic-bezier(.16,1,.3,1) both;
 }
@@ -1169,9 +1288,9 @@ body{
   content:'';position:absolute;
   top:-5px;left:50%;
   width:10px;height:10px;
-  background:#fff;border-radius:2px;
+  background:var(--bg-surface);border-radius:2px;
   transform:translateX(-50%) rotate(45deg);
-  box-shadow:-1px -1px 3px rgba(232,119,153,0.05);
+  box-shadow:-1px -1px 3px rgba(var(--accent-rgb),0.05);
 }
 .world-status{
   display:flex;align-items:center;
@@ -1183,14 +1302,14 @@ body{
 }
 .world-stat-num{
   font-family:'Fredoka',sans-serif;
-  font-size:22px;font-weight:700;color:#E8779A;
+  font-size:22px;font-weight:700;color:var(--accent-heading);
 }
 .world-stat-label{
-  font-size:11px;color:#D4A0B0;font-weight:600;
+  font-size:11px;color:var(--text-soft);font-weight:600;
 }
 .world-status-divider{
   width:1.5px;height:28px;
-  background:#FFE0EC;border-radius:1px;
+  background:var(--accent-blush);border-radius:1px;
 }
 
 /* ── streak visual dots ── */
@@ -1207,7 +1326,7 @@ body{
   50%{transform:scale(1.25);opacity:1}
 }
 .streak-plus{
-  font-size:10px;font-weight:700;color:#D4A0B0;margin-left:2px;
+  font-size:10px;font-weight:700;color:var(--text-soft);margin-left:2px;
 }
 
 /* (mood glow transition for cat-mascot is in main .cat-mascot rule) */
@@ -1262,8 +1381,8 @@ body{
   margin-top:16px;margin-bottom:6px;
   padding:14px 16px;
   border-radius:22px;
-  background:linear-gradient(135deg,rgba(255,240,245,0.8),rgba(243,229,245,0.6));
-  box-shadow:0 2px 12px rgba(232,119,153,0.06);
+  background:linear-gradient(135deg,rgba(var(--accent-softer-rgb),0.8),rgba(243,229,245,0.6));
+  box-shadow:0 2px 12px rgba(var(--accent-rgb),0.06);
   display:flex;align-items:center;gap:12px;
   animation:fadeSlideIn .5s cubic-bezier(.16,1,.3,1) both;
 }
@@ -1273,7 +1392,7 @@ body{
   animation:sparkleFloat 3s ease-in-out infinite;
 }
 .anticipation-text{
-  font-size:13px;font-weight:600;color:#D4A0B0;
+  font-size:13px;font-weight:600;color:var(--text-soft);
   line-height:1.4;
 }
 
@@ -1330,7 +1449,7 @@ body{
   animation:envRevealPop .6s cubic-bezier(.16,1,.3,1);
 }
 .reveal-msg{
-  font-size:13px;font-weight:700;color:#E8779A;
+  font-size:13px;font-weight:700;color:var(--accent-heading);
 }
 @keyframes revealSlide{
   from{opacity:0;transform:translateY(8px) scale(0.95)}
@@ -1353,7 +1472,7 @@ body{
   animation:envRevealPop .8s cubic-bezier(.16,1,.3,1);
 }
 .milestone-msg{
-  font-size:13px;font-weight:700;color:#3D2C5E;
+  font-size:13px;font-weight:700;color:var(--text-dark);
   line-height:1.4;
 }
 @keyframes milestoneIn{
@@ -1387,7 +1506,7 @@ body{
   animation:unlockWiggle 2.5s ease-in-out infinite;
 }
 .next-unlock-text{
-  font-size:12px;font-weight:600;color:#D4A0B0;
+  font-size:12px;font-weight:600;color:var(--text-soft);
 }
 @keyframes unlockWiggle{
   0%,100%{transform:rotate(0deg)}
@@ -1398,7 +1517,7 @@ body{
 /* ── onboarding flow ── */
 .onboard-overlay{
   position:fixed;inset:0;z-index:3000;
-  background:linear-gradient(180deg,#FFF8FA 0%,#FFE8F0 50%,#FFF0F5 100%);
+  background:linear-gradient(180deg,var(--bg-surface-alt) 0%,var(--accent-soft) 50%,var(--accent-softer) 100%);
   display:flex;align-items:center;justify-content:center;
 }
 .onboard-content{
@@ -1418,45 +1537,45 @@ body{
 .onboard-text{
   font-family:'Fredoka',sans-serif;
   font-size:26px;font-weight:700;
-  color:#E8779A;line-height:1.3;
+  color:var(--accent-heading);line-height:1.3;
 }
 .onboard-subtext{
   font-family:'Quicksand',sans-serif;
   font-size:15px;font-weight:600;
-  color:#D4A0B0;line-height:1.5;
+  color:var(--text-soft);line-height:1.5;
   margin-bottom:8px;
 }
 .onboard-input{
   width:200px;padding:12px 16px;
-  border:2px solid #FFD6E0;
+  border:2px solid var(--accent-border);
   border-radius:20px;
-  background:#fff;
+  background:var(--bg-surface);
   font-family:'Quicksand',sans-serif;
   font-size:16px;font-weight:600;
-  color:#E8779A;text-align:center;
+  color:var(--accent-heading);text-align:center;
   outline:none;
   transition:border-color .3s ease;
 }
 .onboard-input:focus{
-  border-color:#FF85A2;
+  border-color:var(--accent);
 }
 .onboard-input::placeholder{
-  color:#E8C4B8;font-weight:500;
+  color:var(--text-placeholder);font-weight:500;
 }
 .onboard-btn{
   padding:12px 28px;
   border:none;border-radius:20px;
-  background:linear-gradient(135deg,#FF85A2,#FFB7C5);
-  color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent-light));
+  color:var(--text-on-accent);
   font-family:'Fredoka',sans-serif;
   font-size:16px;font-weight:700;
   cursor:pointer;
   transition:transform .2s ease,box-shadow .2s ease;
-  box-shadow:0 4px 16px rgba(255,133,162,0.3);
+  box-shadow:0 4px 16px rgba(var(--accent-rgb),0.3);
 }
 .onboard-btn:hover{
   transform:translateY(-2px);
-  box-shadow:0 6px 24px rgba(255,133,162,0.4);
+  box-shadow:0 6px 24px rgba(var(--accent-rgb),0.4);
 }
 .onboard-btn:active{
   transform:translateY(0);
@@ -1467,13 +1586,13 @@ body{
 }
 .onboard-btn.onboard-skip{
   background:transparent;
-  color:#D4A0B0;
+  color:var(--text-soft);
   box-shadow:none;
   font-size:14px;
 }
 .onboard-btn.onboard-skip:hover{
   box-shadow:none;
-  color:#E8779A;
+  color:var(--accent-heading);
 }
 
 /* ── post-onboard soft entry ── */
@@ -1489,7 +1608,7 @@ body{
   padding:18px 16px 6px;
   font-family:'Quicksand',sans-serif;
   font-size:14px;font-weight:700;
-  color:#D4A0B0;
+  color:var(--text-soft);
   animation:bridgeFade 3s ease both;
 }
 @keyframes bridgeFade{
@@ -1502,30 +1621,30 @@ body{
 /* ── return overlay ── */
 .return-overlay{
   position:fixed;inset:0;z-index:2000;
-  background:rgba(62,35,55,0.55);
+  background:rgba(var(--overlay-rgb),0.55);
   backdrop-filter:blur(8px);
   display:flex;align-items:center;justify-content:center;
   animation:overlayIn .4s ease both;
   cursor:pointer;
 }
 .return-card{
-  background:#fff;border-radius:32px;
+  background:var(--bg-surface);border-radius:32px;
   padding:40px 32px;max-width:320px;width:90%;
   text-align:center;
-  box-shadow:0 20px 60px rgba(232,119,153,0.25);
+  box-shadow:0 20px 60px rgba(var(--accent-rgb),0.25);
   animation:modalSlideUp .5s cubic-bezier(.16,1,.3,1) both;
 }
 .return-title{
   font-family:'Fredoka',sans-serif;
-  font-size:20px;font-weight:700;color:#E8779A;
+  font-size:20px;font-weight:700;color:var(--accent-heading);
   margin-bottom:8px;line-height:1.4;
 }
 .return-subtitle{
-  font-size:14px;font-weight:600;color:#D4A0B0;
+  font-size:14px;font-weight:600;color:var(--text-soft);
   line-height:1.5;margin-bottom:16px;
 }
 .return-hint{
-  font-size:12px;color:#E8C4B8;font-weight:600;
+  font-size:12px;color:var(--text-placeholder);font-weight:600;
   animation:hintPulse 2s ease-in-out infinite;
 }
 @keyframes hintPulse{
@@ -1535,9 +1654,9 @@ body{
 
 /* ── background pulse on task complete ── */
 @keyframes appPulse{
-  0%{box-shadow:inset 0 0 0 rgba(255,133,162,0)}
-  40%{box-shadow:inset 0 0 80px rgba(255,133,162,0.08)}
-  100%{box-shadow:inset 0 0 0 rgba(255,133,162,0)}
+  0%{box-shadow:inset 0 0 0 rgba(var(--accent-rgb),0)}
+  40%{box-shadow:inset 0 0 80px rgba(var(--accent-rgb),0.08)}
+  100%{box-shadow:inset 0 0 0 rgba(var(--accent-rgb),0)}
 }
 .app-pulse{
   animation:appPulse .6s cubic-bezier(.16,1,.3,1);
@@ -1563,14 +1682,14 @@ body{
 /* ── full reveal system (100% completion) ── */
 .reveal-overlay{
   position:fixed;inset:0;z-index:1800;
-  background:rgba(62,35,55,0);
+  background:rgba(var(--overlay-rgb),0);
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
   pointer-events:none;
   transition:background 1s var(--ease-smooth);
 }
 .reveal-overlay.active{
-  background:rgba(62,35,55,0.45);
+  background:rgba(var(--overlay-rgb),0.45);
   pointer-events:auto;
 }
 .reveal-stage{
@@ -1613,7 +1732,7 @@ body{
 }
 .reveal-title{
   font-family:'Fredoka',sans-serif;
-  font-size:22px;font-weight:700;color:#FFF;
+  font-size:22px;font-weight:700;color:var(--text-on-accent);
   margin-bottom:8px;text-shadow:0 2px 12px rgba(0,0,0,0.2);
 }
 .reveal-subtitle{
@@ -1670,15 +1789,15 @@ body{
 }
 .quick-chip{
   padding:8px 14px;
-  border-radius:20px;border:2px solid #FFE0EC;
-  background:#FFF8FA;cursor:pointer;
+  border-radius:20px;border:2px solid var(--accent-blush);
+  background:var(--bg-surface-alt);cursor:pointer;
   font-family:'Quicksand',sans-serif;
-  font-size:12px;font-weight:700;color:#E8779A;
+  font-size:12px;font-weight:700;color:var(--accent-heading);
   transition:all .25s var(--ease-spring);
 }
 .quick-chip:hover{
-  background:#FFE8F0;transform:scale(1.05);
-  border-color:#FFB7C5;
+  background:var(--accent-soft);transform:scale(1.05);
+  border-color:var(--accent-light);
 }
 .quick-chip:active{transform:scale(0.95);}
 
@@ -1701,7 +1820,7 @@ body{
 }
 .rel-badge .rel-fill-inner{
   height:100%;border-radius:3px;
-  background:linear-gradient(90deg,var(--pink-primary),#FFD700);
+  background:linear-gradient(90deg,var(--pink-primary),var(--gold));
   transition:width .8s var(--ease-spring);
 }
 
@@ -1804,7 +1923,7 @@ body{
   animation:epicGlow 3s ease-in-out infinite;
 }
 .memory-tier-legendary{
-  border-left:2px solid #FFD700;
+  border-left:2px solid var(--gold);
   padding-left:var(--space-sm);
   background:linear-gradient(135deg,rgba(255,215,0,0.06),rgba(255,143,171,0.04));
   animation:legendaryShine 2.5s ease-in-out infinite;
@@ -1832,8 +1951,8 @@ body{
 
 /* ── Neko nudge (initiation bubble) ── */
 .neko-nudge{
-  background:linear-gradient(135deg,#FFF0F5,#FFE8F0) !important;
-  border:1.5px solid rgba(255,143,171,0.2);
+  background:linear-gradient(135deg,var(--accent-softer),var(--accent-soft)) !important;
+  border:1.5px solid rgba(var(--accent-rgb),0.2);
   animation:nudgePop .5s var(--ease-spring) both !important;
 }
 @keyframes nudgePop{
@@ -1880,57 +1999,57 @@ function CatMascot({ mood = 'content', size = 52 }) {
   switch(m.eyes) {
     case 'star':
       eyes = <>
-        <text x="32" y="43" fontSize="8" textAnchor="middle" fill="#FFD700">★</text>
-        <text x="48" y="43" fontSize="8" textAnchor="middle" fill="#FFD700">★</text>
+        <text x="32" y="43" fontSize="8" textAnchor="middle" fill="var(--gold)">★</text>
+        <text x="48" y="43" fontSize="8" textAnchor="middle" fill="var(--gold)">★</text>
       </>;
       break;
     case 'sparkle':
       eyes = <>
-        <circle cx="32" cy="40" r="3.5" fill="#3D2C5E"/>
-        <circle cx="48" cy="40" r="3.5" fill="#3D2C5E"/>
-        <circle cx="33.5" cy="38.5" r="1.8" fill="#FFF"/>
-        <circle cx="49.5" cy="38.5" r="1.8" fill="#FFF"/>
+        <circle cx="32" cy="40" r="3.5" fill="var(--cat-eyes)"/>
+        <circle cx="48" cy="40" r="3.5" fill="var(--cat-eyes)"/>
+        <circle cx="33.5" cy="38.5" r="1.8" fill="var(--cat-body)"/>
+        <circle cx="49.5" cy="38.5" r="1.8" fill="var(--cat-body)"/>
       </>;
       break;
     case 'closed':
       eyes = <>
-        <path d="M28 40 Q32 43 36 40" stroke="#3D2C5E" strokeWidth="2" fill="none" strokeLinecap="round"/>
-        <path d="M44 40 Q48 43 52 40" stroke="#3D2C5E" strokeWidth="2" fill="none" strokeLinecap="round"/>
+        <path d="M28 40 Q32 43 36 40" stroke="var(--cat-eyes)" strokeWidth="2" fill="none" strokeLinecap="round"/>
+        <path d="M44 40 Q48 43 52 40" stroke="var(--cat-eyes)" strokeWidth="2" fill="none" strokeLinecap="round"/>
       </>;
       break;
     case 'teary':
       eyes = <>
-        <circle cx="32" cy="41" r="3.5" fill="#3D2C5E"/>
-        <circle cx="48" cy="41" r="3.5" fill="#3D2C5E"/>
-        <circle cx="33.5" cy="39.5" r="1.2" fill="#FFF"/>
-        <circle cx="49.5" cy="39.5" r="1.2" fill="#FFF"/>
-        <ellipse cx="35" cy="48" rx="2" ry="1.5" fill="#8ED4F0" opacity=".6"/>
+        <circle cx="32" cy="41" r="3.5" fill="var(--cat-eyes)"/>
+        <circle cx="48" cy="41" r="3.5" fill="var(--cat-eyes)"/>
+        <circle cx="33.5" cy="39.5" r="1.2" fill="var(--cat-body)"/>
+        <circle cx="49.5" cy="39.5" r="1.2" fill="var(--cat-body)"/>
+        <ellipse cx="35" cy="48" rx="2" ry="1.5" fill="var(--cat-tear)" opacity=".6"/>
       </>;
       break;
     default:
       eyes = <>
-        <circle cx="32" cy="40" r="3.5" fill="#3D2C5E"/>
-        <circle cx="48" cy="40" r="3.5" fill="#3D2C5E"/>
-        <circle cx="33.5" cy="38.5" r="1.2" fill="#FFF"/>
-        <circle cx="49.5" cy="38.5" r="1.2" fill="#FFF"/>
+        <circle cx="32" cy="40" r="3.5" fill="var(--cat-eyes)"/>
+        <circle cx="48" cy="40" r="3.5" fill="var(--cat-eyes)"/>
+        <circle cx="33.5" cy="38.5" r="1.2" fill="var(--cat-body)"/>
+        <circle cx="49.5" cy="38.5" r="1.2" fill="var(--cat-body)"/>
       </>;
   }
 
   let mouth;
   switch(m.mouth) {
     case 'big-smile':
-      mouth = <path d="M34 49 Q40 56 46 49" stroke="#FFB7C5" strokeWidth="2" fill="none" strokeLinecap="round"/>;
+      mouth = <path d="M34 49 Q40 56 46 49" stroke="var(--cat-mouth)" strokeWidth="2" fill="none" strokeLinecap="round"/>;
       break;
     case 'yawn':
-      mouth = <ellipse cx="40" cy="50" rx="3" ry="4" fill="#FFB7C5" opacity=".5"/>;
+      mouth = <ellipse cx="40" cy="50" rx="3" ry="4" fill="var(--cat-mouth)" opacity=".5"/>;
       break;
     case 'pout':
-      mouth = <path d="M37 51 Q40 48 43 51" stroke="#FFB7C5" strokeWidth="1.5" fill="none" strokeLinecap="round"/>;
+      mouth = <path d="M37 51 Q40 48 43 51" stroke="var(--cat-mouth)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>;
       break;
     default:
       mouth = <>
-        <ellipse cx="40" cy="47" rx="2" ry="1.5" fill="#FFB7C5"/>
-        <path d="M36 50 Q40 54 44 50" stroke="#FFB7C5" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+        <ellipse cx="40" cy="47" rx="2" ry="1.5" fill="var(--cat-mouth)"/>
+        <path d="M36 50 Q40 54 44 50" stroke="var(--cat-mouth)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
       </>;
   }
 
@@ -1938,24 +2057,24 @@ function CatMascot({ mood = 'content', size = 52 }) {
     <svg className="cat-mascot" viewBox="0 0 80 80" fill="none" style={{width:size,height:size,filter:`drop-shadow(0 4px 12px ${m.glow})`}}>
       <circle cx="40" cy="42" r="32" fill={m.glow} opacity=".35"/>
       {/* ears */}
-      <path d="M18 28 L10 8 L30 22Z" fill="#FFF" stroke="#FFB7C5" strokeWidth="2"/>
-      <path d="M62 28 L70 8 L50 22Z" fill="#FFF" stroke="#FFB7C5" strokeWidth="2"/>
-      <path d="M20 26 L14 12 L28 22Z" fill="#FFE0EC"/>
-      <path d="M60 26 L66 12 L52 22Z" fill="#FFE0EC"/>
+      <path d="M18 28 L10 8 L30 22Z" fill="var(--cat-body)" stroke="var(--cat-outline)" strokeWidth="2"/>
+      <path d="M62 28 L70 8 L50 22Z" fill="var(--cat-body)" stroke="var(--cat-outline)" strokeWidth="2"/>
+      <path d="M20 26 L14 12 L28 22Z" fill="var(--cat-ear-inner)"/>
+      <path d="M60 26 L66 12 L52 22Z" fill="var(--cat-ear-inner)"/>
       {/* head */}
-      <circle cx="40" cy="42" r="26" fill="#FFF" stroke="#FFB7C5" strokeWidth="2.5"/>
+      <circle cx="40" cy="42" r="26" fill="var(--cat-body)" stroke="var(--cat-outline)" strokeWidth="2.5"/>
       {/* blush */}
-      <circle cx="22" cy="48" r="6" fill="#FFE0EC" opacity={m.blush}/>
-      <circle cx="58" cy="48" r="6" fill="#FFE0EC" opacity={m.blush}/>
+      <circle cx="22" cy="48" r="6" fill="var(--cat-blush)" opacity={m.blush}/>
+      <circle cx="58" cy="48" r="6" fill="var(--cat-blush)" opacity={m.blush}/>
       {/* eyes */}
       {eyes}
       {/* nose & mouth */}
       {mouth}
       {/* whiskers */}
-      <line x1="8" y1="42" x2="26" y2="44" stroke="#E8C4B8" strokeWidth="1.2" strokeLinecap="round"/>
-      <line x1="8" y1="48" x2="26" y2="48" stroke="#E8C4B8" strokeWidth="1.2" strokeLinecap="round"/>
-      <line x1="54" y1="44" x2="72" y2="42" stroke="#E8C4B8" strokeWidth="1.2" strokeLinecap="round"/>
-      <line x1="54" y1="48" x2="72" y2="48" stroke="#E8C4B8" strokeWidth="1.2" strokeLinecap="round"/>
+      <line x1="8" y1="42" x2="26" y2="44" stroke="var(--cat-whiskers)" strokeWidth="1.2" strokeLinecap="round"/>
+      <line x1="8" y1="48" x2="26" y2="48" stroke="var(--cat-whiskers)" strokeWidth="1.2" strokeLinecap="round"/>
+      <line x1="54" y1="44" x2="72" y2="42" stroke="var(--cat-whiskers)" strokeWidth="1.2" strokeLinecap="round"/>
+      <line x1="54" y1="48" x2="72" y2="48" stroke="var(--cat-whiskers)" strokeWidth="1.2" strokeLinecap="round"/>
     </svg>
   );
 }
@@ -2081,13 +2200,20 @@ export default function App() {
   const [showReturnOverlay, setShowReturnOverlay] = useState(false);
   const [appPulse, setAppPulse] = useState(false);
   const [worldName, setWorldName] = useState(() => loadState(STORAGE_KEYS.worldName, ''));
+  const [theme, setTheme] = useState(() => loadState(STORAGE_KEYS.theme, 'kawaii'));
   const [showOnboarding, setShowOnboarding] = useState(() => !loadState(STORAGE_KEYS.onboarded, false));
   const [postOnboard, setPostOnboard] = useState(false);
+  const [nekoMessages, setNekoMessages] = useState(() => loadState(STORAGE_KEYS.nekoMessages, [
+    {role:"assistant",content:"Nyaa~ I'm Neko-chan, your kawaii habit companion! 🐱🌸 Ask me to plan your day, motivate you, or check your progress! ✨\n\nTry telling me your name so I can remember you~ 💕"}
+  ]));
 
   const missedDays = calcMissedDays();
 
   /* stamp last active on mount + track routine */
   useEffect(() => { touchLastActive(); trackOpenHour(); }, []);
+
+  /* apply theme on change */
+  useEffect(() => { applyTheme(theme); saveState(STORAGE_KEYS.theme, theme); }, [theme]);
 
   /* return overlay — show when user comes back after missed days */
   useEffect(() => {
@@ -2141,6 +2267,7 @@ export default function App() {
   }, [habits]);
   useEffect(() => { saveState(STORAGE_KEYS.todos, todos); }, [todos]);
   useEffect(() => { saveState(STORAGE_KEYS.challenges, challenges); }, [challenges]);
+  useEffect(() => { saveState(STORAGE_KEYS.nekoMessages, nekoMessages.slice(-50)); }, [nekoMessages]);
 
   /* dialogue rotation timer — re-render with jitter so bubble updates */
   const [, setDialogueTick] = useState(0);
@@ -2231,6 +2358,11 @@ export default function App() {
             <div className="kw-title">{worldName ? `✿ ${worldName}` : '✿ Kawaii Habits'}</div>
             <div className="kw-date">{dow}, {dateStr} 🌸</div>
           </div>
+          <div className="theme-picker">
+            {Object.entries(THEMES).map(([k,t])=>(
+              <button key={k} className={"theme-btn"+(theme===k?" active":"")} onClick={()=>setTheme(k)} title={t.label}>{t.label.split(' ')[0]}</button>
+            ))}
+          </div>
           <CatMascot mood={mood} />
         </div>
 
@@ -2240,7 +2372,7 @@ export default function App() {
             {tab==="home"       && <WorldHome habits={habits} setHabits={setHabits} setModal={setModal} todayStr={todayStr} mood={mood} missedDays={missedDays} timeOfDay={timeOfDay} personality={personality} onPulse={triggerPulse} worldName={worldName} setWorldName={updateWorldName}/>}
             {tab==="todo"       && <TodoTab todos={todos} setTodos={setTodos} setModal={setModal}/>}
             {tab==="challenges" && <ChallengesTab challenges={challenges} setChallenges={setChallenges} setModal={setModal} todayStr={todayStr}/>}
-            {tab==="ai"         && <NekoChanTab habits={habits} todos={todos} challenges={challenges}/>}
+            {tab==="ai"         && <NekoChanTab habits={habits} todos={todos} challenges={challenges} messages={nekoMessages} setMessages={setNekoMessages}/>}
           </div>
         </div>
 
@@ -2702,7 +2834,7 @@ function WorldHome({habits,setHabits,setModal,todayStr,mood,missedDays,timeOfDay
       </div>
 
       {/* ── Emotional status strip ── */}
-      <div style={{textAlign:'center',fontSize:13,color:'#D4A0B0',fontWeight:600,margin:'2px 0 10px',lineHeight:1.4}}>
+      <div style={{textAlign:'center',fontSize:13,color:'var(--text-soft)',fontWeight:600,margin:'2px 0 10px',lineHeight:1.4}}>
         {statusText}
       </div>
 
@@ -2718,7 +2850,7 @@ function WorldHome({habits,setHabits,setModal,todayStr,mood,missedDays,timeOfDay
         const checked = h.completedDates.includes(todayStr);
         const streak = calcStreak(h.completedDates);
         const glowIntensity = Math.min(streak / 14, 1);
-        const glowColor = h.color || '#FFB7C5';
+        const glowColor = h.color || 'var(--accent-light)';
         return (
           <div key={h.id} className="card-sm" style={{
             position:'relative',
@@ -2731,13 +2863,13 @@ function WorldHome({habits,setHabits,setModal,todayStr,mood,missedDays,timeOfDay
               <div
                 className={`habit-check${checked?" checked":""}`}
                 style={{
-                  background: checked ? (h.color || "#8FD4B4") : "#FFF8FA",
-                  borderColor: checked ? "transparent" : "#FFD6E0"
+                  background: checked ? (h.color || "var(--green-done-1)") : "var(--bg-surface-alt)",
+                  borderColor: checked ? "transparent" : "var(--accent-border)"
                 }}
                 onClick={()=>toggle(h.id)}
               >
                 {checked
-                  ? <span style={{color:"#fff",fontSize:18,fontWeight:900}}>✓</span>
+                  ? <span style={{color:"var(--text-on-accent)",fontSize:18,fontWeight:900}}>✓</span>
                   : <span style={{opacity:.4,fontSize:16}}>{h.emoji}</span>
                 }
               </div>
@@ -2846,19 +2978,19 @@ function TodoTab({todos,setTodos,setModal}) {
 
   return (
     <>
-      <div className="sticker-card" style={{background:"linear-gradient(145deg,#F0FFF4,#E8FAF0)"}}>
+      <div className="sticker-card" style={{background:"linear-gradient(145deg,var(--sticker-green-1),var(--sticker-green-2))"}}>
         <span className="sparkle" style={{top:10,right:24}}>🍀</span>
-        <div style={{fontFamily:"'Fredoka',sans-serif",fontSize:22,fontWeight:700,color:"#6BAF8D"}}>
+        <div style={{fontFamily:"'Fredoka',sans-serif",fontSize:22,fontWeight:700,color:"var(--green-1)"}}>
           {left===0?"All done! 🎉":`${left} task${left!==1?"s":""} left`}
         </div>
-        <div style={{fontSize:13,color:"#A0C8B0",fontWeight:600,marginTop:4}}>
+        <div style={{fontSize:13,color:"var(--green-text-soft)",fontWeight:600,marginTop:4}}>
           {emotionalSummary || "Tick them off one by one~ 🍀"}
         </div>
       </div>
 
       <div className="section-head">
-        <div className="section-title" style={{color:"#6BAF8D"}}>To-do List ✅</div>
-        <button className="fab" onClick={()=>setModal("todo")} style={{width:48,height:48,fontSize:24,background:"linear-gradient(135deg,#6BAF8D,#8FD4B4)"}}>+</button>
+        <div className="section-title" style={{color:"var(--green-1)"}}>To-do List ✅</div>
+        <button className="fab" onClick={()=>setModal("todo")} style={{width:48,height:48,fontSize:24,background:"linear-gradient(135deg,var(--green-1),var(--green-2))"}}>+</button>
       </div>
 
       <div className="card">
@@ -2866,7 +2998,7 @@ function TodoTab({todos,setTodos,setModal}) {
         {todos.map(t=>(
           <div key={t.id} className="todo-row">
             <div className={`todo-check${t.done?" done":""}`} onClick={()=>toggle(t.id)}>
-              {t.done && <span style={{color:"#fff",fontSize:12,fontWeight:900}}>✓</span>}
+              {t.done && <span style={{color:"var(--text-on-accent)",fontSize:12,fontWeight:900}}>✓</span>}
             </div>
             <div style={{flex:1}}>
               <div className={`todo-name${t.done?" done":""}`}>{t.emoji} {t.name}</div>
@@ -2904,15 +3036,15 @@ function ChallengesTab({challenges,setChallenges,setModal,todayStr}) {
   return (
     <>
       {emotionalText && (
-        <div className="sticker-card" style={{background:"linear-gradient(145deg,#FFF0F5,#F8E8FF)",textAlign:"center"}}>
+        <div className="sticker-card" style={{background:"linear-gradient(145deg,var(--sticker-purple-1),var(--sticker-purple-2))",textAlign:"center"}}>
           <div style={{fontSize:28,marginBottom:6}}>🌱</div>
-          <div style={{fontFamily:"'Fredoka',sans-serif",fontSize:18,fontWeight:700,color:"#E8779A",lineHeight:1.4}}>{emotionalText}</div>
+          <div style={{fontFamily:"'Fredoka',sans-serif",fontSize:18,fontWeight:700,color:"var(--accent-heading)",lineHeight:1.4}}>{emotionalText}</div>
         </div>
       )}
 
       <div className="section-head">
         <div className="section-title">Your Growth Journey 🌱</div>
-        <button className="fab" onClick={()=>setModal("challenge")} style={{width:48,height:48,fontSize:24,background:"linear-gradient(135deg,#FF9AA2,#FFB7C5)"}}>+</button>
+        <button className="fab" onClick={()=>setModal("challenge")} style={{width:48,height:48,fontSize:24,background:"linear-gradient(135deg,var(--challenge-1),var(--challenge-2))"}}>+</button>
       </div>
 
       {challenges.length===0 && (
@@ -2929,14 +3061,14 @@ function ChallengesTab({challenges,setChallenges,setModal,todayStr}) {
           <div key={c.id} className="chal-card" style={{background:`linear-gradient(145deg,${bg},${bg}dd)`}}>
             <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between"}}>
               <div>
-                <div className="chal-title" style={{color:"#3D2C5E"}}>{c.emoji} {c.name}</div>
+                <div className="chal-title" style={{color:"var(--text-dark)"}}>{c.emoji} {c.name}</div>
                 <div className="chal-sub">{c.targetDays}-day challenge • Day {elapsed}</div>
               </div>
               <button
                 className="chal-btn"
                 style={{
-                  background:checkedToday?"#fff":"rgba(255,255,255,.55)",
-                  color:checkedToday?"#E8779A":"#3D2C5E"
+                  background:checkedToday?"var(--bg-surface)":"rgba(255,255,255,.55)",
+                  color:checkedToday?"var(--accent-heading)":"var(--text-dark)"
                 }}
                 onClick={()=>toggleDay(c.id)}
               >
@@ -2958,7 +3090,7 @@ function ChallengesTab({challenges,setChallenges,setModal,todayStr}) {
               </div>
             </div>
             <div className="prog-bar" style={{marginTop:12,background:"rgba(255,255,255,.4)"}}>
-              <div style={{height:"100%",width:`${progress}%`,background: progress >= 80 ? "linear-gradient(90deg,rgba(255,255,255,.75),#FFD700)" : "rgba(255,255,255,.75)",borderRadius:12,transition:"width .5s cubic-bezier(.16,1,.3,1)",boxShadow: progress >= 80 ? "0 0 12px rgba(255,215,0,0.3)" : "none"}}/>
+              <div style={{height:"100%",width:`${progress}%`,background: progress >= 80 ? "linear-gradient(90deg,rgba(255,255,255,.75),var(--gold))" : "rgba(255,255,255,.75)",borderRadius:12,transition:"width .5s cubic-bezier(.16,1,.3,1)",boxShadow: progress >= 80 ? "0 0 12px rgba(255,215,0,0.3)" : "none"}}/>
             </div>
           </div>
         );
@@ -2968,10 +3100,7 @@ function ChallengesTab({challenges,setChallenges,setModal,todayStr}) {
 }
 
 /* ─── Neko-chan Tab ───────────────────────────────────────── */
-function NekoChanTab({habits,todos,challenges}) {
-  const [messages, setMessages] = useState([
-    {role:"assistant",content:"Nyaa~ I'm Neko-chan, your kawaii habit companion! 🐱🌸 Ask me to plan your day, motivate you, or check your progress! ✨\n\nTry telling me your name so I can remember you~ 💕"}
-  ]);
+function NekoChanTab({habits,todos,challenges,messages,setMessages}) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
@@ -3039,12 +3168,12 @@ function NekoChanTab({habits,todos,challenges}) {
 
   return (
     <div className="neko-container">
-      <div className="sticker-card" style={{background:"linear-gradient(145deg,#FFF8FA,#F0E6FF)",textAlign:"center",flexShrink:0}}>
+      <div className="sticker-card" style={{background:"linear-gradient(145deg,var(--sticker-neko-1),var(--sticker-neko-2))",textAlign:"center",flexShrink:0}}>
         <div className="neko-breathe" style={{display:'inline-block'}}>
           <CatMascot mood="happy" size={56} />
         </div>
-        <div style={{fontFamily:"'Fredoka',sans-serif",fontSize:20,fontWeight:700,color:"#E8779A"}}>Neko-chan ✨</div>
-        <div style={{fontSize:13,color:"#D4A0B0",fontWeight:600,marginTop:4}}>Your kawaii habit companion~</div>
+        <div style={{fontFamily:"'Fredoka',sans-serif",fontSize:20,fontWeight:700,color:"var(--accent-heading)"}}>Neko-chan ✨</div>
+        <div style={{fontSize:13,color:"var(--text-soft)",fontWeight:600,marginTop:4}}>Your kawaii habit companion~</div>
       </div>
 
       {/* ── Quick Actions ── */}
@@ -3143,7 +3272,7 @@ function AddTodoModal({onAdd,onClose}) {
         <select value={cat} onChange={e=>setCat(e.target.value)}>
           {["Personal","Work","Health","Family","Shopping","Other"].map(c=><option key={c}>{c}</option>)}
         </select>
-        <button className="btn-pri" style={{background:"linear-gradient(135deg,#6BAF8D,#8FD4B4)",boxShadow:"0 6px 24px rgba(107,175,141,0.35)"}} onClick={()=>name.trim()&&onAdd({name:name.trim(),emoji,category:cat})}>Add Task ✨</button>
+        <button className="btn-pri" style={{background:"linear-gradient(135deg,var(--green-1),var(--green-2))",boxShadow:"0 6px 24px var(--green-glow)"}} onClick={()=>name.trim()&&onAdd({name:name.trim(),emoji,category:cat})}>Add Task ✨</button>
       </div>
     </div>
   );
@@ -3175,7 +3304,7 @@ function AddChalModal({onAdd,onClose}) {
         </div>
         <div className="label-text">How many days?</div>
         <input type="number" placeholder="30" value={days} min={1} max={365} onChange={e=>setDays(Number(e.target.value))}/>
-        <button className="btn-pri" style={{background:"linear-gradient(135deg,#FF9AA2,#FFB7C5)",boxShadow:"0 6px 24px rgba(255,154,162,0.35)"}} onClick={()=>name.trim()&&onAdd({name:name.trim(),emoji,targetDays:days,startDate:today()})}>Start Challenge 🚀</button>
+        <button className="btn-pri" style={{background:"linear-gradient(135deg,var(--challenge-1),var(--challenge-2))",boxShadow:"0 6px 24px var(--challenge-glow)"}} onClick={()=>name.trim()&&onAdd({name:name.trim(),emoji,targetDays:days,startDate:today()})}>Start Challenge 🚀</button>
       </div>
     </div>
   );
@@ -3200,7 +3329,7 @@ function WorldNameModal({currentName, onSave, onClose}) {
         />
         <button
           className="btn-pri"
-          style={{marginTop:12,background:'linear-gradient(135deg,#FFB7C5,#CDB4DB)',width:'100%'}}
+          style={{marginTop:12,background:'linear-gradient(135deg,var(--lavender-btn-1),var(--lavender-btn-2))',width:'100%'}}
           onClick={() => name.trim() && onSave(name.trim())}
         >
           {currentName ? 'Rename World ✨' : 'Create My World 🌸'}
