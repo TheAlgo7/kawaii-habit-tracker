@@ -87,7 +87,6 @@ export function KawaiiApp() {
       <div className="sakura sakura-a" />
       <div className="sakura sakura-b" />
       <section className="phone-frame" aria-label="Kawaii Habit Tracker">
-        <StatusBar />
         <Header
           date={date}
           mood={mood}
@@ -195,16 +194,6 @@ function Header({ date, mood, onRename, worldName }) {
       </div>
       <img className="avatar" src={moodAssets[mood]} alt="" />
     </header>
-  );
-}
-
-function StatusBar() {
-  return (
-    <div className="status-bar" aria-hidden="true">
-      <span>9:41</span>
-      <span className="dynamic-island" />
-      <span className="signal-icons">▮▮▮ ᯤ ▭</span>
-    </div>
   );
 }
 
