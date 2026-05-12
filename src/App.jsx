@@ -1,9 +1,8 @@
-import KawaiiHabit from './KawaiiHabit';
+import { KawaiiApp } from "./features/KawaiiApp";
+import "./styles/kawaii.css";
 
 function App() {
-  return (
-    <KawaiiHabit />
-  );
+  return <KawaiiApp />;
 }
 
 export default App;

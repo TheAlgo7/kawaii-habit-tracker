@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kawaii-habits-v1';
+const CACHE_NAME = 'kawaii-habits-v4';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
