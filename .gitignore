@@ -20,6 +20,10 @@ coverage
 playwright-report
 test-results
 
+# HD icon masters (50MB+ each), kept locally only, too large for git.
+# Regenerate the shipped icons any time with: node scripts/make-icons.mjs
+design/*.png
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

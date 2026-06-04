@@ -1,15 +1,33 @@
+// Dates are stored as plain local calendar keys ("YYYY-MM-DD"), never UTC.
+// Using toISOString() would record an Asia/Kolkata early morning as the
+// previous UTC day, so we read the user's *local* year/month/day instead.
+
+function pad(value) {
+  return String(value).padStart(2, "0");
+}
+
+// Turn a Date into a local calendar key using the device's own timezone.
+export function toDateKey(date) {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 export function today() {
-  return new Date().toISOString().slice(0, 10);
+  return toDateKey(new Date());
 }
 
-export function offsetDate(date, offset) {
-  const next = new Date(date);
-  next.setDate(next.getDate() + offset);
-  return next.toISOString().slice(0, 10);
+// Shift a "YYYY-MM-DD" key by a number of days, staying on the calendar grid.
+// We rebuild the Date from its parts so DST never nudges us a day off.
+export function offsetDate(dateKey, offset) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return toDateKey(new Date(year, month - 1, day + offset));
 }
 
+// Whole-day difference between two calendar keys. Computed in UTC space so the
+// result is the number of calendar days regardless of DST transitions.
 export function daysBetween(start, end) {
-  return Math.floor((new Date(end) - new Date(start)) / 86400000);
+  const [sy, sm, sd] = start.split("-").map(Number);
+  const [ey, em, ed] = end.split("-").map(Number);
+  return Math.round((Date.UTC(ey, em - 1, ed) - Date.UTC(sy, sm - 1, sd)) / 86400000);
 }
 
 export function calcStreak(dates) {

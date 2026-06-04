@@ -2,12 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Kawaii Habits 🌸</title>
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#FF85A2" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Kawaii Habits" />
@@ -16,16 +17,41 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
     <!-- Icons -->
-    <link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
-    <link rel="apple-touch-icon" href="/icon-192.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        function showUpdateToast(worker) {
+          const bar = document.createElement('div');
+          bar.setAttribute('role', 'status');
+          bar.style.cssText =
+            'position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:9999;background:linear-gradient(145deg,#ff6fa8,#ff93bd);color:#3a0f22;font-weight:800;font-family:Quicksand,system-ui,sans-serif;padding:12px 18px;border-radius:16px;box-shadow:0 10px 30px rgba(255,111,168,.5);cursor:pointer';
+          bar.textContent = '✨ A fresh version is ready, tap to update';
+          bar.onclick = () => { worker.postMessage({ type: 'SKIP_WAITING' }); bar.remove(); };
+          document.body.appendChild(bar);
+        }
+        window.addEventListener('load', async () => {
+          try {
+            const reg = await navigator.serviceWorker.register('/sw.js');
+            reg.addEventListener('updatefound', () => {
+              const sw = reg.installing;
+              if (!sw) return;
+              sw.addEventListener('statechange', () => {
+                if (sw.state === 'installed' && navigator.serviceWorker.controller) showUpdateToast(sw);
+              });
+            });
+          } catch {}
+          let refreshing = false;
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshing) return;
+            refreshing = true;
+            window.location.reload();
+          });
         });
       }
     </script>

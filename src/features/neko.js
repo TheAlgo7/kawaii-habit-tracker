@@ -1,18 +1,22 @@
 import { daysBetween, today } from "./date";
 
 export const moodAssets = {
-  blissful: "/neko-cat-blissful.png",
-  happy: "/neko-cat-happy.png",
-  content: "/neko-cat-normal.png",
-  sleepy: "/neko-cat-sleepy.png",
-  sad: "/neko-cat-sad.png",
-  lonely: "/neko-cat-sad.png",
+  blissful: "/neko-cat-blissful.webp",
+  happy: "/neko-cat-happy.webp",
+  content: "/neko-cat-normal.webp",
+  welcome: "/neko-cat-happy.webp",
+  recovered: "/neko-cat-happy.webp",
+  sleepy: "/neko-cat-sleepy.webp",
+  sad: "/neko-cat-sad.webp",
+  lonely: "/neko-cat-sad.webp",
 };
 
 export const moodLayout = {
   blissful: { "--neko-width": "258px", "--neko-y": "5px", "--neko-x": "0px" },
   happy: { "--neko-width": "238px", "--neko-y": "2px", "--neko-x": "0px" },
   content: { "--neko-width": "234px", "--neko-y": "0px", "--neko-x": "0px" },
+  welcome: { "--neko-width": "238px", "--neko-y": "2px", "--neko-x": "0px" },
+  recovered: { "--neko-width": "238px", "--neko-y": "2px", "--neko-x": "0px" },
   sleepy: { "--neko-width": "235px", "--neko-y": "0px", "--neko-x": "-1px" },
   sad: { "--neko-width": "268px", "--neko-y": "7px", "--neko-x": "0px" },
   lonely: { "--neko-width": "268px", "--neko-y": "7px", "--neko-x": "0px" },
@@ -22,22 +26,63 @@ export const moodMessages = {
   blissful: "Nyaa~ everything is glowing because of you.",
   happy: "You're doing great. Let's make today amazing.",
   content: "I'm here whenever you're ready for the next tiny step.",
+  welcome: "Welcome~ pick one tiny thing and we'll grow this little world together.",
+  recovered: "You came back, and that's the part that matters. Let's start gently.",
   sleepy: "Soft start today? We can begin gently.",
   sad: "Even one small thing would make the world warmer.",
-  lonely: "I saved your place. We can start again slowly.",
+  lonely: "I saved your place. Whenever you're ready, we begin again, no rush.",
 };
 
+// Find the most recent day (before today) on which any habit was completed.
+// This is how we tell a brand-new user apart from someone returning after a gap.
+function lastActiveDayBefore(habits, todayStr) {
+  let latest = null;
+  for (const habit of habits) {
+    for (const date of [...(habit.completedDates || []), ...(habit.tinyDates || [])]) {
+      if (date < todayStr && (latest === null || date > latest)) latest = date;
+    }
+  }
+  return latest;
+}
+
+function doneOn(habit, day) {
+  return (habit.completedDates || []).includes(day) || (habit.tinyDates || []).includes(day);
+}
+
+// Mood is a lifecycle signal, never a punishment. A new user (no history at all)
+// must never meet a sad or lonely Neko, sadness is reserved for an established
+// relationship that has actually lapsed, and even then the copy is recovery-first.
 export function getMood(habits, todayStr) {
   const hour = new Date().getHours();
-  const done = habits.filter((habit) => habit.completedDates.includes(todayStr)).length;
   const total = habits.length;
+  const done = habits.filter((habit) => doneOn(habit, todayStr)).length;
   const pct = total ? done / total : 0;
 
-  if (pct >= 1 && total > 0) return "blissful";
+  // Doing well today always wins, regardless of past history.
+  if (total > 0 && pct >= 1) return "blissful";
   if (pct >= 0.67) return "happy";
   if (pct >= 0.34) return "content";
+
+  const lastActive = lastActiveDayBefore(habits, todayStr);
+
+  // No relationship yet → only ever warm/neutral moods. But if they've already
+  // done their first tiny thing today, celebrate it, the first win should land.
+  if (lastActive === null) {
+    if (done > 0) return "happy";
+    if (hour < 9) return "sleepy";
+    return "welcome";
+  }
+
+  const gap = daysBetween(lastActive, todayStr);
+
+  // Returned today after a real break → celebrate the comeback, don't guilt.
+  if (done > 0 && gap >= 2) return "recovered";
+
+  // Established relationship with an open gap → gentle, recovery-focused only.
+  if (gap >= 3) return "lonely";
+  if (gap >= 2) return "sad";
+
   if (hour < 9) return "sleepy";
-  if (hour >= 20) return "lonely";
   return "content";
 }
 
@@ -48,6 +93,20 @@ export function getLocalReply(message, habits, tasks, challenges, userName) {
   const pending = tasks.filter((task) => !task.done).length;
   const name = userName ? `${userName}, ` : "";
 
+  if (/miss|back|recover|restart|gone|away|fell off/.test(lower)) {
+    return `${name}coming back is the whole win. Let's not miss twice, pick the tiniest version of one habit and we'll start there. 🌱`;
+  }
+
+  if (/celebrate|win|proud|did it|done|yay|finished/.test(lower)) {
+    return done > 0
+      ? `${name}look at you, ${done} care task${done === 1 ? "" : "s"} done today. The world's a little warmer because of it. 🎉`
+      : `${name}let's make a win to celebrate, even one tiny thing counts, and I'll cheer the moment you do it. ✨`;
+  }
+
+  if (/easier|easy|tiny|smaller|too much|overwhelm|stuck|hard|difficult/.test(lower)) {
+    return `${name}let's shrink it. What's the two-minute version of the next habit? Done tiny still counts as done. 🌸`;
+  }
+
   if (/plan|today|routine|schedule/.test(lower)) {
     return `${name}start with one easy care task, then one important task, then take a real break. Tiny steps still count. 🌸`;
   }
@@ -57,10 +116,12 @@ export function getLocalReply(message, habits, tasks, challenges, userName) {
   }
 
   if (/challenge|goal|growth/.test(lower)) {
-    if (!challenges.length) return "No active growth challenges yet. We can plant one when you're ready. 🌱";
-    const lines = challenges.map((challenge) => {
-      const elapsed = daysBetween(challenge.startDate, todayStr) + 1;
-      return `${challenge.emoji} ${challenge.name}: day ${elapsed}/${challenge.targetDays}`;
+    const live = challenges.filter((challenge) => !challenge.archivedAt);
+    if (!live.length) return "No active growth challenges yet. We can plant one when you're ready. 🌱";
+    const lines = live.map((challenge) => {
+      // Real check-ins, matching the World screen, not calendar days.
+      const doneDays = challenge.completedDates.length;
+      return `${challenge.emoji} ${challenge.name}: ${doneDays}/${challenge.targetDays} days done`;
     });
     return `Your growth garden:\n${lines.join("\n")}`;
   }

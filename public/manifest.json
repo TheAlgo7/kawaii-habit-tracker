@@ -1,7 +1,7 @@
 {
   "name": "Kawaii Habit Tracker",
   "short_name": "Kawaii Habits",
-  "description": "A cute habit tracker with Neko-chan — your kawaii companion that grows when you take care of yourself",
+  "description": "A cute habit tracker with Neko-chan, your kawaii companion that grows when you take care of yourself",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFF4F7",
@@ -9,16 +9,22 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/icon-192.svg",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.svg",
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

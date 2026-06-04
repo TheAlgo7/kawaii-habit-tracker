@@ -16,30 +16,34 @@
   <img src="./docs/assets/hero.png" width="400" alt="Kawaii Habit Tracker" />
 </p>
 
-Kawaii Habit Tracker treats habits as a relationship, not a checklist. The app builds attachment: habits feed trust, trust shapes Neko's mood, and progress turns into a world that feels alive enough to revisit. Instead of sterile task management, you get a companion who remembers, reacts, and evolves with your consistency. Show up, and your world brightens. Drift away, and Neko feels it too.
+Kawaii Habit Tracker treats habits as a relationship, not a checklist. The app builds attachment: tiny care rituals feed trust, trust grows a world that visibly comes alive, and Neko's mood reflects where you are, never punishing a missed day. Show up, and your world brightens. Step away, and coming back is the win. It's a gentle daily companion, not a productivity tracker.
 
-> **Status:** Actively in development. Core habit tracking and Neko companion are live. The living world mechanics and full theme system are still being built out.
+> **Status:** Launch-ready single-user PWA. Offline-first, no account, all data stays on your device.
 
 ## Features
 
-- **Habit tracking** with streaks, progress feedback, and daily flow.
-- **To-do and challenge systems** for short-term and long-term momentum.
-- **Persistent Neko companion** with trust, sadness, and mood-driven reactions.
-- **Living world mechanics** that visually evolve as you stay consistent.
-- **Installable PWA** that works like a native app after first load.
-- **Theme and personalization support** without breaking the kawaii identity.
+- **First-run onboarding:** name your companion and world, pick 1-3 starter rituals, set their tiny versions, and do your first check-in.
+- **Tiny versions:** every habit has a two-minute version that still counts, so bad days stay doable.
+- **Gentle recovery, not streaks-as-punishment:** rest/skip days with reasons keep streaks safe, and Neko welcomes you back instead of guilting you.
+- **Living world:** completing rituals earns care points that level up your world and unlock decor; a weekly trend shows your rhythm.
+- **Full habit CRUD:** edit, recolour, reschedule (daily / weekdays / custom days), add notes, archive.
+- **Neko companion:** a mood lifecycle (welcome → recovered → resting) plus an optional AI coach scoped to planning, reflection, and recovery.
+- **Your data, yours:** export/import a JSON backup, reset anytime; nothing leaves the device.
+- **Themes & comfort:** multiple accent themes, reduce-motion and softer-emotion toggles.
+- **Installable, offline-first PWA** with optimized art and an update prompt.
+- **Accessible:** keyboard-trapped modals, Escape to close, visible focus, live completion feedback, zoom enabled.
 
 ## Install to Home Screen
 
 **Android (Chrome):**
 1. Open [kawaii-habit-tracker.vercel.app](https://kawaii-habit-tracker.vercel.app) in Chrome
 2. Tap the **⋮** menu → **Add to Home screen**
-3. Tap **Add** — Neko moves in permanently~
+3. Tap **Add**. Neko moves in permanently~
 
 **iOS (Safari):**
 1. Open [kawaii-habit-tracker.vercel.app](https://kawaii-habit-tracker.vercel.app) in Safari
 2. Tap the **Share** button → **Add to Home Screen**
-3. Tap **Add** — your kawaii companion is always one tap away
+3. Tap **Add**. Your kawaii companion is always one tap away
 
 ## Stack
 
