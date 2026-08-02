@@ -44,6 +44,11 @@ const AUTO_TONES = {
   book: "blossom",
   journal: "blossom",
   stretch: "honey",
+  move: "honey",
+  walk: "sage",
+  meditate: "night",
+  tidy: "honey",
+  fresh: "sage",
   moon: "night",
   rest: "night",
   breathe: "dew",
@@ -51,6 +56,14 @@ const AUTO_TONES = {
   music: "blossom",
   heart: "blossom",
   task: "sage",
+};
+
+const PAINTED_GLYPHS = {
+  move: "/ui-icons/habit-move-v1.webp",
+  walk: "/ui-icons/habit-walk-v1.webp",
+  meditate: "/ui-icons/habit-meditate-v1.webp",
+  tidy: "/ui-icons/habit-tidy-v1.webp",
+  fresh: "/ui-icons/habit-fresh-v1.webp",
 };
 
 const CUSTOM_GLYPHS = {
@@ -184,6 +197,7 @@ export function HabitIcon({
     ...style,
   };
   const glyph = CUSTOM_GLYPHS[name];
+  const paintedGlyph = PAINTED_GLYPHS[name];
 
   return (
     <svg
@@ -211,7 +225,16 @@ export function HabitIcon({
       <circle cx="51.7" cy="20.2" r="1.7" fill="var(--habit-icon-accent)" opacity=".7" />
       <circle cx="13.5" cy="44.8" r="1.3" fill="var(--habit-icon-accent)" opacity=".62" />
 
-      {glyph || (
+      {paintedGlyph ? (
+        <image
+          href={paintedGlyph}
+          x="5"
+          y="5"
+          width="54"
+          height="54"
+          preserveAspectRatio="xMidYMid meet"
+        />
+      ) : glyph || (
         <KawaiiIcon
           name={name}
           x="15"

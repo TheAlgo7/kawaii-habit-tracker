@@ -27,6 +27,23 @@ describe("normalizeHabit", () => {
     expect(h.icon).toBe("water");
     expect(h.emoji).toBe("💧");
   });
+
+  it("gives movement, walking, meditation, tidying, and fresh food distinct artwork", () => {
+    expect(normalizeHabit({ name: "Move your body" }).icon).toBe("move");
+    expect(normalizeHabit({ name: "Walk after lunch" }).icon).toBe("walk");
+    expect(normalizeHabit({ name: "Meditate" }).icon).toBe("meditate");
+    expect(normalizeHabit({ name: "Tidy the desk" }).icon).toBe("tidy");
+    expect(normalizeHabit({ name: "Eat fresh fruit" }).icon).toBe("fresh");
+  });
+
+  it("migrates old duplicated icon choices without changing unrelated habits", () => {
+    expect(normalizeHabit({ name: "Walk", icon: "stretch" }).icon).toBe("walk");
+    expect(normalizeHabit({ name: "Move your body", icon: "stretch" }).icon).toBe("move");
+    expect(normalizeHabit({ name: "Meditate", icon: "breathe" }).icon).toBe("meditate");
+    expect(normalizeHabit({ name: "Breathing break", icon: "breathe" }).icon).toBe("breathe");
+    expect(normalizeHabit({ name: "Tidy up", icon: "home" }).icon).toBe("tidy");
+    expect(normalizeHabit({ name: "Eat something fresh", icon: "plant" }).icon).toBe("fresh");
+  });
 });
 
 describe("isScheduledOn", () => {

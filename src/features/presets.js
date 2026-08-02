@@ -3,14 +3,14 @@
 export const HABIT_PRESETS = [
   { name: "Drink water", icon: "water", color: "#87b6c5", category: "body", timeOfDay: "morning", tinyVersion: "One glass is enough" },
   { name: "Read", icon: "book", color: "#d6ad72", category: "mind", timeOfDay: "evening", tinyVersion: "Read one page" },
-  { name: "Move your body", icon: "stretch", color: "#9ba984", category: "body", timeOfDay: "anytime", tinyVersion: "Stretch for one minute" },
-  { name: "Meditate", icon: "breathe", color: "#a99bbb", category: "mind", timeOfDay: "morning", tinyVersion: "Take three slow breaths" },
-  { name: "Tidy up", icon: "home", color: "#d8b16b", category: "home", timeOfDay: "evening", tinyVersion: "Put away one thing" },
+  { name: "Move your body", icon: "move", color: "#9ba984", category: "body", timeOfDay: "anytime", tinyVersion: "Stretch for one minute" },
+  { name: "Meditate", icon: "meditate", color: "#a99bbb", category: "mind", timeOfDay: "morning", tinyVersion: "Take three slow breaths" },
+  { name: "Tidy up", icon: "tidy", color: "#d8b16b", category: "home", timeOfDay: "evening", tinyVersion: "Put away one thing" },
   { name: "Journal", icon: "journal", color: "#c97b65", category: "mind", timeOfDay: "evening", tinyVersion: "Write one honest line" },
   { name: "Sleep on time", icon: "moon", color: "#7f7f9f", category: "body", timeOfDay: "evening", tinyVersion: "Put your phone down five minutes early" },
-  { name: "Eat something fresh", icon: "plant", color: "#91ad83", category: "body", timeOfDay: "anytime", tinyVersion: "Have one piece of fruit" },
+  { name: "Eat something fresh", icon: "fresh", color: "#91ad83", category: "body", timeOfDay: "anytime", tinyVersion: "Have one piece of fruit" },
   { name: "Reach out", icon: "heart", color: "#c78379", category: "social", timeOfDay: "anytime", tinyVersion: "Send one kind message" },
-  { name: "Walk", icon: "stretch", color: "#8fae8b", category: "body", timeOfDay: "anytime", tinyVersion: "Walk to the door and back" },
+  { name: "Walk", icon: "walk", color: "#8fae8b", category: "body", timeOfDay: "anytime", tinyVersion: "Walk to the door and back" },
 ];
 
 export const THEMES = [

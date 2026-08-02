@@ -9,6 +9,16 @@ const chromePath = process.env.CHROME_PATH || "C:/Program Files/Google/Chrome/Ap
 const outputDir = path.resolve(__dirname, "../docs/assets");
 const { version: appVersion } = require("../package.json");
 const iconReleaseTag = `v${appVersion}`;
+const uiArtworkUrls = [
+  "/ui-icons/theme-sunlit-v1.webp",
+  "/ui-icons/theme-moonlit-v1.webp",
+  "/ui-icons/theme-matcha-v1.webp",
+  "/ui-icons/habit-move-v1.webp",
+  "/ui-icons/habit-walk-v1.webp",
+  "/ui-icons/habit-meditate-v1.webp",
+  "/ui-icons/habit-tidy-v1.webp",
+  "/ui-icons/habit-fresh-v1.webp",
+];
 
 fs.mkdirSync(outputDir, { recursive: true });
 
@@ -351,6 +361,30 @@ async function verifyPwa(page, context, profileName) {
     assert(serviceWorkerSource.includes(icon.src), `${profileName}: ${icon.src} is missing from the offline cache`);
   }
 
+  const uiArtworkChecks = [];
+  for (const artworkUrl of uiArtworkUrls) {
+    const response = await context.request.get(new URL(artworkUrl, baseUrl).href);
+    const localPath = path.resolve(__dirname, "../public", artworkUrl.replace(/^\//, ""));
+    const image = await sharp(localPath).metadata();
+    const stats = await sharp(localPath).stats();
+    const alpha = stats.channels[3];
+    uiArtworkChecks.push({
+      src: artworkUrl,
+      status: response.status(),
+      contentType: response.headers()["content-type"],
+      actual: `${image.width}x${image.height}`,
+      transparent: Boolean(alpha && alpha.min === 0 && alpha.max === 255),
+    });
+    assert(response.ok(), `${profileName}: ${artworkUrl} failed to load`);
+    assert(
+      response.headers()["content-type"]?.includes("image/webp"),
+      `${profileName}: ${artworkUrl} is not served as WebP`
+    );
+    assert(image.width === 192 && image.height === 192, `${profileName}: ${artworkUrl} has incorrect dimensions`);
+    assert(alpha && alpha.min === 0 && alpha.max === 255, `${profileName}: ${artworkUrl} lost its alpha matte`);
+    assert(serviceWorkerSource.includes(artworkUrl), `${profileName}: ${artworkUrl} is missing from the offline cache`);
+  }
+
   const screenshotChecks = [];
   for (const screenshot of manifest.screenshots || []) {
     const localPath = path.resolve(__dirname, "../public", screenshot.src.replace(/^\//, ""));
@@ -387,6 +421,7 @@ async function verifyPwa(page, context, profileName) {
     manifest: { display: manifest.display, orientation: manifest.orientation },
     iconChecks,
     linkedIconChecks,
+    uiArtworkChecks,
     screenshotChecks,
     serviceWorker,
   };
@@ -493,6 +528,76 @@ async function completeOnboarding(page, profileName) {
   const fontAudit = await formFontAudit(page, "onboarding-name");
   await page.getByPlaceholder("What should Neko call you?").fill(profileName.includes("iPhone") ? "Ivy" : "Sam");
   await page.getByRole("button", { name: "Continue" }).tap();
+  await page.getByRole("heading", { name: "Pick one to three rituals" }).waitFor();
+
+  const pickerBody = page.locator(".onboarding-body");
+  const pickerFooter = page.locator(".onboarding-actions");
+  const lastPreset = page.locator(".preset-grid button").last();
+  const pickerBefore = await page.evaluate(() => {
+    const onboarding = document.querySelector(".onboarding");
+    const body = document.querySelector(".onboarding-body");
+    const footer = document.querySelector(".onboarding-actions");
+    const footerRect = footer.getBoundingClientRect();
+    return {
+      viewportHeight: window.visualViewport?.height || window.innerHeight,
+      onboardingHeight: onboarding.getBoundingClientRect().height,
+      bodyClientHeight: body.clientHeight,
+      bodyScrollHeight: body.scrollHeight,
+      footerTop: footerRect.top,
+      footerBottom: footerRect.bottom,
+    };
+  });
+  assert(
+    Math.abs(pickerBefore.onboardingHeight - pickerBefore.viewportHeight) <= 1,
+    `${profileName}: onboarding is not constrained to the visual viewport`
+  );
+  assert(
+    pickerBefore.bodyScrollHeight > pickerBefore.bodyClientHeight + 1,
+    `${profileName}: ritual picker does not expose an internal scroll range`
+  );
+  assert(
+    pickerBefore.footerBottom <= pickerBefore.viewportHeight + 1,
+    `${profileName}: onboarding actions are outside the visual viewport`
+  );
+
+  await pickerBody.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await page.waitForFunction(() => (document.querySelector(".onboarding-body")?.scrollTop || 0) > 0);
+  const pickerAfter = await page.evaluate(() => {
+    const body = document.querySelector(".onboarding-body");
+    const footer = document.querySelector(".onboarding-actions");
+    const last = document.querySelector(".preset-grid button:last-child");
+    const bodyRect = body.getBoundingClientRect();
+    const footerRect = footer.getBoundingClientRect();
+    const lastRect = last.getBoundingClientRect();
+    return {
+      scrollTop: body.scrollTop,
+      bodyTop: bodyRect.top,
+      bodyBottom: bodyRect.bottom,
+      lastTop: lastRect.top,
+      lastBottom: lastRect.bottom,
+      footerTop: footerRect.top,
+      footerBottom: footerRect.bottom,
+    };
+  });
+  assert(pickerAfter.scrollTop > 0, `${profileName}: ritual picker did not scroll`);
+  assert(
+    pickerAfter.lastTop >= pickerAfter.bodyTop - 1 && pickerAfter.lastBottom <= pickerAfter.bodyBottom + 1,
+    `${profileName}: final ritual is not reachable inside the picker scroller`
+  );
+  assert(
+    Math.abs(pickerAfter.footerTop - pickerBefore.footerTop) <= 1,
+    `${profileName}: onboarding actions moved while the ritual list scrolled`
+  );
+  await lastPreset.tap();
+  assert((await lastPreset.getAttribute("aria-pressed")) === "true", `${profileName}: final ritual could not be selected`);
+  await lastPreset.tap();
+  await pickerBody.evaluate((element) => {
+    element.scrollTop = 0;
+  });
+  fontAudit.pickerScroll = { before: pickerBefore, after: pickerAfter };
+
   await page.locator(".preset-grid button").nth(0).tap();
   await page.locator(".preset-grid button").nth(1).tap();
   await page.locator(".preset-grid button").nth(2).tap();

@@ -1,5 +1,5 @@
 // The cache name changes whenever the shipped shell or visual assets change.
-const CACHE_NAME = 'kawaii-habits-v14';
+const CACHE_NAME = 'kawaii-habits-v15';
 
 const SHELL_URLS = [
   '/',
@@ -16,6 +16,14 @@ const STATIC_ASSET_URLS = [
   '/favicon-48-v1.1.0.png',
   '/scene-garden-day.webp',
   '/scene-garden-night.webp',
+  '/ui-icons/theme-sunlit-v1.webp',
+  '/ui-icons/theme-moonlit-v1.webp',
+  '/ui-icons/theme-matcha-v1.webp',
+  '/ui-icons/habit-move-v1.webp',
+  '/ui-icons/habit-walk-v1.webp',
+  '/ui-icons/habit-meditate-v1.webp',
+  '/ui-icons/habit-tidy-v1.webp',
+  '/ui-icons/habit-fresh-v1.webp',
   '/screenshots/today-phone.webp',
   '/screenshots/today-tablet.webp',
   '/neko-cat-happy.webp',
