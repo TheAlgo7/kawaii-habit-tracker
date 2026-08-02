@@ -1,5 +1,5 @@
 // The cache name changes whenever the shipped shell or visual assets change.
-const CACHE_NAME = 'kawaii-habits-v11';
+const CACHE_NAME = 'kawaii-habits-v12';
 
 const SHELL_URLS = [
   '/',

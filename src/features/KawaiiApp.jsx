@@ -40,12 +40,17 @@ export function KawaiiApp() {
   const [modal, setModal] = useState(null);
   const [feedback, setFeedback] = useState(null);
   const feedbackTimer = useRef(null);
+  const appScrollRef = useRef(null);
 
   const allHabits = state.habits;
   const activeHabits = useMemo(() => allHabits.filter((habit) => !habit.archivedAt), [allHabits]);
   const world = useMemo(() => computeWorld(allHabits, todayStr), [allHabits, todayStr]);
 
   useEffect(() => () => clearTimeout(feedbackTimer.current), []);
+
+  useEffect(() => {
+    if (appScrollRef.current) appScrollRef.current.scrollTop = 0;
+  }, [activeTab]);
 
   useEffect(() => {
     let midnightTimer;
@@ -293,10 +298,10 @@ export function KawaiiApp() {
   }
 
   return (
-    <main className="app-root">
+    <main className="app-root" data-theme={state.preferences.theme}>
       <a className="skip-link" href="#main-content">Skip to main content</a>
       <section className="app-frame" aria-label="Kawaii Habit Tracker">
-        <div className="app-scroll" id="main-content" tabIndex="-1">
+        <div className="app-scroll" id="main-content" ref={appScrollRef} tabIndex="-1">
           {activeTab === "today" && (
             <TodayPanel
               habits={activeHabits}

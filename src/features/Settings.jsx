@@ -55,7 +55,11 @@ export function Settings({ state, onUpdate, onClose }) {
   }
 
   return (
-    <Modal title="Settings" onClose={onClose} className="settings-panel">
+    <Modal
+      title="Settings"
+      onClose={onClose}
+      className={`settings-panel settings-panel--${preferences.theme}`}
+    >
       <header className="modal-heading settings-heading">
         <div><p className="section-kicker">Make the garden comfortable</p><h2>Settings</h2></div>
         <button type="button" className="icon-button" onClick={onClose} aria-label="Close settings"><KawaiiIcon name="close" /></button>

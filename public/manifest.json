@@ -43,7 +43,7 @@
     },
     {
       "src": "/screenshots/today-tablet.webp",
-      "sizes": "834x1112",
+      "sizes": "834x1144",
       "type": "image/webp",
       "form_factor": "wide",
       "label": "Tablet two-page garden and agenda layout"

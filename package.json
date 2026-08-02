@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify:visual": "node scripts/visual-verify.cjs"
+    "verify:visual": "node scripts/visual-verify.cjs",
+    "verify:devices": "node scripts/device-verify.cjs"
   },
   "dependencies": {
     "react": "^19.2.4",

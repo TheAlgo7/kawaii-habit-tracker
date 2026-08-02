@@ -62,6 +62,24 @@ npm run verify:visual
 
 The visual check completes onboarding, verifies all four tabs, switches day and night themes, types in Settings to catch focus regressions, checks compact-phone overflow, and writes review screenshots to `docs/assets`.
 
+The release device suite targets iPhone 15 Pro through Playwright's WebKit profile and Galaxy S24 Ultra through a touch-enabled Android/Chromium profile. It checks onboarding, every tab, 44px touch targets, 16px form text, tab scroll restoration, theme switching, WCAG A/AA scans, manifest icons and screenshot dimensions, service-worker scope, standalone display, installability, and the offline shell.
+
+Install the WebKit runtime once, build, and serve the production app:
+
+```bash
+npx playwright-core install webkit
+npm run build
+npm run preview -- --host 127.0.0.1
+```
+
+Then run the suite in a second terminal:
+
+```bash
+npm run verify:devices
+```
+
+These are deterministic browser/device emulations for release gating. A final check on physical iPhone and Galaxy hardware is still recommended for operating-system install prompts, status-bar insets, and keyboard behavior.
+
 ## Install on a device
 
 ### Android or ChromeOS

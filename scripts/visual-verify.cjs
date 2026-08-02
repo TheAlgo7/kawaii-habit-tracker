@@ -4,7 +4,7 @@ const { chromium } = require("playwright-core");
 const sharp = require("sharp");
 const axePath = require.resolve("axe-core/axe.min.js");
 
-const baseUrl = process.env.KAWAII_VERIFY_URL || "http://127.0.0.1:5173";
+const baseUrl = process.env.KAWAII_VERIFY_URL || "http://127.0.0.1:4173";
 const chromePath = process.env.CHROME_PATH || "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const outputDir = path.resolve(__dirname, "../docs/assets");
 const publicScreenshotDir = path.resolve(__dirname, "../public/screenshots");
