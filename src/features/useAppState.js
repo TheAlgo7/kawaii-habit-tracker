@@ -13,7 +13,7 @@ export function useAppState() {
   // Reflect theme + motion choices on the document so CSS can react globally.
   useEffect(() => {
     const root = document.documentElement;
-    root.setAttribute("data-theme", state.preferences.theme || "midnight-sakura");
+    root.setAttribute("data-theme", state.preferences.theme || "garden-day");
     root.setAttribute("data-motion", state.preferences.motion || "full");
   }, [state.preferences.theme, state.preferences.motion]);
 

@@ -1,5 +1,4 @@
-// Generates the shipped icon set from the HD Photoshop masters.
-// Masters live in /design (out of the deploy path); outputs go to /public.
+// Generates the shipped icon set from the approved, image-generated master artwork.
 // Run: node scripts/make-icons.mjs
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -7,34 +6,57 @@ import { dirname, join } from "node:path";
 import sharp from "sharp";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const design = join(here, "..", "design");
 const pub = join(here, "..", "public");
+const source = await readFile(join(here, "..", "design", "app-icon-master.png"));
+const { version } = JSON.parse(await readFile(join(here, "..", "package.json"), "utf8"));
+const releaseTag = `v${version}`;
 
-// Background used to make maskable / apple icons full-bleed (no transparent
-// corners), sampled to match the icons' dark plum edge.
-const FILL = "#1b1029";
+const OAT = "#F3D7AA";
+const PNG_OPTIONS = {
+  compressionLevel: 9,
+  adaptiveFiltering: true,
+  palette: false,
+  effort: 10,
+};
 
-const full = await readFile(join(design, "Kawaii-App-Icon.png")); // full sakura scene
-const zoom = await readFile(join(design, "Kawaii-App-Icon-Zoomed.png")); // centered cat
+async function render(size, contentScale = 1) {
+  const artworkSize = Math.round(size * contentScale);
+  const artwork = sharp(source)
+    .resize({ width: artworkSize, height: artworkSize, fit: "fill" })
 
-async function square(buf, size, fill) {
-  let pipe = sharp(buf).resize({ width: size, height: size, fit: "cover", position: "centre" });
-  if (fill) pipe = pipe.flatten({ background: fill });
-  return pipe.png({ compressionLevel: 9 }).toBuffer();
+  if (contentScale === 1) return artwork.png(PNG_OPTIONS).toBuffer();
+
+  const remaining = size - artworkSize;
+  const leading = Math.floor(remaining / 2);
+  const trailing = remaining - leading;
+
+  // Extend the painting's own edge pixels into the adaptive-icon margin so
+  // Android masks never reveal a flat inset square around the watercolor.
+  return artwork
+    .extend({
+      top: leading,
+      bottom: trailing,
+      left: leading,
+      right: trailing,
+      extendWith: "copy",
+      background: OAT,
+    })
+    .png(PNG_OPTIONS)
+    .toBuffer();
 }
 
 const jobs = [
-  ["icon-192.png", () => square(full, 192)], // any
-  ["icon-512.png", () => square(full, 512)], // any
-  ["icon-maskable.png", () => square(zoom, 512, FILL)], // maskable, full-bleed, centered
-  ["apple-touch-icon.png", () => square(zoom, 180, FILL)], // iOS rounds it itself
-  ["favicon-48.png", () => square(zoom, 48)],
+  [["icon-192.png", `icon-192-${releaseTag}.png`], 192, 1],
+  [["icon-512.png", `icon-512-${releaseTag}.png`], 512, 1],
+  [["icon-maskable.png", `icon-maskable-${releaseTag}.png`], 512, 0.82],
+  [["apple-touch-icon.png", `apple-touch-icon-${releaseTag}.png`], 180, 1],
+  [["favicon-48.png", `favicon-48-${releaseTag}.png`], 48, 1],
 ];
 
-for (const [name, make] of jobs) {
-  const out = await make();
-  await writeFile(join(pub, name), out);
-  console.log(`${name.padEnd(22)} ${(out.length / 1024).toFixed(0)} KB`);
+for (const [names, size, contentScale] of jobs) {
+  const out = await render(size, contentScale);
+  await Promise.all(names.map((name) => writeFile(join(pub, name), out)));
+  console.log(`${names.join(", ")}  ${size}x${size}  ${(out.length / 1024).toFixed(1)} KB each`);
 }
 
 console.log("\nIcons written to /public.");

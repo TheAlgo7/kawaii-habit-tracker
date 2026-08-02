@@ -23,15 +23,21 @@ export const moodLayout = {
 };
 
 export const moodMessages = {
-  blissful: "Nyaa~ everything is glowing because of you.",
-  happy: "You're doing great. Let's make today amazing.",
-  content: "I'm here whenever you're ready for the next tiny step.",
-  welcome: "Welcome~ pick one tiny thing and we'll grow this little world together.",
+  blissful: "Your care is making this little place glow.",
+  happy: "A gentle rhythm is taking root.",
+  content: "I’m here when you’re ready for one small step.",
+  welcome: "Choose one tiny thing and we’ll grow from there.",
   recovered: "You came back, and that's the part that matters. Let's start gently.",
-  sleepy: "Soft start today? We can begin gently.",
-  sad: "Even one small thing would make the world warmer.",
-  lonely: "I saved your place. Whenever you're ready, we begin again, no rush.",
+  sleepy: "A quiet start is still a start.",
+  sad: "One small act of care is enough for today.",
+  lonely: "Your place is still here. Begin again whenever you’re ready.",
 };
+
+export function isCrisisMessage(message) {
+  return /\b(suicid(?:e|al)|kill myself|end my life|hurt myself|self[- ]?harm|harm someone|kill someone)\b/i.test(
+    String(message || ""),
+  );
+}
 
 // Find the most recent day (before today) on which any habit was completed.
 // This is how we tell a brand-new user apart from someone returning after a gap.
@@ -89,46 +95,50 @@ export function getMood(habits, todayStr) {
 export function getLocalReply(message, habits, tasks, challenges, userName) {
   const lower = message.toLowerCase();
   const todayStr = today();
-  const done = habits.filter((habit) => habit.completedDates.includes(todayStr)).length;
+  const done = habits.filter((habit) => doneOn(habit, todayStr)).length;
   const pending = tasks.filter((task) => !task.done).length;
   const name = userName ? `${userName}, ` : "";
 
+  if (isCrisisMessage(message)) {
+    return "I’m really glad you said something. Please contact local emergency services or a crisis line now, and reach out to someone you trust who can stay with you. You deserve immediate, real-world support.";
+  }
+
   if (/miss|back|recover|restart|gone|away|fell off/.test(lower)) {
-    return `${name}coming back is the whole win. Let's not miss twice, pick the tiniest version of one habit and we'll start there. 🌱`;
+    return `${name}coming back is the whole win. Choose the tiniest version of one ritual and begin there.`;
   }
 
   if (/celebrate|win|proud|did it|done|yay|finished/.test(lower)) {
     return done > 0
-      ? `${name}look at you, ${done} care task${done === 1 ? "" : "s"} done today. The world's a little warmer because of it. 🎉`
-      : `${name}let's make a win to celebrate, even one tiny thing counts, and I'll cheer the moment you do it. ✨`;
+      ? `${name}${done} care ritual${done === 1 ? " is" : "s are"} complete today. Your garden is warmer because of it.`
+      : `${name}one tiny thing is enough to make a win worth noticing.`;
   }
 
   if (/easier|easy|tiny|smaller|too much|overwhelm|stuck|hard|difficult/.test(lower)) {
-    return `${name}let's shrink it. What's the two-minute version of the next habit? Done tiny still counts as done. 🌸`;
+    return `${name}let’s shrink it. What is the two-minute version of the next ritual? Tiny still counts.`;
   }
 
   if (/plan|today|routine|schedule/.test(lower)) {
-    return `${name}start with one easy care task, then one important task, then take a real break. Tiny steps still count. 🌸`;
+    return `${name}start with one easy care ritual, then one important task, then take a real break.`;
   }
 
   if (/progress|habit|streak|check/.test(lower)) {
-    return `${name}you have ${done}/${habits.length} care tasks done today and ${pending} task${pending === 1 ? "" : "s"} waiting. Keep it gentle. ✨`;
+    return `${name}you have ${done} of ${habits.length} care ritual${habits.length === 1 ? "" : "s"} complete and ${pending} to-do${pending === 1 ? "" : "s"} waiting. Keep it gentle.`;
   }
 
   if (/challenge|goal|growth/.test(lower)) {
     const live = challenges.filter((challenge) => !challenge.archivedAt);
-    if (!live.length) return "No active growth challenges yet. We can plant one when you're ready. 🌱";
+    if (!live.length) return "No active longer goals yet. We can plant one when you’re ready.";
     const lines = live.map((challenge) => {
       // Real check-ins, matching the World screen, not calendar days.
-      const doneDays = challenge.completedDates.length;
-      return `${challenge.emoji} ${challenge.name}: ${doneDays}/${challenge.targetDays} days done`;
+      const doneDays = (challenge.completedDates || []).length;
+      return `${challenge.name}: ${doneDays}/${challenge.targetDays} care days`;
     });
     return `Your growth garden:\n${lines.join("\n")}`;
   }
 
   if (/tired|sad|lazy|hard|difficult|motivat|encourage/.test(lower)) {
-    return `${name}you don't have to become a new person today. Just choose the next kind thing and I'll cheer from here. 💗`;
+    return `${name}you don’t have to become a new person today. Choose the next kind thing and begin there.`;
   }
 
-  return `${name}I'm listening. Want to plan the day, check progress, or pick one tiny task together? 🐱`;
+  return `${name}I’m listening. We can plan the day, check your rhythm, or choose one tiny action together.`;
 }

@@ -2,89 +2,122 @@
 
 # Kawaii Habit Tracker
 
-### *A living world that grows with you~*
+### A sunlit pocket garden for gentle, imperfect routines
 
-[![Live Demo](https://img.shields.io/badge/Live-kawaii--habit--tracker.vercel.app-FF85A2?style=flat-square&labelColor=111111)](https://kawaii-habit-tracker.vercel.app)
-[![React](https://img.shields.io/badge/React-19-FF85A2?style=flat-square&logo=react&logoColor=white&labelColor=111111)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-8-FF85A2?style=flat-square&logo=vite&logoColor=white&labelColor=111111)](https://vite.dev)
-[![PWA](https://img.shields.io/badge/PWA-Installable-FF85A2?style=flat-square&labelColor=111111)](https://kawaii-habit-tracker.vercel.app)
-[![Neko](https://img.shields.io/badge/System-Neko%20Mood%20Engine-FF85A2?style=flat-square&labelColor=111111)](https://github.com/TheAlgo7/kawaii-habit-tracker)
+[![React](https://img.shields.io/badge/React-19-C96648?style=flat-square&logo=react&logoColor=white&labelColor=38272B)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-8-C96648?style=flat-square&logo=vite&logoColor=white&labelColor=38272B)](https://vite.dev)
+[![PWA](https://img.shields.io/badge/PWA-Installable-7B9B6D?style=flat-square&labelColor=38272B)](https://kawaii-habit-tracker.vercel.app)
+[![Tests](https://img.shields.io/badge/tests-passing-7B9B6D?style=flat-square&labelColor=38272B)](#verification)
 
 </div>
 
 <p align="center">
-  <img src="./docs/assets/hero.png" width="400" alt="Kawaii Habit Tracker" />
+  <img src="./docs/assets/hero.png" width="390" alt="Kawaii Habit Tracker Today screen in the Sunlit Garden theme" />
 </p>
 
-Kawaii Habit Tracker treats habits as a relationship, not a checklist. The app builds attachment: tiny care rituals feed trust, trust grows a world that visibly comes alive, and Neko's mood reflects where you are, never punishing a missed day. Show up, and your world brightens. Step away, and coming back is the win. It's a gentle daily companion, not a productivity tracker.
+Kawaii Habit Tracker is a private, phone-first habit companion for Android, iPhone, and tablet browsers. Tiny versions count, planned rest never becomes failure, and ordinary care grows a small illustrated world. The default Sunlit Garden theme follows the warm watercolor direction; Moonlit Nook offers the same product under lantern light.
 
-> **Status:** Launch-ready single-user PWA. Offline-first, no account, all data stays on your device.
+> **Status:** Version 1.1.0 is a verified release candidate. The repository builds as an installable offline-first PWA. A public deployment may lag behind the current branch.
 
-## Features
+## What is included
 
-- **First-run onboarding:** name your companion and world, pick 1-3 starter rituals, set their tiny versions, and do your first check-in.
-- **Tiny versions:** every habit has a two-minute version that still counts, so bad days stay doable.
-- **Gentle recovery, not streaks-as-punishment:** rest/skip days with reasons keep streaks safe, and Neko welcomes you back instead of guilting you.
-- **Living world:** completing rituals earns care points that level up your world and unlock decor; a weekly trend shows your rhythm.
-- **Full habit CRUD:** edit, recolour, reschedule (daily / weekdays / custom days), add notes, archive.
-- **Neko companion:** a mood lifecycle (welcome → recovered → resting) plus an optional AI coach scoped to planning, reflection, and recovery.
-- **Your data, yours:** export/import a JSON backup, reset anytime; nothing leaves the device.
-- **Themes & comfort:** multiple accent themes, reduce-motion and softer-emotion toggles.
-- **Installable, offline-first PWA** with optimized art and an update prompt.
-- **Accessible:** keyboard-trapped modals, Escape to close, visible focus, live completion feedback, zoom enabled.
+- **Fast Today loop:** rituals grouped by morning, anytime, and evening, with seven-day context and one-tap completion.
+- **Tiny and rest states:** mark the smallest honest version, record a rest day, attach a note, or reopen today without losing history.
+- **Rhythm, not punishment:** a seven-day view, monthly trail, schedule-aware percentages, and protected rest days replace brittle streak pressure.
+- **Living garden:** care points unlock original botanical keepsakes and grow longer goals without countdown anxiety.
+- **Neko companion:** local planning and recovery guidance works offline; the optional API route adds AI responses while retaining a safe local fallback.
+- **Full ritual editing:** first-party illustrated icons, accent, part of day, daily/weekday/custom scheduling, notes, archive, and migration from legacy data.
+- **Three coherent themes:** Sunlit Garden, Moonlit Nook, and Matcha Study preserve one component and icon language.
+- **Local ownership:** versioned `localStorage`, defensive hydration, strict backup import, JSON export, and no account or analytics tracker.
+- **Installable PWA:** custom app icons, maskable icon, pre-paint theme restoration, offline scene assets, and an accessible update prompt.
+- **Accessible interaction:** semantic headings, labeled state, keyboard-trapped dialogs, focus restoration, inline Undo, 44px touch targets, reduced motion, and zoom support.
 
-## Install to Home Screen
+The app intentionally does not schedule background notifications. It stays quiet when closed instead of inventing unreliable reminder behavior on iOS and Android browsers.
 
-**Android (Chrome):**
-1. Open [kawaii-habit-tracker.vercel.app](https://kawaii-habit-tracker.vercel.app) in Chrome
-2. Tap the **⋮** menu → **Add to Home screen**
-3. Tap **Add**. Neko moves in permanently~
+## Run locally
 
-**iOS (Safari):**
-1. Open [kawaii-habit-tracker.vercel.app](https://kawaii-habit-tracker.vercel.app) in Safari
-2. Tap the **Share** button → **Add to Home Screen**
-3. Tap **Add**. Your kawaii companion is always one tap away
-
-## Stack
-
-| Layer | Technology |
-| --- | --- |
-| Framework | React 19 |
-| Build Tool | Vite |
-| Styling | CSS with handcrafted design tokens |
-| Persistence | localStorage |
-| PWA | Web App Manifest + service worker |
-| Hosting | Vercel |
-
-## Design Language
-
-- **Hyper-kawaii, but intentional.** Pastels, softness, and emotional warmth without becoming shapeless.
-- **Mobile-first.** Tuned for phone-sized interaction, not desktop-first compromise.
-- **Companion-driven UX.** Neko is a system, not just a mascot.
-- **Handmade UI.** No component-library sameness, no off-the-shelf vibe.
-
-<details>
-<summary>Quick Start</summary>
+Requirements: Node.js 20.19 or newer and npm.
 
 ```bash
-git clone https://github.com/TheAlgo7/kawaii-habit-tracker.git
-cd kawaii-habit-tracker
 npm install
 npm run dev
 ```
 
-Open `http://localhost:5173`.
+Open `http://127.0.0.1:5173`.
+
+## Verification
 
 ```bash
-npm run build
-npm run preview
+npm test
 npm run lint
+npm run build
+npm audit
 ```
 
-</details>
+For the automated phone and tablet browser pass, keep the development server running in one terminal and run this in another:
 
-<div align="center">
+```bash
+npm run verify:visual
+```
 
-Built with too much pink, just enough psychology, and a lot of love by **[The Algothrim](https://thealgothrim.com)**
+The visual check completes onboarding, verifies all four tabs, switches day and night themes, types in Settings to catch focus regressions, checks compact-phone overflow, and writes review screenshots to `docs/assets`.
 
-</div>
+The release device suite targets iPhone 15 Pro through Playwright's WebKit profile and Galaxy S24 Ultra through a touch-enabled Android/Chromium profile. It checks onboarding, every tab, 44px touch targets, 16px form text, tab scroll restoration, theme switching, WCAG A/AA scans, manifest icons and screenshot dimensions, service-worker scope, standalone display, installability, and the offline shell.
+
+Install the WebKit runtime once, build, and serve the production app:
+
+```bash
+npx playwright-core install webkit
+npm run build
+npm run preview -- --host 127.0.0.1
+```
+
+Then run the suite in a second terminal:
+
+```bash
+npm run verify:devices
+```
+
+These are deterministic browser/device emulations for release gating. A final check on physical iPhone and Galaxy hardware is still recommended for operating-system install prompts, status-bar insets, and keyboard behavior.
+
+## Install on a device
+
+### Updating an installed copy
+
+- App code and visual assets are delivered through a versioned service worker. When an update is ready, choose **Update now** in the in-app notice.
+- Android launcher icons use versioned manifest URLs so current Chrome/WebAPK installs can offer the operating-system **Review app update** flow.
+- iOS and iPadOS update the app itself, but Safari does not replace metadata such as an existing Home Screen icon in place. Export a backup, remove the old Home Screen app, and add it again to receive a changed launcher icon.
+
+### Android or ChromeOS
+
+1. Open the deployed HTTPS URL in Chrome.
+2. Open the browser menu and choose **Install app** or **Add to Home screen**.
+3. Confirm the installation.
+
+### iPhone or iPad
+
+1. Open the deployed HTTPS URL in Safari.
+2. Open **Share**, then choose **Add to Home Screen**.
+3. Confirm **Add**.
+
+## Architecture
+
+| Layer | Implementation |
+| --- | --- |
+| UI | React 19, semantic JSX, handcrafted CSS |
+| Design | OKLCH semantic themes, editorial serif plus system UI, first-party SVG icons |
+| State | One versioned local object with defensive migration and hydration |
+| Dates | Local calendar keys, schedule-aware history, no UTC day drift |
+| PWA | Manifest, custom icon family, service worker, offline asset cache |
+| Optional AI | `/api/chat` with scoped system prompt and local fallback |
+| Quality | Vitest, ESLint, Vite production build, Playwright Core device checks |
+
+Product and visual decisions are recorded in [PRODUCT.md](./PRODUCT.md), [DESIGN.md](./DESIGN.md), and [the competitor research note](./docs/COMPETITOR_RESEARCH.md). The generated design sidecar lives at `.impeccable/design.json` for design-aware tooling.
+
+## Privacy and safety
+
+Habit data, notes, names, and chat history stay on the current device unless the user exports a backup. AI chat is optional and degrades to a local response when the API is unavailable. Messages suggesting immediate self-harm or harm to others are routed to a local crisis-support response before any network request.
+
+---
+
+Built by [The Algothrim](https://thealgothrim.com).

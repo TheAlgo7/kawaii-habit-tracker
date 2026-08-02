@@ -15,9 +15,17 @@ describe("normalizeHabit", () => {
   it("fills gentle defaults", () => {
     const h = normalizeHabit({ name: "Read" });
     expect(h.type).toBe("build");
+    expect(h.icon).toBe("book");
+    expect(h.timeOfDay).toBe("anytime");
     expect(h.frequency).toEqual({ kind: "daily", days: [0, 1, 2, 3, 4, 5, 6] });
     expect(h.tinyDates).toEqual([]);
     expect(h.archivedAt).toBeNull();
+  });
+
+  it("infers a first-party icon for migrated habits without changing legacy data", () => {
+    const h = normalizeHabit({ name: "Drink water", emoji: "💧" });
+    expect(h.icon).toBe("water");
+    expect(h.emoji).toBe("💧");
   });
 });
 

@@ -1,16 +1,16 @@
 import { today } from "./date";
 
-export const HABIT_COLORS = ["#ff6fa8", "#b7a27d", "#b56cff", "#86d8a7", "#89c5ff", "#ffd166"];
+export const HABIT_COLORS = ["#c96648", "#81946f", "#87a8b5", "#a392ae", "#c99b62", "#b87568"];
 
 export const seedHabits = [
-  { id: 1, name: "Drink 8 glasses of water", emoji: "💧", color: "#ff6fa8", completedDates: [] },
-  { id: 2, name: "Read for 20 mins", emoji: "📖", color: "#b7a27d", completedDates: [] },
-  { id: 3, name: "Meditate for 10 mins", emoji: "🌸", color: "#b56cff", completedDates: [] },
+  { id: 1, name: "Drink water", icon: "water", color: "#87a8b5", tinyVersion: "One glass is enough", timeOfDay: "morning", completedDates: [] },
+  { id: 2, name: "Read for 10 minutes", icon: "book", color: "#c99b62", tinyVersion: "Read one page", timeOfDay: "evening", completedDates: [] },
+  { id: 3, name: "Take a mindful pause", icon: "breathe", color: "#a392ae", tinyVersion: "Take three slow breaths", timeOfDay: "anytime", completedDates: [] },
 ];
 
 export const seedTasks = [
-  { id: 1, name: "Buy groceries", emoji: "🛒", category: "Personal", done: false },
-  { id: 2, name: "Reply to emails", emoji: "✉️", category: "Work", done: false },
+  { id: 1, name: "Buy groceries", icon: "task", category: "Personal", done: false },
+  { id: 2, name: "Reply to emails", icon: "journal", category: "Work", done: false },
 ];
 
 // Built as a function so the start date is always relative to the day the user
@@ -18,6 +18,6 @@ export const seedTasks = [
 // renders as "Day 96/30", a stale-demo bug that makes the app look broken.
 export function makeSeedChallenges() {
   return [
-    { id: 1, name: "No junk food", emoji: "🥗", targetDays: 30, startDate: today(), completedDates: [] },
+    { id: 1, name: "Eat something fresh", icon: "plant", targetDays: 30, startDate: today(), completedDates: [] },
   ];
 }

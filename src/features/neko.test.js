@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getMood } from "./neko";
+import { getLocalReply, getMood, isCrisisMessage } from "./neko";
 
 const TODAY = "2026-06-04";
 
@@ -53,5 +53,61 @@ describe("getMood lifecycle", () => {
 
   it("shows gentle sadness only after a short established gap", () => {
     expect(getMood([habit(["2026-06-02"])], TODAY)).toBe("sad");
+  });
+});
+
+describe("crisis routing", () => {
+  it.each([
+    "I want to kill myself",
+    "I might end my life",
+    "I have been thinking about self-harm",
+    "I want to hurt myself",
+    "I might harm someone",
+  ])("recognises an urgent message: %s", (message) => {
+    expect(isCrisisMessage(message)).toBe(true);
+  });
+
+  it.each([
+    "I need to kill time before dinner",
+    "This task is hurting my progress",
+    "I want help restarting my habits",
+  ])("does not flag ordinary language: %s", (message) => {
+    expect(isCrisisMessage(message)).toBe(false);
+  });
+
+  it("routes urgent language before ordinary coaching intents", () => {
+    const reply = getLocalReply(
+      "I want to kill myself and need a plan today",
+      [habit([])],
+      [],
+      [],
+      "Mina",
+    );
+
+    expect(reply).toContain("local emergency services or a crisis line");
+    expect(reply).toContain("someone you trust");
+    expect(reply).not.toContain("start with one easy care ritual");
+  });
+});
+
+describe("local coaching summary", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 5, 4, 12, 0));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("counts a tiny version as care in the progress reply", () => {
+    const reply = getLocalReply(
+      "check my progress",
+      [{ ...habit([]), tinyDates: [TODAY] }],
+      [],
+      [],
+      "Mina",
+    );
+    expect(reply).toContain("1 of 1 care ritual complete");
   });
 });

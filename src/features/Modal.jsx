@@ -9,10 +9,19 @@ const FOCUSABLE =
 export function Modal({ title, onClose, children, className = "entry-modal", labelId }) {
   const panelRef = useRef(null);
   const restoreRef = useRef(null);
+  const closeRef = useRef(onClose);
+
+  useEffect(() => {
+    closeRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     restoreRef.current = document.activeElement;
     const node = panelRef.current;
+    const appFrame = document.querySelector(".app-frame");
+    const previousOverflow = document.body.style.overflow;
+    if (appFrame) appFrame.inert = true;
+    document.body.style.overflow = "hidden";
     const items = () =>
       [...node.querySelectorAll(FOCUSABLE)].filter((el) => !el.disabled && el.offsetParent !== null);
 
@@ -21,7 +30,7 @@ export function Modal({ title, onClose, children, className = "entry-modal", lab
     function onKey(event) {
       if (event.key === "Escape") {
         event.stopPropagation();
-        onClose();
+        closeRef.current();
         return;
       }
       if (event.key !== "Tab") return;
@@ -41,10 +50,12 @@ export function Modal({ title, onClose, children, className = "entry-modal", lab
     node.addEventListener("keydown", onKey);
     return () => {
       node.removeEventListener("keydown", onKey);
+      if (appFrame) appFrame.inert = false;
+      document.body.style.overflow = previousOverflow;
       const restore = restoreRef.current;
       if (restore && typeof restore.focus === "function") restore.focus();
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <div

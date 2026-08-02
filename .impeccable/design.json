@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-02T14:45:00+05:30",
+  "title": "Design System: Kawaii Habit Tracker",
+  "extensions": {
+    "colorMeta": {
+      "canvas-day": {
+        "role": "neutral",
+        "displayName": "Oat Canvas",
+        "canonical": "oklch(96.4% 0.024 80)",
+        "tonalRamp": ["oklch(15% 0.024 80)", "oklch(27% 0.024 80)", "oklch(39% 0.024 80)", "oklch(51% 0.024 80)", "oklch(63% 0.024 80)", "oklch(75% 0.024 80)", "oklch(87% 0.024 80)", "oklch(96.4% 0.024 80)"]
+      },
+      "surface-day": {
+        "role": "neutral",
+        "displayName": "Raised Cream",
+        "canonical": "oklch(98.5% 0.015 82)",
+        "tonalRamp": ["oklch(15% 0.015 82)", "oklch(27% 0.015 82)", "oklch(39% 0.015 82)", "oklch(51% 0.015 82)", "oklch(63% 0.015 82)", "oklch(75% 0.015 82)", "oklch(87% 0.015 82)", "oklch(98.5% 0.015 82)"]
+      },
+      "ink-day": {
+        "role": "neutral",
+        "displayName": "Editorial Plum",
+        "canonical": "oklch(30% 0.045 18)",
+        "tonalRamp": ["oklch(15% 0.045 18)", "oklch(27% 0.045 18)", "oklch(39% 0.045 18)", "oklch(51% 0.045 18)", "oklch(63% 0.045 18)", "oklch(75% 0.045 18)", "oklch(87% 0.045 18)", "oklch(95% 0.045 18)"]
+      },
+      "muted-ink-day": {
+        "role": "neutral",
+        "displayName": "Quiet Umber",
+        "canonical": "oklch(46% 0.035 35)",
+        "tonalRamp": ["oklch(15% 0.035 35)", "oklch(27% 0.035 35)", "oklch(39% 0.035 35)", "oklch(51% 0.035 35)", "oklch(63% 0.035 35)", "oklch(75% 0.035 35)", "oklch(87% 0.035 35)", "oklch(95% 0.035 35)"]
+      },
+      "persimmon": {
+        "role": "primary",
+        "displayName": "Pressed Persimmon",
+        "canonical": "oklch(53% 0.14 38)",
+        "tonalRamp": ["oklch(15% 0.05 38)", "oklch(27% 0.08 38)", "oklch(39% 0.11 38)", "oklch(48% 0.14 38)", "oklch(53% 0.14 38)", "oklch(70% 0.11 38)", "oklch(84% 0.07 38)", "oklch(95% 0.03 38)"]
+      },
+      "sage": {
+        "role": "secondary",
+        "displayName": "Garden Sage",
+        "canonical": "oklch(62% 0.075 137)",
+        "tonalRamp": ["oklch(15% 0.035 137)", "oklch(27% 0.05 137)", "oklch(39% 0.065 137)", "oklch(51% 0.075 137)", "oklch(62% 0.075 137)", "oklch(74% 0.065 137)", "oklch(86% 0.05 137)", "oklch(95% 0.025 137)"]
+      },
+      "sage-soft": {
+        "role": "secondary",
+        "displayName": "Soft Sage Paper",
+        "canonical": "oklch(91% 0.05 130)",
+        "tonalRamp": ["oklch(15% 0.03 130)", "oklch(27% 0.04 130)", "oklch(39% 0.05 130)", "oklch(51% 0.05 130)", "oklch(63% 0.05 130)", "oklch(75% 0.05 130)", "oklch(87% 0.05 130)", "oklch(95% 0.025 130)"]
+      },
+      "warm-divider": {
+        "role": "neutral",
+        "displayName": "Warm Divider",
+        "canonical": "oklch(84% 0.035 74)",
+        "tonalRamp": ["oklch(15% 0.025 74)", "oklch(27% 0.03 74)", "oklch(39% 0.035 74)", "oklch(51% 0.035 74)", "oklch(63% 0.035 74)", "oklch(75% 0.035 74)", "oklch(87% 0.03 74)", "oklch(95% 0.02 74)"]
+      },
+      "canvas-night": {
+        "role": "neutral",
+        "displayName": "Moonlit Aubergine",
+        "canonical": "oklch(20% 0.035 278)",
+        "tonalRamp": ["oklch(15% 0.035 278)", "oklch(27% 0.035 278)", "oklch(39% 0.035 278)", "oklch(51% 0.035 278)", "oklch(63% 0.035 278)", "oklch(75% 0.035 278)", "oklch(87% 0.03 278)", "oklch(95% 0.02 278)"]
+      },
+      "surface-night": {
+        "role": "neutral",
+        "displayName": "Night Paper",
+        "canonical": "oklch(25% 0.04 276)",
+        "tonalRamp": ["oklch(15% 0.04 276)", "oklch(27% 0.04 276)", "oklch(39% 0.04 276)", "oklch(51% 0.04 276)", "oklch(63% 0.04 276)", "oklch(75% 0.035 276)", "oklch(87% 0.03 276)", "oklch(95% 0.02 276)"]
+      },
+      "ink-night": {
+        "role": "neutral",
+        "displayName": "Moon Cream",
+        "canonical": "oklch(94% 0.025 82)",
+        "tonalRamp": ["oklch(15% 0.025 82)", "oklch(27% 0.025 82)", "oklch(39% 0.025 82)", "oklch(51% 0.025 82)", "oklch(63% 0.025 82)", "oklch(75% 0.025 82)", "oklch(87% 0.025 82)", "oklch(95% 0.02 82)"]
+      },
+      "lantern-gold": {
+        "role": "tertiary",
+        "displayName": "Lantern Gold",
+        "canonical": "oklch(80% 0.105 78)",
+        "tonalRamp": ["oklch(15% 0.045 78)", "oklch(27% 0.065 78)", "oklch(39% 0.085 78)", "oklch(51% 0.105 78)", "oklch(63% 0.105 78)", "oklch(75% 0.105 78)", "oklch(87% 0.075 78)", "oklch(95% 0.03 78)"]
+      },
+      "danger": {
+        "role": "danger",
+        "displayName": "Caring Red",
+        "canonical": "oklch(51% 0.16 28)",
+        "tonalRamp": ["oklch(15% 0.06 28)", "oklch(27% 0.1 28)", "oklch(39% 0.14 28)", "oklch(51% 0.16 28)", "oklch(63% 0.14 28)", "oklch(75% 0.11 28)", "oklch(87% 0.07 28)", "oklch(95% 0.03 28)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Storybook Display", "purpose": "Scene greetings and onboarding promises only." },
+      "title": { "displayName": "Editorial Title", "purpose": "Page and section hierarchy." },
+      "body": { "displayName": "Humanist Interface", "purpose": "Actions, descriptions, and conversation." },
+      "label": { "displayName": "Garden Label", "purpose": "Dates, kickers, and compact state groups." }
+    },
+    "shadows": [
+      { "name": "ambient-lift", "value": "0 18px 50px oklch(32% 0.04 40 / 0.13)", "purpose": "App frames, dialogs, and exceptional floating feedback." },
+      { "name": "quiet-lift", "value": "0 8px 24px oklch(32% 0.035 40 / 0.09)", "purpose": "Selected controls, illustrated panels, and the tablet navigation dock." },
+      { "name": "night-ambient", "value": "0 22px 60px oklch(8% 0.03 285 / 0.48)", "purpose": "Moonlit Nook dialogs and app frames." }
+    ],
+    "motion": [
+      { "name": "state", "value": "160ms ease", "purpose": "Hover, color, and completion-state changes." },
+      { "name": "sheet", "value": "220ms cubic-bezier(0.2, 0.82, 0.2, 1)", "purpose": "Bottom-sheet entry without bounce." },
+      { "name": "reduced", "value": "1ms linear", "purpose": "Applied globally when the user or operating system requests reduced motion." }
+    ],
+    "breakpoints": [
+      { "name": "wide-phone", "value": "520px" },
+      { "name": "tablet", "value": "760px" },
+      { "name": "wide-tablet", "value": "1020px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single warm, verb-led action in a section or dialog.",
+      "html": "<button class=\"ds-btn-primary\">Create ritual</button>",
+      "css": ".ds-btn-primary { min-height: 44px; padding: 11px 17px; border: 0; border-radius: 999px; background: oklch(53% 0.14 38); color: oklch(98.5% 0.015 82); font: 760 14px/1 Inter, system-ui, sans-serif; box-shadow: 0 6px 16px oklch(53% 0.14 38 / .28); transition: background 160ms ease, transform 160ms ease; } .ds-btn-primary:hover { background: oklch(48% 0.15 35); } .ds-btn-primary:active { transform: scale(.97); } .ds-btn-primary:focus-visible { outline: 3px solid oklch(65% 0.12 40); outline-offset: 3px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A quiet bordered alternative that never competes with the main action.",
+      "html": "<button class=\"ds-btn-secondary\">Keep browsing</button>",
+      "css": ".ds-btn-secondary { min-height: 44px; padding: 11px 17px; border: 1px solid oklch(84% 0.035 74); border-radius: 999px; background: oklch(98.5% 0.015 82); color: oklch(30% 0.045 18); font: 760 14px/1 Inter, system-ui, sans-serif; transition: background 160ms ease, border-color 160ms ease; } .ds-btn-secondary:hover { border-color: oklch(62% 0.075 137); background: oklch(91% 0.05 130); } .ds-btn-secondary:focus-visible { outline: 3px solid oklch(65% 0.12 40); outline-offset: 3px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "A warm paper field with a precise semantic focus ring.",
+      "html": "<label class=\"ds-field\"><span>Ritual name</span><input placeholder=\"Drink water\"></label>",
+      "css": ".ds-field { display: grid; gap: 6px; color: oklch(30% 0.045 18); font: 740 12px/1.4 Inter, system-ui, sans-serif; } .ds-field input { box-sizing: border-box; width: 100%; min-height: 46px; padding: 11px 12px; border: 1px solid oklch(84% 0.035 74); border-radius: 11px; outline: 0; background: oklch(98.5% 0.015 82); color: oklch(30% 0.045 18); font: 16px/1.4 Inter, system-ui, sans-serif; } .ds-field input:focus { border-color: oklch(62% 0.14 38); box-shadow: 0 0 0 3px oklch(91% 0.055 47); }"
+    },
+    {
+      "name": "Bottom Navigation",
+      "kind": "nav",
+      "refersTo": "bottom-navigation",
+      "description": "Four labeled destinations with a soft, unmistakable current state.",
+      "html": "<nav class=\"ds-nav\"><button class=\"is-active\">Today</button><button>Rhythm</button><button>Garden</button><button>Neko</button></nav>",
+      "css": ".ds-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 7px; border: 1px solid oklch(84% 0.035 74); border-radius: 14px; background: oklch(98.5% 0.015 82); box-shadow: 0 8px 24px oklch(32% 0.035 40 / .09); } .ds-nav button { min-height: 48px; border: 0; border-radius: 12px; background: transparent; color: oklch(48% 0.025 55); font: 760 11px/1 Inter, system-ui, sans-serif; } .ds-nav button:hover { color: oklch(30% 0.045 18); } .ds-nav button.is-active { background: oklch(91% 0.055 47); color: oklch(43% 0.13 35); } .ds-nav button:focus-visible { outline: 3px solid oklch(65% 0.12 40); outline-offset: 1px; }"
+    },
+    {
+      "name": "Ritual Row",
+      "kind": "custom",
+      "description": "The signature open habit row with a botanical mark, tiny version, rhythm, and completion circle.",
+      "html": "<article class=\"ds-ritual\"><span class=\"ds-ritual-icon\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3S6.5 9.3 6.5 14a5.5 5.5 0 0 0 11 0C17.5 9.3 12 3 12 3Z\"/></svg></span><div><strong>Drink water</strong><small>One glass is enough</small><span class=\"ds-rhythm\" aria-label=\"Six open days and one cared day\"><i></i><i></i><i></i><i></i><i></i><i></i><i class=\"is-cared\"></i></span></div><button aria-label=\"Complete Drink water\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m6 12 4 4 8-9\"/></svg></button></article>",
+      "css": ".ds-ritual { display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; gap: 12px; min-height: 104px; padding: 12px 0; border-bottom: 1px solid oklch(89% 0.026 76); color: oklch(30% 0.045 18); font-family: Inter, system-ui, sans-serif; } .ds-ritual-icon { display: grid; width: 46px; height: 46px; place-items: center; border-radius: 42% 58% 55% 45%; background: oklch(91% 0.05 130); color: oklch(48% 0.09 138); } .ds-ritual-icon svg { width: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; } .ds-ritual div { display: grid; gap: 4px; } .ds-ritual strong { font-size: 14px; } .ds-ritual small { color: oklch(46% 0.035 35); } .ds-rhythm { display: flex; gap: 5px; } .ds-rhythm i { width: 10px; height: 10px; border: 1px solid oklch(84% 0.035 74); border-radius: 50%; } .ds-rhythm i.is-cared { border-color: oklch(48% 0.09 138); background: oklch(48% 0.09 138); } .ds-ritual button { display: grid; width: 48px; height: 48px; place-items: center; border: 2px solid oklch(62% 0.075 137); border-radius: 50%; background: oklch(48% 0.09 138); color: oklch(98.5% 0.015 82); } .ds-ritual button svg { width: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; } .ds-ritual button:focus-visible { outline: 3px solid oklch(72% 0.12 40); outline-offset: 3px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Sunlit Storybook Garden",
+    "overview": "The interface should feel like opening a quiet illustrated journal beside a sunny window. Painterly scenes carry emotion, editorial plum typography gives the experience dignity, and crisp interface controls preserve speed and trust. The daily loop stays sparse, while Moonlit Nook changes the light without changing the product identity.",
+    "keyCharacteristics": [
+      "Painterly atmosphere paired with precise, accessible controls.",
+      "Editorial serif headings and quiet humanist interface type.",
+      "Warm paper, persimmon action, sage completion, and plum ink.",
+      "Open rows and dividers before nested card stacks.",
+      "Botanical first-party icons instead of platform emoji.",
+      "Responsive phone and tablet composition, never a stretched phone mockup."
+    ],
+    "rules": [
+      { "name": "The One Warm Action Rule", "body": "Persimmon should occupy less than roughly ten percent of a screen. Its rarity makes the next action obvious.", "section": "colors" },
+      { "name": "The State Before Decoration Rule", "body": "Sage means completion or growth, gold means tiny or warm emphasis, and danger red means destructive action. Never use these roles interchangeably.", "section": "colors" },
+      { "name": "The Editorial Split Rule", "body": "Serif type expresses place and meaning. Sans type expresses action and state.", "section": "typography" },
+      { "name": "The Flat Agenda Rule", "body": "Habit rows, task rows, history rows, and settings rows use dividers, not individual shadows.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do let the approved watercolor garden carry atmosphere while every interactive control remains real HTML with visible states.",
+      "Do preserve 44px touch targets, three-pixel keyboard focus, readable state labels, reduced motion, and 200 percent zoom.",
+      "Do compose tablets as a deliberate two-page spread when space allows."
+    ],
+    "donts": [
+      "Don't build an emoji collage interface where platform glyphs substitute for a designed asset system.",
+      "Don't use neon gamer dashboards, heavy RPG terminology, multiple currencies, punishment, or loss mechanics.",
+      "Don't make a corporate productivity dashboard that turns self-care into performance management.",
+      "Don't create a childish toy interface that reduces readability, dignity, or all-ages appeal.",
+      "Don't ship generic AI-generated pastel cards, decorative glass effects, or inconsistent controls.",
+      "Don't use streak systems that shame users, reset their identity to zero, or make rest feel like failure."
+    ]
+  }
+}

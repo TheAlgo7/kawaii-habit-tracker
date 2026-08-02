@@ -1,9 +1,11 @@
 import { useRef, useState } from "react";
+import { KawaiiIcon } from "../components/KawaiiIcon";
 import { Modal } from "./Modal";
 import { defaultState, exportState, importState } from "./appState";
-import { REMINDER_STYLES, THEMES } from "./presets";
+import { THEMES } from "./presets";
 
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "1.1.0";
+const THEME_ICONS = { "garden-day": "sun", "garden-night": "moon", matcha: "leaf" };
 
 export function Settings({ state, onUpdate, onClose }) {
   const { profile, preferences } = state;
@@ -14,6 +16,7 @@ export function Settings({ state, onUpdate, onClose }) {
   function setProfile(partial) {
     onUpdate((current) => ({ ...current, profile: { ...current.profile, ...partial } }));
   }
+
   function setPrefs(partial) {
     onUpdate((current) => ({ ...current, preferences: { ...current.preferences, ...partial } }));
   }
@@ -21,10 +24,10 @@ export function Settings({ state, onUpdate, onClose }) {
   function doExport() {
     const blob = new Blob([exportState(state)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `kawaii-habits-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `kawaii-habits-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    anchor.click();
     URL.revokeObjectURL(url);
   }
 
@@ -39,9 +42,10 @@ export function Settings({ state, onUpdate, onClose }) {
         setImportError("");
         onClose();
       } catch (error) {
-        setImportError(error.message || "Could not read that file.");
+        setImportError(error.message || "We could not read that backup. Choose a JSON backup exported by Kawaii Habits.");
       }
     };
+    reader.onerror = () => setImportError("We could not open that file. Try exporting or selecting the backup again.");
     reader.readAsText(file);
   }
 
@@ -51,103 +55,88 @@ export function Settings({ state, onUpdate, onClose }) {
   }
 
   return (
-    <Modal title="Settings" onClose={onClose} className="settings-panel">
-      <header className="settings-head">
-        <h2>Settings</h2>
-        <button type="button" className="settings-close" onClick={onClose} aria-label="Close settings">
-          ✕
-        </button>
+    <Modal
+      title="Settings"
+      onClose={onClose}
+      className={`settings-panel settings-panel--${preferences.theme}`}
+    >
+      <header className="modal-heading settings-heading">
+        <div><p className="section-kicker">Make the garden comfortable</p><h2>Settings</h2></div>
+        <button type="button" className="icon-button" onClick={onClose} aria-label="Close settings"><KawaiiIcon name="close" /></button>
       </header>
 
-      <section className="settings-group">
-        <h3>You & your world</h3>
-        <label>
-          Your name
-          <input value={profile.userName} onChange={(e) => setProfile({ userName: e.target.value })} placeholder="optional" />
-        </label>
-        <label>
-          Companion name
-          <input value={profile.nekoName} onChange={(e) => setProfile({ nekoName: e.target.value })} />
-        </label>
-        <label>
-          World name
-          <input value={profile.worldName} onChange={(e) => setProfile({ worldName: e.target.value })} />
-        </label>
-      </section>
-
-      <section className="settings-group">
-        <h3>Theme</h3>
-        <div className="onb-options">
-          {THEMES.map((t) => (
-            <button key={t.id} type="button" className={`onb-option${preferences.theme === t.id ? " on" : ""}`} aria-pressed={preferences.theme === t.id} onClick={() => setPrefs({ theme: t.id })}>
-              <span className="onb-swatch" style={{ background: t.swatch }} aria-hidden="true" />
-              {t.name}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="settings-group">
-        <h3>Comfort</h3>
-        <Toggle label="Reduce motion" hint="Calmer, fewer animations" checked={preferences.motion === "reduced"} onChange={(on) => setPrefs({ motion: on ? "reduced" : "full" })} />
-        <Toggle label="Softer emotions" hint="Neko stays gentle and low-key" checked={preferences.emotionalIntensity === "soft"} onChange={(on) => setPrefs({ emotionalIntensity: on ? "soft" : "gentle" })} />
-        <Toggle label="Reminders (coming soon)" hint="Saves your preferred tone for when reminders ship" checked={preferences.remindersEnabled} onChange={(on) => setPrefs({ remindersEnabled: on })} />
-        {preferences.remindersEnabled && (
-          <label>
-            Preferred tone
-            <select value={preferences.reminderStyle} onChange={(e) => setPrefs({ reminderStyle: e.target.value })}>
-              {REMINDER_STYLES.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-      </section>
-
-      <section className="settings-group">
-        <h3>Your data</h3>
-        <p className="settings-note">
-          Everything lives only on this device, in your browser. No account, no server, no tracking. Export a backup anytime, clearing your browser data erases it.
-        </p>
-        <div className="settings-buttons">
-          <button type="button" onClick={doExport}>⬇ Export backup</button>
-          <button type="button" onClick={() => fileRef.current?.click()}>⬆ Import backup</button>
-          <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={doImport} />
-        </div>
-        {importError && <p className="settings-error" role="alert">{importError}</p>}
-
-        {confirmReset ? (
-          <div className="reset-confirm" role="alert">
-            <p>This erases everything and starts fresh. Sure?</p>
-            <div className="settings-buttons">
-              <button type="button" onClick={() => setConfirmReset(false)}>Keep my world</button>
-              <button type="button" className="sheet-danger" onClick={doReset}>Reset everything</button>
-            </div>
+      <div className="settings-scroll">
+        <section className="settings-group" aria-labelledby="settings-profile">
+          <h3 id="settings-profile"><KawaiiIcon name="neko" size={18} /> You and your garden</h3>
+          <div className="settings-field-grid">
+            <label className="field"><span>Your name <small>optional</small></span><input value={profile.userName} onChange={(event) => setProfile({ userName: event.target.value })} placeholder="What should Neko call you?" /></label>
+            <label className="field"><span>Companion name</span><input value={profile.nekoName} onChange={(event) => setProfile({ nekoName: event.target.value })} /></label>
+            <label className="field wide"><span>Garden name</span><input value={profile.worldName} onChange={(event) => setProfile({ worldName: event.target.value })} /></label>
           </div>
-        ) : (
-          <button type="button" className="reset-trigger sheet-danger" onClick={() => setConfirmReset(true)}>
-            Reset app
-          </button>
-        )}
-      </section>
+        </section>
 
-      <p className="settings-version">Kawaii Habits v{APP_VERSION}</p>
+        <section className="settings-group" aria-labelledby="settings-theme">
+          <h3 id="settings-theme"><KawaiiIcon name="sun" size={18} /> Atmosphere</h3>
+          <div className="settings-theme-grid">
+            {THEMES.map((theme) => (
+              <button
+                key={theme.id}
+                type="button"
+                className={`settings-theme theme-${theme.id}${preferences.theme === theme.id ? " is-selected" : ""}`}
+                aria-pressed={preferences.theme === theme.id}
+                onClick={() => setPrefs({ theme: theme.id })}
+              >
+                <span aria-hidden="true"><KawaiiIcon name={THEME_ICONS[theme.id]} /></span>
+                <strong>{theme.name}</strong>
+                <small>{theme.description}</small>
+                <i aria-hidden="true">{preferences.theme === theme.id && <KawaiiIcon name="check" size={15} />}</i>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="settings-group" aria-labelledby="settings-comfort">
+          <h3 id="settings-comfort"><KawaiiIcon name="heart" size={18} /> Comfort</h3>
+          <div className="toggle-list">
+            <Toggle label="Reduce motion" hint="Use quiet fades instead of spatial movement" checked={preferences.motion === "reduced"} onChange={(on) => setPrefs({ motion: on ? "reduced" : "full" })} />
+          </div>
+          <p className="settings-note">Kawaii Habits stays quiet in the background. It does not schedule system notifications or pressure you to return.</p>
+        </section>
+
+        <section className="settings-group" aria-labelledby="settings-data">
+          <h3 id="settings-data"><KawaiiIcon name="lock" size={18} /> Your data</h3>
+          <p className="settings-note">Your habits stay on this device. There is no account, advertising tracker, or cloud copy. Export a backup before clearing browser storage or moving to another device.</p>
+          <div className="settings-buttons">
+            <button type="button" className="secondary-button" onClick={doExport}><KawaiiIcon name="download" size={18} /> Export backup</button>
+            <button type="button" className="secondary-button" onClick={() => fileRef.current?.click()}><KawaiiIcon name="upload" size={18} /> Import backup</button>
+            <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={doImport} />
+          </div>
+          {importError && <p className="settings-error" role="alert"><KawaiiIcon name="heart" size={18} /> {importError}</p>}
+
+          {confirmReset ? (
+            <div className="reset-confirm" role="alert">
+              <div><strong>Reset this garden?</strong><p>This permanently erases local habits, history, notes, and settings from this device.</p></div>
+              <div className="settings-buttons">
+                <button type="button" className="secondary-button" onClick={() => setConfirmReset(false)}>Keep my garden</button>
+                <button type="button" className="danger-button" onClick={doReset}>Reset everything</button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" className="text-danger-button" onClick={() => setConfirmReset(true)}><KawaiiIcon name="trash" size={18} /> Reset app data</button>
+          )}
+        </section>
+
+        <footer className="settings-footer"><KawaiiIcon name="leaf" size={16} /> Kawaii Habits v{APP_VERSION}. Private, local, and offline-first.</footer>
+      </div>
     </Modal>
   );
 }
 
 function Toggle({ label, hint, checked, onChange }) {
   return (
-    <button type="button" className={`toggle-row${checked ? " on" : ""}`} role="switch" aria-checked={checked} onClick={() => onChange(!checked)}>
-      <span>
-        {label}
-        {hint && <small>{hint}</small>}
-      </span>
-      <span className="toggle-track" aria-hidden="true">
-        <span className="toggle-knob" />
-      </span>
+    <button type="button" className={`toggle-row${checked ? " is-on" : ""}`} role="switch" aria-checked={checked} onClick={() => onChange(!checked)}>
+      <span><strong>{label}</strong>{hint && <small>{hint}</small>}</span>
+      <span className="toggle-track" aria-hidden="true"><span className="toggle-knob" /></span>
     </button>
   );
 }
