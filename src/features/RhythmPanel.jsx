@@ -128,7 +128,7 @@ export function RhythmPanel({ habits = [], todayStr, onEditHabit }) {
                     <strong>{Number(day.dateKey.slice(-2))}</strong>
                   </time>
                   <div className="rhythm-day__track" aria-hidden="true">
-                    <span style={{ width: `${day.completionPercent}%` }} />
+                    <span style={{ "--progress": day.completionPercent / 100 }} />
                   </div>
                   <span className="rhythm-day__state">{dayStatusLabel(day.status)}</span>
                   <span className="rhythm-day__detail">{dayDescription(day)}</span>
@@ -222,7 +222,7 @@ export function RhythmPanel({ habits = [], todayStr, onEditHabit }) {
                           aria-valuemax="100"
                           aria-valuenow={stats.completionPercent}
                         >
-                          <span style={{ width: `${stats.completionPercent}%` }} />
+                          <span style={{ "--progress": stats.completionPercent / 100 }} />
                         </div>
                         <p className="rhythm-habit__detail">
                           {plural(checkIns, "check-in")}

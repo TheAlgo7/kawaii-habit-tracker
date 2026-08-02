@@ -213,9 +213,9 @@ The system is flat by default and gains depth through tonal layers, one-pixel wa
 - Tablets use the same four-tab model as a centered floating dock inside the app frame. Navigation is never reduced to icons alone.
 - Page headers pair one small illustrated mark with a serif title and a quiet subtitle. Settings remains a familiar gear icon at the far edge.
 
-### Ritual Row
+### Habit Row
 
-- Each ritual combines a first-party botanical tile, name, tiny version, seven dated state marks, a menu action, and one large completion circle.
+- Each habit combines a first-party botanical tile, name, tiny version, seven dated state marks, a menu action, and one large completion circle.
 - Full care uses sage with a check. Tiny care uses gold with a leaf. Rest uses a dashed state. Today receives a separate outline.
 - Completion feedback appears inline with Undo, so acknowledgment stays next to the action and never interrupts the session.
 

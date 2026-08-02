@@ -111,7 +111,7 @@ export function Onboarding({ onFinish }) {
               <div className="onboarding-step welcome-step">
                 <p className="section-kicker">A habit companion for imperfect days</p>
                 <h1 ref={headingRef} tabIndex="-1">Care for yourself. Grow a little world.</h1>
-                <p>Choose tiny rituals, mark what you can, and watch Neko’s garden respond. Rest never counts against you.</p>
+                <p>Choose tiny habits, mark what you can, and watch Neko’s garden respond. Rest never counts against you.</p>
                 <div className="welcome-promises">
                   <span><KawaiiIcon name="check" size={18} /> Private and offline</span>
                   <span><KawaiiIcon name="leaf" size={18} /> Tiny versions count</span>
@@ -142,7 +142,7 @@ export function Onboarding({ onFinish }) {
             {stepName === "pick" && (
               <div className="onboarding-step">
                 <p className="section-kicker">Begin with less</p>
-                <h1 ref={headingRef} tabIndex="-1">Pick one to three rituals</h1>
+                <h1 ref={headingRef} tabIndex="-1">Pick one to three habits</h1>
                 <p>Choose only what deserves space in an ordinary day. You can change everything later.</p>
                 <div className="preset-grid">
                   {HABIT_PRESETS.map((preset, index) => {
@@ -171,7 +171,7 @@ export function Onboarding({ onFinish }) {
               <div className="onboarding-step">
                 <p className="section-kicker">Design for the difficult day</p>
                 <h1 ref={headingRef} tabIndex="-1">What is the tiny version?</h1>
-                <p>The smallest honest version still moves the ritual forward.</p>
+                <p>The smallest honest version still counts.</p>
                 <div className="tiny-fields">
                   {picked.map((index) => (
                     <label className="tiny-field" key={HABIT_PRESETS[index].name}>
@@ -222,7 +222,7 @@ export function Onboarding({ onFinish }) {
                   <>
                     <p className="section-kicker">Try the real loop</p>
                     <h1 ref={headingRef} tabIndex="-1">Do one tiny thing now</h1>
-                    <p>Choose a ritual below. Its tiny version counts as a complete, gentle win.</p>
+                    <p>Choose a habit below. Its tiny version counts as a complete, gentle win.</p>
                     <div className="first-ritual-list">
                       {habits.map((habit) => (
                         <button key={habit.id} type="button" onClick={() => completeFirst(habit.id)}>

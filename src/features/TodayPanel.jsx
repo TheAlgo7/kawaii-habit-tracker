@@ -77,7 +77,7 @@ export function TodayPanel({
           </button>
         </header>
 
-        <div className="hero-progress" aria-label={`${done} of ${scheduled.length} rituals cared for today`}>
+        <div className={`hero-progress${feedback?.habitId ? " has-update" : ""}`} aria-label={`${done} of ${scheduled.length} habits completed today`}>
           <span className="hero-progress-icon" aria-hidden="true">
             <KawaiiIcon name="seedling" size={22} />
           </span>
@@ -100,9 +100,9 @@ export function TodayPanel({
             <p className="section-kicker">{new Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric" }).format(dateParts(todayStr))}</p>
             <h2 id="today-title">Today</h2>
           </div>
-          <button className="create-button" type="button" onClick={onAddHabit} aria-label="Create ritual">
+          <button className="create-button" type="button" onClick={onAddHabit} aria-label="Create habit">
             <KawaiiIcon name="plus" size={20} />
-            <span>Create ritual</span>
+            <span>Create habit</span>
           </button>
         </header>
 
@@ -165,7 +165,7 @@ function HabitRow({ habit, todayStr, week, feedback, onUndo, onComplete, onMenu 
     .join(", ");
 
   return (
-    <article className={`ritual-row is-${status}`}>
+    <article className={`ritual-row is-${status}${(feedback?.kind === "care" || feedback?.kind === "unlock") && completed ? " is-celebrating" : ""}`}>
       <HabitIcon name={habit.icon} color={habit.color} />
       <div className="ritual-copy">
         <div className="ritual-title-line">
@@ -194,9 +194,10 @@ function HabitRow({ habit, todayStr, week, feedback, onUndo, onComplete, onMenu 
         aria-label={completed ? `Undo completion for ${habit.name}` : `Complete ${habit.name}`}
         aria-pressed={completed}
       >
-        {completed ? <KawaiiIcon name={status === "tiny" ? "leaf" : "check"} size={30} /> : <span aria-hidden="true" />}
+        {completed ? <KawaiiIcon name={status === "tiny" ? "leaf" : "check"} size={30} /> : <span className="completion-dot" aria-hidden="true" />}
+        <span className="completion-flourish" aria-hidden="true" key={feedback?.id || "idle"}><i /><i /><i /></span>
       </button>
-      {feedback && (
+      {feedback && feedback.kind !== "unlock" && (
         <div className="inline-feedback" role="status">
           <KawaiiIcon name="leaf" size={18} />
           <span>{feedback.message}</span>
@@ -247,10 +248,10 @@ function EmptyRituals({ onCreate }) {
     <div className="illustrated-empty">
       <HabitIcon name="plant" color="#91ad83" />
       <div>
-        <h3>Plant your first tiny ritual</h3>
+        <h3>Plant your first tiny habit</h3>
         <p>Choose something small enough to do on an ordinary, imperfect day.</p>
       </div>
-      <button className="primary-button" type="button" onClick={onCreate}>Create a ritual</button>
+      <button className="primary-button" type="button" onClick={onCreate}>Create a habit</button>
     </div>
   );
 }

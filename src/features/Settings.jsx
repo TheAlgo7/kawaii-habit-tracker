@@ -97,7 +97,7 @@ export function Settings({ state, onUpdate, onClose }) {
         <section className="settings-group" aria-labelledby="settings-comfort">
           <h3 id="settings-comfort"><KawaiiIcon name="heart" size={18} /> Comfort</h3>
           <div className="toggle-list">
-            <Toggle label="Reduce motion" hint="Use quiet fades instead of spatial movement" checked={preferences.motion === "reduced"} onChange={(on) => setPrefs({ motion: on ? "reduced" : "full" })} />
+            <Toggle label="Reduce motion" hint="Turn off animated movement" checked={preferences.motion === "reduced"} onChange={(on) => setPrefs({ motion: on ? "reduced" : "full" })} />
           </div>
           <p className="settings-note">Kawaii Habits stays quiet in the background. It does not schedule system notifications or pressure you to return.</p>
         </section>
