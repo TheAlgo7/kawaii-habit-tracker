@@ -67,6 +67,26 @@ async function screenshot(page, name) {
   return target;
 }
 
+async function waitForAppReady(page) {
+  const root = page.locator(".onboarding, .app-frame").first();
+  const deadline = Date.now() + 10000;
+
+  while (Date.now() < deadline) {
+    try {
+      await page.waitForLoadState("domcontentloaded", { timeout: 2000 });
+      if (await root.isVisible()) {
+        await page.waitForTimeout(250);
+        if (await root.isVisible()) return;
+      }
+    } catch {
+      // A first-install controllerchange can replace the execution context once.
+    }
+    await page.waitForTimeout(150);
+  }
+
+  throw new Error("App root did not remain visible after the service-worker handoff");
+}
+
 async function accessibilityAudit(page, label) {
   const violations = await page.evaluate(async () => {
     const result = await window.axe.run(document, {
@@ -500,7 +520,9 @@ async function verifyProfile(profile) {
   page.on("requestfailed", (request) => failedRequests.push(`${request.method()} ${request.url()}: ${request.failure()?.errorText}`));
 
   try {
-    await page.goto(baseUrl, { waitUntil: "networkidle" });
+    await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+    await waitForAppReady(page);
+    await page.waitForLoadState("networkidle");
     await page.waitForFunction(() =>
       [...document.images].every((image) => image.complete && image.naturalWidth > 0)
     );
