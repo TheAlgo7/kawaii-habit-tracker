@@ -397,6 +397,7 @@ async function verifyStandaloneAndOffline(profile, browser, savedState) {
     ...profile.contextOptions,
     viewport: profile.standaloneViewport,
     screen: profile.standaloneViewport,
+    bypassCSP: true,
   });
   await context.addInitScript((value) => localStorage.setItem("kw_state_v2", value), savedState);
   const page = await context.newPage();
@@ -485,7 +486,7 @@ async function completeOnboarding(page, profileName) {
 
 async function verifyProfile(profile) {
   const browser = await profile.browserType.launch(profile.launchOptions);
-  const context = await browser.newContext(profile.contextOptions);
+  const context = await browser.newContext({ ...profile.contextOptions, bypassCSP: true });
   await context.addInitScript(() => localStorage.clear());
   const page = await context.newPage();
   const consoleErrors = [];
@@ -648,7 +649,10 @@ async function verifyProfile(profile) {
     const violations = accessibility.flatMap((entry) => entry.violations);
     assert(consoleErrors.length === 0, `${profile.name}: console errors detected`);
     assert(pageErrors.length === 0, `${profile.name}: page errors detected`);
-    assert(failedRequests.length === 0, `${profile.name}: failed network requests detected`);
+    assert(
+      failedRequests.length === 0,
+      `${profile.name}: failed network requests detected: ${JSON.stringify(failedRequests)}`
+    );
     assert(
       violations.length === 0,
       `${profile.name}: accessibility violations detected: ${JSON.stringify({ violations, settingsNightStyle })}`

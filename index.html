@@ -97,6 +97,7 @@
         }
 
         window.addEventListener('load', async () => {
+          const wasControlled = Boolean(navigator.serviceWorker.controller);
           let refreshing = false;
           navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (refreshing) return;
@@ -114,7 +115,7 @@
                 if (sw.state === 'installed' && navigator.serviceWorker.controller) showUpdateToast(sw);
               });
             });
-            await reg.update();
+            if (wasControlled) await reg.update();
           } catch {
             // The app remains fully usable when service workers are unavailable.
           }
