@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import handler, { buildSystemPrompt } from "./chat";
+import handler, { buildSystemPrompt } from "../api/chat";
 
 function responseRecorder() {
   return {
