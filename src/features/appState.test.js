@@ -74,7 +74,7 @@ describe("hydrate", () => {
     expect(state.tasks[0]).toMatchObject({ name: "Call home", done: true, icon: "task" });
     expect(state.challenges[0]).toMatchObject({ targetDays: 8, completedDates: [] });
     expect(state.challenges).toHaveLength(1);
-    expect(state.chat).toEqual([{ role: "assistant", content: "Welcome back" }]);
+    expect(state.chat).toEqual([{ id: "chat-legacy-0", role: "assistant", content: "Welcome back" }]);
   });
 
   it("falls back to Sunlit Garden for an unknown theme", () => {

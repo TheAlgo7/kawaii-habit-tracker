@@ -104,25 +104,25 @@ export function getLocalReply(message, habits, tasks, challenges, userName) {
   }
 
   if (/miss|back|recover|restart|gone|away|fell off/.test(lower)) {
-    return `${name}coming back is the whole win. Choose the tiniest version of one ritual and begin there.`;
+    return `${name}coming back is the whole win. Choose the tiniest version of one habit and begin there.`;
   }
 
   if (/celebrate|win|proud|did it|done|yay|finished/.test(lower)) {
     return done > 0
-      ? `${name}${done} care ritual${done === 1 ? " is" : "s are"} complete today. Your garden is warmer because of it.`
+      ? `${name}${done} habit${done === 1 ? " is" : "s are"} complete today. Your garden is warmer because of it.`
       : `${name}one tiny thing is enough to make a win worth noticing.`;
   }
 
   if (/easier|easy|tiny|smaller|too much|overwhelm|stuck|hard|difficult/.test(lower)) {
-    return `${name}let’s shrink it. What is the two-minute version of the next ritual? Tiny still counts.`;
+    return `${name}let’s shrink it. What is the two-minute version of the next habit? Tiny still counts.`;
   }
 
   if (/plan|today|routine|schedule/.test(lower)) {
-    return `${name}start with one easy care ritual, then one important task, then take a real break.`;
+    return `${name}start with one easy habit, then one important task, then take a real break.`;
   }
 
   if (/progress|habit|streak|check/.test(lower)) {
-    return `${name}you have ${done} of ${habits.length} care ritual${habits.length === 1 ? "" : "s"} complete and ${pending} to-do${pending === 1 ? "" : "s"} waiting. Keep it gentle.`;
+    return `${name}you have ${done} of ${habits.length} habit${habits.length === 1 ? "" : "s"} complete and ${pending} to-do${pending === 1 ? "" : "s"} waiting. Keep it gentle.`;
   }
 
   if (/challenge|goal|growth/.test(lower)) {

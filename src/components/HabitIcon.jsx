@@ -56,14 +56,11 @@ const AUTO_TONES = {
   music: "blossom",
   heart: "blossom",
   task: "sage",
-};
-
-const PAINTED_GLYPHS = {
-  move: "/ui-icons/habit-move-v1.webp",
-  walk: "/ui-icons/habit-walk-v1.webp",
-  meditate: "/ui-icons/habit-meditate-v1.webp",
-  tidy: "/ui-icons/habit-tidy-v1.webp",
-  fresh: "/ui-icons/habit-fresh-v1.webp",
+  home: "honey",
+  sun: "honey",
+  flower: "blossom",
+  plant: "sage",
+  seedling: "sage",
 };
 
 const CUSTOM_GLYPHS = {
@@ -82,6 +79,53 @@ const CUSTOM_GLYPHS = {
       <path d="M43 17.7c1.2-3 3.6-4.4 7-4.1-.6 3.3-2.9 4.7-7 4.1Z" fill="var(--habit-icon-accent)" />
     </>
   ),
+  move: (
+    <>
+      <path d="M16.2 24.4h25.6v20.1H16.2V24.4Z" fill="var(--habit-icon-light)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.5" />
+      <ellipse cx="42.3" cy="34.5" rx="7.1" ry="10.2" fill="var(--habit-icon-soft)" stroke="var(--habit-icon-ink)" strokeWidth="2.5" />
+      <ellipse cx="42.3" cy="34.5" rx="2.8" ry="4.2" fill="var(--habit-icon-light)" stroke="var(--habit-icon-ink)" strokeWidth="2.2" />
+      <path d="M25 24.7v19.4" fill="none" stroke="var(--habit-icon-accent)" strokeLinecap="round" strokeWidth="3.2" />
+      <path d="M18.4 18.8c4.3-1.2 7.5.1 9.4 3.8-4.4 1.5-7.6.2-9.4-3.8ZM37.8 18.7c.8-3.7 3.2-5.7 7-5.8-.2 4-2.5 5.9-7 5.8Z" fill="var(--habit-icon-accent)" />
+    </>
+  ),
+  walk: (
+    <>
+      <path d="M22.8 18.1c4.6.4 7.4 5.3 6.8 11-.5 4.4-3.2 7.5-6.7 7.2-3.8-.3-6.3-4.2-5.8-9.1.5-5.3 2.6-9.4 5.7-9.1Z" fill="var(--habit-icon-accent)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.2" />
+      <path d="M39.6 29.2c4.4.6 6.8 5.3 6 10.7-.7 4.4-3.4 7.1-6.8 6.6-3.8-.6-5.9-4.5-5.1-9.3.8-5 2.9-8.4 5.9-8Z" fill="var(--habit-icon-soft)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.2" />
+      <circle cx="18.2" cy="17.1" r="2.2" fill="var(--habit-icon-soft)" />
+      <circle cx="23.2" cy="13.5" r="2.5" fill="var(--habit-icon-accent)" />
+      <circle cx="29.1" cy="14.5" r="2" fill="var(--habit-icon-accent)" />
+      <circle cx="35.6" cy="27.1" r="2" fill="var(--habit-icon-accent)" />
+      <circle cx="40.2" cy="24" r="2.4" fill="var(--habit-icon-soft)" />
+      <circle cx="45.6" cy="25.3" r="1.8" fill="var(--habit-icon-soft)" />
+    </>
+  ),
+  meditate: (
+    <>
+      <path d="M17 45.4c3.6-5.2 8.5-7.8 15-7.8s11.4 2.6 15 7.8c-4 3-9 4.5-15 4.5s-11-1.5-15-4.5Z" fill="var(--habit-icon-soft)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.3" />
+      <circle cx="32" cy="20.2" r="5.3" fill="var(--habit-icon-accent)" stroke="var(--habit-icon-ink)" strokeWidth="2.2" />
+      <path d="M24.7 38c.8-7 3.2-11 7.3-11s6.5 4 7.3 11M31.9 31.5v8.2M19.8 37.3c3.3 1.9 7.3 2.9 12.2 2.9s8.9-1 12.2-2.9" fill="none" stroke="var(--habit-icon-ink)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.8" />
+      <path d="M44 18.1c3.9.2 6.2 2.2 6.8 5.8-4 .2-6.3-1.7-6.8-5.8Z" fill="var(--habit-icon-light)" />
+    </>
+  ),
+  tidy: (
+    <>
+      <path d="M17.1 28.3h29.8l-2.7 21H19.8l-2.7-21Z" fill="var(--habit-icon-soft)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.5" />
+      <path d="M21 28.3c1-7 4.7-10.5 11-10.5s10 3.5 11 10.5" fill="none" stroke="var(--habit-icon-ink)" strokeLinecap="round" strokeWidth="2.7" />
+      <path d="M24.5 23.6h15v8.7h-15v-8.7Z" fill="var(--habit-icon-light)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.1" />
+      <path d="M30.5 23.8v8.1M22.8 36.3h18.4M23.7 42.2h16.6" fill="none" stroke="var(--habit-icon-accent)" strokeLinecap="round" strokeWidth="2.4" />
+      <path d="M40.6 20.4c.4-3.8 2.6-6 6.4-6.5.1 4-2 6.3-6.4 6.5Z" fill="var(--habit-icon-accent)" />
+    </>
+  ),
+  fresh: (
+    <>
+      <path d="M16.2 34.3h31.6c-.8 9.7-6.1 15-15.8 15s-15-5.3-15.8-15Z" fill="var(--habit-icon-light)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.5" />
+      <path d="M18.1 34.3h27.8" fill="none" stroke="var(--habit-icon-ink)" strokeLinecap="round" strokeWidth="3" />
+      <path d="M24.2 33.2c-2.5-6.3.1-11.3 5.4-11.3 4.2 0 6.4 4.3 4.5 10.7" fill="var(--habit-icon-accent)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.1" />
+      <path d="M34 33.5c-1.1-7.1 2.2-11.5 7.3-10.5 4.2.9 5.3 5.7 2.2 10.5" fill="var(--habit-icon-soft)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.1" />
+      <path d="M31.4 21.2c.9-4 3.5-6 7.5-5.7-.5 4.2-3 6.2-7.5 5.7Z" fill="var(--habit-icon-soft)" />
+    </>
+  ),
   stretch: (
     <>
       <circle cx="32" cy="20" r="5.2" fill="var(--habit-icon-accent)" />
@@ -94,6 +138,31 @@ const CUSTOM_GLYPHS = {
       <path d="M44.2 40.8A18 18 0 0 1 22 17.4a17.6 17.6 0 1 0 22.2 23.4Z" fill="var(--habit-icon-light)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.4" />
       <path d="m43.8 17.4 1.2 3 3 1.2-3 1.2-1.2 3-1.2-3-3-1.2 3-1.2 1.2-3Z" fill="var(--habit-icon-accent)" />
       <circle cx="49.5" cy="32.5" r="2.2" fill="var(--habit-icon-soft)" />
+    </>
+  ),
+  home: (
+    <>
+      <path d="m14.7 30.4 17.4-14.2 17.2 14.2v18.4H14.7V30.4Z" fill="var(--habit-icon-light)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.5" />
+      <path d="m11.5 31.5 20.6-17 20.4 17" fill="none" stroke="var(--habit-icon-ink)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+      <path d="M26.7 48.8V36h10.6v12.8M40.8 24.3v-7h5v11.1" fill="var(--habit-icon-soft)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.2" />
+      <path d="M19.4 34.5h5.4v5.4h-5.4z" fill="var(--habit-icon-accent)" />
+      <path d="M44.8 16.7c.7-3.7 3-5.7 6.8-5.8-.1 4-2.4 6-6.8 5.8Z" fill="var(--habit-icon-accent)" />
+    </>
+  ),
+  sun: (
+    <>
+      <circle cx="32" cy="32" r="10.8" fill="var(--habit-icon-accent)" stroke="var(--habit-icon-ink)" strokeWidth="2.5" />
+      <path d="M32 14.4v4.2M32 45.4v4.2M14.4 32h4.2M45.4 32h4.2M19.6 19.6l3 3M41.4 41.4l3 3M44.4 19.6l-3 3M22.6 41.4l-3 3" fill="none" stroke="var(--habit-icon-ink)" strokeLinecap="round" strokeWidth="3" />
+      <path d="M42.5 14.7c.6-3.6 2.7-5.7 6.3-6.1.1 3.8-2 5.9-6.3 6.1Z" fill="var(--habit-icon-soft)" />
+      <path d="M27.4 29.2c1.5-2.1 3.4-3.1 5.8-3" fill="none" stroke="var(--habit-icon-light)" strokeLinecap="round" strokeWidth="2.6" />
+    </>
+  ),
+  flower: (
+    <>
+      <path d="M32 36.5v14" fill="none" stroke="var(--habit-icon-ink)" strokeLinecap="round" strokeWidth="2.7" />
+      <path d="M31.8 45.2c-5.7-.1-8.8-2.9-9-8.1 5.7-.1 8.8 2.6 9 8.1ZM32.2 42.5c.2-5.8 3.2-8.9 8.8-9 .1 5.5-2.9 8.7-8.8 9Z" fill="var(--habit-icon-soft)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.1" />
+      <path d="M32 26.7c-6.2-3.5-6.2-10 0-10.5 6.2.5 6.2 7 0 10.5ZM37.3 32c3.5-6.2 10-6.2 10.5 0-.5 6.2-7 6.2-10.5 0ZM32 37.3c6.2 3.5 6.2 10 0 10.5-6.2-.5-6.2-7 0-10.5ZM26.7 32c-3.5 6.2-10 6.2-10.5 0 .5-6.2 7-6.2 10.5 0Z" fill="var(--habit-icon-light)" stroke="var(--habit-icon-ink)" strokeLinejoin="round" strokeWidth="2.1" />
+      <circle cx="32" cy="32" r="5.2" fill="var(--habit-icon-accent)" stroke="var(--habit-icon-ink)" strokeWidth="2.2" />
     </>
   ),
   breathe: (
@@ -197,7 +266,6 @@ export function HabitIcon({
     ...style,
   };
   const glyph = CUSTOM_GLYPHS[name];
-  const paintedGlyph = PAINTED_GLYPHS[name];
 
   return (
     <svg
@@ -206,7 +274,8 @@ export function HabitIcon({
       viewBox="0 0 64 64"
       width={size}
       height={size}
-      className={className}
+      className={`habit-icon${className ? ` ${className}` : ""}`}
+      data-icon={name}
       style={customProperties}
       focusable="false"
       aria-hidden={isDecorative ? true : undefined}
@@ -225,16 +294,7 @@ export function HabitIcon({
       <circle cx="51.7" cy="20.2" r="1.7" fill="var(--habit-icon-accent)" opacity=".7" />
       <circle cx="13.5" cy="44.8" r="1.3" fill="var(--habit-icon-accent)" opacity=".62" />
 
-      {paintedGlyph ? (
-        <image
-          href={paintedGlyph}
-          x="5"
-          y="5"
-          width="54"
-          height="54"
-          preserveAspectRatio="xMidYMid meet"
-        />
-      ) : glyph || (
+      {glyph || (
         <KawaiiIcon
           name={name}
           x="15"

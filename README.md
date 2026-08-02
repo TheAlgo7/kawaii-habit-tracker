@@ -21,12 +21,12 @@ Kawaii Habit Tracker is a private, phone-first habit companion for Android, iPho
 
 ## What is included
 
-- **Fast Today loop:** rituals grouped by morning, anytime, and evening, with seven-day context and one-tap completion.
+- **Fast Today loop:** habits grouped by morning, anytime, and evening, with seven-day context and one-tap completion.
 - **Tiny and rest states:** mark the smallest honest version, record a rest day, attach a note, or reopen today without losing history.
 - **Rhythm, not punishment:** a seven-day view, monthly trail, schedule-aware percentages, and protected rest days replace brittle streak pressure.
 - **Living garden:** care points unlock original botanical keepsakes and grow longer goals without countdown anxiety.
 - **Neko companion:** local planning and recovery guidance works offline; the optional API route adds AI responses while retaining a safe local fallback.
-- **Full ritual editing:** first-party illustrated icons, accent, part of day, daily/weekday/custom scheduling, notes, archive, and migration from legacy data.
+- **Full habit editing:** first-party illustrated icons, accent, part of day, daily/weekday/custom scheduling, notes, archive, and migration from legacy data.
 - **Three coherent themes:** Sunlit Garden, Moonlit Nook, and Matcha Study preserve one component and icon language.
 - **Local ownership:** versioned `localStorage`, defensive hydration, strict backup import, JSON export, and no account or analytics tracker.
 - **Installable PWA:** custom app icons, maskable icon, pre-paint theme restoration, offline scene assets, and an accessible update prompt.

@@ -20,6 +20,9 @@ const ICON_CHOICES = [
   "plant",
   "heart",
   "music",
+  "tea",
+  "task",
+  "seedling",
   "sun",
   "flower",
 ];
@@ -50,7 +53,7 @@ export function HabitEditor({ habit, onClose, onSave }) {
   function submit(event) {
     event.preventDefault();
     if (!name.trim()) {
-      setError("Please give this ritual a name.");
+      setError("Please give this habit a name.");
       return;
     }
     const frequency = freqKind === "days"
@@ -68,21 +71,21 @@ export function HabitEditor({ habit, onClose, onSave }) {
   }
 
   return (
-    <Modal title={editing ? "Edit ritual" : "Create ritual"} onClose={onClose} className="entry-modal habit-editor">
+    <Modal title={editing ? "Edit habit" : "Create habit"} onClose={onClose} className="entry-modal habit-editor">
       <form onSubmit={submit}>
         <header className="modal-heading">
           <div>
             <p className="section-kicker">Make it kind enough to repeat</p>
-            <h2>{editing ? "Edit ritual" : "Create a ritual"}</h2>
+            <h2>{editing ? "Edit habit" : "Create a habit"}</h2>
           </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Close ritual editor">
+          <button className="icon-button" type="button" onClick={onClose} aria-label="Close habit editor">
             <KawaiiIcon name="close" />
           </button>
         </header>
 
         <div className="editor-preview">
           <HabitIcon name={icon} color={color} />
-          <div><strong>{name || "Your ritual"}</strong><span>{tinyVersion || "Its smallest honest version"}</span></div>
+          <div><strong>{name || "Your habit"}</strong><span>{tinyVersion || "Its smallest honest version"}</span></div>
         </div>
 
         <label className="field">
@@ -93,7 +96,7 @@ export function HabitEditor({ habit, onClose, onSave }) {
               setName(event.target.value);
               setError("");
             }}
-            onBlur={() => !name.trim() && setError("Please give this ritual a name.")}
+            onBlur={() => !name.trim() && setError("Please give this habit a name.")}
             placeholder="Drink water"
             autoComplete="off"
             aria-describedby={error ? "habit-name-error" : undefined}
@@ -200,7 +203,7 @@ export function HabitEditor({ habit, onClose, onSave }) {
 
         <div className="modal-actions">
           <button type="button" className="secondary-button" onClick={onClose}>Keep browsing</button>
-          <button type="submit" className="primary-button">{editing ? "Save ritual" : "Create ritual"}</button>
+          <button type="submit" className="primary-button">{editing ? "Save habit" : "Create habit"}</button>
         </div>
       </form>
     </Modal>
@@ -215,7 +218,7 @@ export function HabitMenu({ habit, todayStr, onClose, onComplete, onTiny, onSkip
       <header className="sheet-heading">
         <HabitIcon name={habit.icon} color={habit.color} />
         <div><h2>{habit.name}</h2>{habit.tinyVersion && <p>{habit.tinyVersion}</p>}</div>
-        <button className="icon-button" type="button" onClick={onClose} aria-label="Close ritual options"><KawaiiIcon name="close" /></button>
+        <button className="icon-button" type="button" onClick={onClose} aria-label="Close habit options"><KawaiiIcon name="close" /></button>
       </header>
       <div className="sheet-actions">
         {status !== "done" && <SheetAction icon="check" label="Mark fully cared for" onClick={onComplete} />}
@@ -223,8 +226,8 @@ export function HabitMenu({ habit, todayStr, onClose, onComplete, onTiny, onSkip
         {(status === "done" || status === "tiny") && <SheetAction icon="back" label="Open today again" onClick={onResetToday} />}
         <SheetAction icon="rest" label="Take a rest day" onClick={onSkip} />
         <SheetAction icon="note" label={note ? "Edit today’s note" : "Add a note for today"} onClick={onNote} />
-        <SheetAction icon="edit" label="Edit ritual" onClick={onEdit} />
-        <SheetAction icon="archive" label="Archive ritual" onClick={onArchive} danger />
+        <SheetAction icon="edit" label="Edit habit" onClick={onEdit} />
+        <SheetAction icon="archive" label="Archive habit" onClick={onArchive} danger />
       </div>
     </Modal>
   );

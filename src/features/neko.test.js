@@ -86,7 +86,7 @@ describe("crisis routing", () => {
 
     expect(reply).toContain("local emergency services or a crisis line");
     expect(reply).toContain("someone you trust");
-    expect(reply).not.toContain("start with one easy care ritual");
+    expect(reply).not.toContain("start with one easy habit");
   });
 });
 
@@ -108,6 +108,6 @@ describe("local coaching summary", () => {
       [],
       "Mina",
     );
-    expect(reply).toContain("1 of 1 care ritual complete");
+    expect(reply).toContain("1 of 1 habit complete");
   });
 });

@@ -79,7 +79,7 @@ Verification:
 
 Required launch flow:
 
-1. Welcome: "Meet Neko. Build tiny care rituals. Your world grows as you show up."
+1. Welcome: "Meet Neko. Build tiny habits. Your world grows as you show up."
 2. Name user, optional.
 3. Name Neko or keep "Neko-chan."
 4. Pick 1 to 3 starter habits from presets.
@@ -158,7 +158,7 @@ Add:
 
 - Skip day: "Rest day", "Sick day", "Travel", "Too much today", custom.
 - Repair: users can protect a streak with limited "petals" earned through consistency.
-- Restart ritual: after missed days, Neko offers one tiny comeback action.
+- Gentle restart: after missed days, Neko offers one tiny comeback action.
 - "Never miss twice" nudge.
 - Partial credit for tiny version completion.
 

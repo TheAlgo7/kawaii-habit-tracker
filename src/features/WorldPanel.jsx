@@ -45,12 +45,12 @@ export function WorldPanel({ world, worldName, habits, challenges, theme, onAddC
           <h2 id="garden-level-title">{world.levelTitle} garden</h2>
           <p>Level {world.level}. {world.nextLevelTitle ? `${points(world.trustToNextLevel)} until ${world.nextLevelTitle.toLowerCase()}.` : "Every corner is awake."}</p>
           <div className="garden-level-track" role="progressbar" aria-label="Garden level progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow={world.levelProgress}>
-            <span style={{ width: `${world.levelProgress}%` }} />
+            <span style={{ "--progress": world.levelProgress / 100 }} />
           </div>
         </div>
         <div className={`garden-today-note${todayPoints ? " has-care" : ""}`}>
           <KawaiiIcon name={todayPoints ? "sparkles" : "moon"} size={20} />
-          <span>{todayPoints ? `Today added ${points(todayPoints)}.` : "The garden is resting. One tiny ritual can wake it."}</span>
+          <span>{todayPoints ? `Today added ${points(todayPoints)}.` : "The garden is resting. One tiny habit can wake it."}</span>
         </div>
       </section>
 
@@ -85,7 +85,7 @@ export function WorldPanel({ world, worldName, habits, challenges, theme, onAddC
         <div className="garden-week-chart">
           {trend.map((item) => (
             <div key={item.day} className={item.day === todayStr ? "is-today" : ""}>
-              <span role="img" aria-label={`${item.day}: ${item.count} completed ritual${item.count === 1 ? "" : "s"}`}><i style={{ height: `${Math.max(8, (item.count / peak) * 100)}%` }} /></span>
+              <span role="img" aria-label={`${item.day}: ${item.count} completed habit${item.count === 1 ? "" : "s"}`}><i style={{ "--bar": Math.max(0.08, item.count / peak) }} /></span>
               <small>{item.label}</small>
             </div>
           ))}
@@ -110,7 +110,7 @@ export function WorldPanel({ world, worldName, habits, challenges, theme, onAddC
               return (
                 <article className="challenge-row" key={challenge.id}>
                   <span className="challenge-icon" aria-hidden="true"><KawaiiIcon name={challenge.icon || "plant"} /></span>
-                  <div><h3>{challenge.name}</h3><p>{complete ? "Ready to tuck into the archive." : `${doneDays} of ${challenge.targetDays} care days`}</p><div className="mini-track" aria-hidden="true"><span style={{ width: `${percent}%` }} /></div></div>
+                  <div><h3>{challenge.name}</h3><p>{complete ? "Ready to tuck into the archive." : `${doneDays} of ${challenge.targetDays} care days`}</p><div className="mini-track" aria-hidden="true"><span style={{ "--progress": percent / 100 }} /></div></div>
                   {complete ? (
                     <button type="button" className="secondary-button" onClick={() => onArchiveChallenge(challenge.id)}>Archive</button>
                   ) : (

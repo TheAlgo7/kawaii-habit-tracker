@@ -32,6 +32,10 @@ function nextId() {
   return Date.now() + Math.floor(Math.random() * 1000);
 }
 
+function createChatMessage(role, content) {
+  return { id: `chat-${nextId()}`, role, content };
+}
+
 export function KawaiiApp() {
   const [state, { update }] = useAppState();
   const [todayStr, setTodayStr] = useState(today);
@@ -87,7 +91,7 @@ export function KawaiiApp() {
       setFeedback(null);
       return;
     }
-    setFeedback({ message, ...options });
+    setFeedback({ id: nextId(), message, ...options });
     feedbackTimer.current = setTimeout(() => setFeedback(null), options.persist ? 8000 : 5200);
   }
 
@@ -98,7 +102,7 @@ export function KawaiiApp() {
     setFeedback(null);
   }
 
-  function applyHabit(id, mutator, message) {
+  function applyHabit(id, mutator, message, kind = "care") {
     const previousHabits = allHabits;
     const nextHabits = allHabits.map((habit) => (habit.id === id ? mutator(habit) : habit));
     const before = computeTrust(previousHabits);
@@ -109,10 +113,11 @@ export function KawaiiApp() {
     if (upcoming && after > before && after >= upcoming.unlockAt) {
       flash(`You unlocked ${upcoming.name}. Your garden grew.`, {
         habitId: id,
+        kind: "unlock",
         restore: { habits: previousHabits },
       });
     } else if (message) {
-      flash(message, { habitId: id, restore: { habits: previousHabits } });
+      flash(message, { habitId: id, kind, restore: { habits: previousHabits } });
     } else {
       setFeedback(null);
     }
@@ -128,6 +133,7 @@ export function KawaiiApp() {
         : status === "tiny"
           ? "The full version is cared for."
           : "Lovely. One gentle thing is cared for.",
+      status === "done" ? "reopen" : "care",
     );
   }
 
@@ -151,16 +157,17 @@ export function KawaiiApp() {
         };
       },
       "Completion reopened.",
+      "reopen",
     );
   }
 
   function tinyHabit(habit) {
-    applyHabit(habit.id, (current) => toggleTiny(current, todayStr), "Tiny still counts. Neko noticed.");
+    applyHabit(habit.id, (current) => toggleTiny(current, todayStr), "Tiny still counts. Neko noticed.", "care");
     setModal(null);
   }
 
   function skipHabit(habit, reason) {
-    applyHabit(habit.id, (current) => setSkip(current, todayStr, reason), "Rest is part of the rhythm.");
+    applyHabit(habit.id, (current) => setSkip(current, todayStr, reason), "Rest is part of the rhythm.", "rest");
     setModal(null);
   }
 
@@ -169,7 +176,7 @@ export function KawaiiApp() {
     const nextHabits = allHabits.map((item) => (item.id === habit.id ? setNote(item, todayStr, text) : item));
     update((current) => ({ ...current, habits: nextHabits }));
     setModal(null);
-    flash("Today’s note is saved.", { habitId: habit.id, restore: { habits: previousHabits } });
+    flash("Today’s note is saved.", { habitId: habit.id, kind: "note", restore: { habits: previousHabits } });
   }
 
   function resetToday(habit) {
@@ -187,7 +194,7 @@ export function KawaiiApp() {
     });
     update((current) => ({ ...current, habits: nextHabits }));
     setModal(null);
-    flash("Today is open again.", { habitId: habit.id, restore: { habits: previousHabits } });
+    flash("Today is open again.", { habitId: habit.id, kind: "reopen", restore: { habits: previousHabits } });
   }
 
   function archiveHabit(habit) {
@@ -208,7 +215,7 @@ export function KawaiiApp() {
         ...current,
         habits: current.habits.map((item) => (item.id === modal.habit.id ? normalizeHabit({ ...item, ...partial }) : item)),
       }));
-      flash("Ritual updated.");
+      flash("Habit updated.");
     } else {
       update((current) => ({
         ...current,
@@ -217,7 +224,7 @@ export function KawaiiApp() {
           normalizeHabit({ ...partial, id: nextId(), order: current.habits.length }),
         ],
       }));
-      flash("A new ritual is ready for you.");
+      flash("A new habit is ready for you.");
     }
     setModal(null);
   }
@@ -302,6 +309,7 @@ export function KawaiiApp() {
       <a className="skip-link" href="#main-content">Skip to main content</a>
       <section className="app-frame" aria-label="Kawaii Habit Tracker">
         <div className="app-scroll" id="main-content" ref={appScrollRef} tabIndex="-1">
+          <div className={`tab-view tab-view--${activeTab}`} key={activeTab}>
           {activeTab === "today" && (
             <TodayPanel
               habits={activeHabits}
@@ -380,13 +388,14 @@ export function KawaiiApp() {
               />
             </>
           )}
+          </div>
         </div>
 
         <BottomNav activeTab={activeTab} onChange={setActiveTab} />
       </section>
 
-      {feedback && !feedback.habitId && (
-        <div className="global-toast" role="status">
+      {feedback && (!feedback.habitId || feedback.kind === "unlock") && (
+        <div className={`global-toast${feedback.kind === "unlock" ? " is-unlock" : ""}`} key={feedback.id} role="status">
           <KawaiiIcon name="leaf" size={18} />
           <span>{feedback.message}</span>
           {feedback.restore && <button type="button" onClick={undoFeedback}>Undo</button>}
@@ -512,7 +521,7 @@ function NekoPanel({ challenges, habits, messages, nekoName, setMessages, tasks,
   async function send(text = input.trim()) {
     if (!text || loading) return;
     setInput("");
-    const nextMessages = [...messages, { role: "user", content: text }];
+    const nextMessages = [...messages, createChatMessage("user", text)];
     setMessages(nextMessages);
     setLoading(true);
 
@@ -539,11 +548,11 @@ function NekoPanel({ challenges, habits, messages, nekoName, setMessages, tasks,
       if (!response.ok) throw new Error("chat");
       const data = await response.json();
       if (!data.reply) throw new Error("empty");
-      setMessages((current) => [...current, { role: "assistant", content: data.reply }]);
+      setMessages((current) => [...current, createChatMessage("assistant", data.reply)]);
     } catch {
       setMessages((current) => [
         ...current,
-        { role: "assistant", content: getLocalReply(text, habits, tasks, challenges, userName) },
+        createChatMessage("assistant", getLocalReply(text, habits, tasks, challenges, userName)),
       ]);
     } finally {
       setLoading(false);
@@ -551,9 +560,9 @@ function NekoPanel({ challenges, habits, messages, nekoName, setMessages, tasks,
   }
 
   return (
-    <section className="companion-panel">
+    <section className={`companion-panel${loading ? " is-thinking" : ""}`}>
       <div className="companion-scene">
-        <img src={moodAssets[mood]} alt={moodAlt} width="240" height="240" />
+        <img key={mood} src={moodAssets[mood]} alt={moodAlt} width="240" height="240" />
         <div>
           <p className="section-kicker">A quiet place to pause</p>
           <h2>What would feel kind right now?</h2>
@@ -571,12 +580,18 @@ function NekoPanel({ challenges, habits, messages, nekoName, setMessages, tasks,
       </div>
 
       <div className="chat-log" ref={scrollRef} aria-live="polite" aria-busy={loading}>
-        {messages.map((message, index) => (
-          <div className={`bubble ${message.role}`} key={`${message.role}-${index}`}>
+        {messages.map((message) => (
+          <div className={`bubble ${message.role}`} key={message.id}>
             {message.content}
           </div>
         ))}
-        {loading && <div className="bubble assistant">{nekoName || "Neko"} is thinking about one gentle next step.</div>}
+        {loading && (
+          <div className="bubble assistant thinking-bubble">
+            <span>{nekoName || "Neko"} is thinking</span>
+            <i aria-hidden="true" /><i aria-hidden="true" /><i aria-hidden="true" />
+            <span className="sr-only">about one gentle next step.</span>
+          </div>
+        )}
       </div>
 
       <form

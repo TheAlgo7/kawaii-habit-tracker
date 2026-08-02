@@ -13,11 +13,6 @@ const uiArtworkUrls = [
   "/ui-icons/theme-sunlit-v1.webp",
   "/ui-icons/theme-moonlit-v1.webp",
   "/ui-icons/theme-matcha-v1.webp",
-  "/ui-icons/habit-move-v1.webp",
-  "/ui-icons/habit-walk-v1.webp",
-  "/ui-icons/habit-meditate-v1.webp",
-  "/ui-icons/habit-tidy-v1.webp",
-  "/ui-icons/habit-fresh-v1.webp",
 ];
 
 fs.mkdirSync(outputDir, { recursive: true });
@@ -110,7 +105,11 @@ async function accessibilityAudit(page, label) {
       id: violation.id,
       impact: violation.impact,
       help: violation.help,
-      targets: violation.nodes.slice(0, 4).map((node) => node.target.join(" ")),
+      targets: violation.nodes.slice(0, 4).map((node) => ({
+        selector: node.target.join(" "),
+        html: node.html,
+        summary: node.failureSummary,
+      })),
     }));
   });
 
@@ -528,7 +527,7 @@ async function completeOnboarding(page, profileName) {
   const fontAudit = await formFontAudit(page, "onboarding-name");
   await page.getByPlaceholder("What should Neko call you?").fill(profileName.includes("iPhone") ? "Ivy" : "Sam");
   await page.getByRole("button", { name: "Continue" }).tap();
-  await page.getByRole("heading", { name: "Pick one to three rituals" }).waitFor();
+  await page.getByRole("heading", { name: "Pick one to three habits" }).waitFor();
 
   const pickerBody = page.locator(".onboarding-body");
   const pickerFooter = page.locator(".onboarding-actions");
@@ -553,7 +552,7 @@ async function completeOnboarding(page, profileName) {
   );
   assert(
     pickerBefore.bodyScrollHeight > pickerBefore.bodyClientHeight + 1,
-    `${profileName}: ritual picker does not expose an internal scroll range`
+    `${profileName}: habit picker does not expose an internal scroll range`
   );
   assert(
     pickerBefore.footerBottom <= pickerBefore.viewportHeight + 1,
@@ -581,17 +580,17 @@ async function completeOnboarding(page, profileName) {
       footerBottom: footerRect.bottom,
     };
   });
-  assert(pickerAfter.scrollTop > 0, `${profileName}: ritual picker did not scroll`);
+  assert(pickerAfter.scrollTop > 0, `${profileName}: habit picker did not scroll`);
   assert(
     pickerAfter.lastTop >= pickerAfter.bodyTop - 1 && pickerAfter.lastBottom <= pickerAfter.bodyBottom + 1,
-    `${profileName}: final ritual is not reachable inside the picker scroller`
+    `${profileName}: final habit is not reachable inside the picker scroller`
   );
   assert(
     Math.abs(pickerAfter.footerTop - pickerBefore.footerTop) <= 1,
-    `${profileName}: onboarding actions moved while the ritual list scrolled`
+    `${profileName}: onboarding actions moved while the habit list scrolled`
   );
   await lastPreset.tap();
-  assert((await lastPreset.getAttribute("aria-pressed")) === "true", `${profileName}: final ritual could not be selected`);
+  assert((await lastPreset.getAttribute("aria-pressed")) === "true", `${profileName}: final habit could not be selected`);
   await lastPreset.tap();
   await pickerBody.evaluate((element) => {
     element.scrollTop = 0;
@@ -668,11 +667,69 @@ async function verifyProfile(profile) {
     accessibility.push(await accessibilityAudit(page, "today"));
     screenshots.push(await screenshot(page, `verify-${profile.slug}-today.png`));
 
+    const motionPreference = {
+      operatingSystemReduce: await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches),
+    };
+    assert(motionPreference.operatingSystemReduce, `${profile.name}: reduced-motion device profile is not active`);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+
+    await page.getByRole("button", { name: "Create habit" }).tap();
+    await page.getByRole("heading", { name: "Create a habit" }).waitFor();
+    const iconFamily = await page.locator(".icon-choice-grid").evaluate((grid) => {
+      const buttons = [...grid.querySelectorAll("button")];
+      const icons = buttons.map((button) => button.querySelector(".habit-icon"));
+      return {
+        choices: buttons.length,
+        renderedIcons: icons.filter(Boolean).length,
+        uniqueIcons: new Set(icons.map((icon) => icon?.dataset.icon).filter(Boolean)).size,
+        rasterGlyphs: grid.querySelectorAll("svg image").length,
+      };
+    });
+    assert(iconFamily.choices === 19, `${profile.name}: habit editor does not expose the complete icon family`);
+    assert(iconFamily.renderedIcons === 19 && iconFamily.uniqueIcons === 19, `${profile.name}: habit icon family contains a missing or duplicated tile`);
+    assert(iconFamily.rasterGlyphs === 0, `${profile.name}: habit icon family still contains mismatched raster glyphs`);
+    screenshots.push(await screenshot(page, `verify-${profile.slug}-habit-icons.png`));
+    await page.locator(".icon-choice-grid button").last().tap();
+    const iconChoiceMotion = await page.locator(".icon-choice-grid button").last().locator(".habit-icon").evaluate((icon) => {
+      const style = getComputedStyle(icon);
+      return { animationName: style.animationName, animationDuration: style.animationDuration };
+    });
+    assert(iconChoiceMotion.animationName.includes("icon-choice-in"), `${profile.name}: icon selection has no motion feedback`);
+    await page.getByRole("button", { name: "Close habit editor" }).tap();
+
     const tinyUndo = page.getByRole("button", { name: "Undo completion for Drink water" });
     await tinyUndo.tap();
     await page.getByRole("button", { name: "Complete Drink water" }).waitFor();
     await page.getByRole("button", { name: "Complete Drink water" }).tap();
     await tinyUndo.waitFor();
+    const careMotion = await page.locator(".ritual-row").filter({ hasText: "Drink water" }).evaluate((row) => {
+      const flourish = row.querySelector(".completion-flourish");
+      const flourishStyle = getComputedStyle(flourish);
+      const previousMotion = document.documentElement.dataset.motion || "full";
+      document.documentElement.dataset.motion = "reduced";
+      const reducedDuration = getComputedStyle(flourish).animationDuration;
+      document.documentElement.dataset.motion = previousMotion;
+      return {
+        celebrating: row.classList.contains("is-celebrating"),
+        animationName: flourishStyle.animationName,
+        animationDuration: flourishStyle.animationDuration,
+        reducedDuration,
+      };
+    });
+    assert(careMotion.celebrating && careMotion.animationName.includes("care-ring"), `${profile.name}: habit completion has no care flourish`);
+    assert(parseFloat(careMotion.animationDuration) >= 0.3, `${profile.name}: care flourish is too brief to perceive`);
+    assert(parseFloat(careMotion.reducedDuration) <= 0.01, `${profile.name}: reduced motion does not suppress the care flourish`);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    motionPreference.operatingSystemDuration = await page
+      .locator(".ritual-row")
+      .filter({ hasText: "Drink water" })
+      .locator(".completion-flourish")
+      .evaluate((flourish) => getComputedStyle(flourish).animationDuration);
+    assert(
+      parseFloat(motionPreference.operatingSystemDuration) <= 0.01,
+      `${profile.name}: operating-system reduced motion does not suppress the care flourish`
+    );
+    await page.emulateMedia({ reducedMotion: "no-preference" });
 
     const appScroll = page.locator(".app-scroll");
     await appScroll.evaluate((element) => {
@@ -684,6 +741,11 @@ async function verifyProfile(profile) {
       .getByRole("button", { name: "Rhythm", exact: true })
       .tap();
     await page.waitForFunction(() => (document.querySelector(".app-scroll")?.scrollTop || 0) <= 1);
+    const tabMotion = await page.locator(".tab-view").evaluate((view) => {
+      const style = getComputedStyle(view);
+      return { animationName: style.animationName, animationDuration: style.animationDuration };
+    });
+    assert(tabMotion.animationName.includes("tab-view-in"), `${profile.name}: tab navigation has no continuity motion`);
     const scrollAfterSwitch = await appScroll.evaluate((element) => element.scrollTop);
     const rhythmHeadingTop = await page
       .getByRole("heading", { name: "Your rhythm", exact: true })
@@ -784,6 +846,15 @@ async function verifyProfile(profile) {
     layouts.push(standalone.layout);
     screenshots.push(standalone.screenshot);
 
+    const navStyles = await page.locator(".bottom-nav button").evaluateAll((buttons) =>
+      buttons.map((button) => ({
+        label: button.textContent.trim(),
+        active: button.classList.contains("is-active"),
+        buttonColor: getComputedStyle(button).color,
+        buttonBackground: getComputedStyle(button).backgroundColor,
+        labelColor: getComputedStyle(button.querySelector("span")).color,
+      }))
+    );
     const violations = accessibility.flatMap((entry) => entry.violations);
     assert(consoleErrors.length === 0, `${profile.name}: console errors detected`);
     assert(pageErrors.length === 0, `${profile.name}: page errors detected`);
@@ -793,7 +864,7 @@ async function verifyProfile(profile) {
     );
     assert(
       violations.length === 0,
-      `${profile.name}: accessibility violations detected: ${JSON.stringify({ violations, settingsNightStyle })}`
+      `${profile.name}: accessibility violations detected: ${JSON.stringify({ violations, navStyles, settingsNightStyle })}`
     );
 
     return {
@@ -807,11 +878,17 @@ async function verifyProfile(profile) {
       pageErrors,
       failedRequests,
       pwa,
+      iconFamily,
+      iconChoiceMotion,
+      careMotion,
+      motionPreference,
+      tabMotion,
       chromiumInstallability,
       standalone,
       formControls,
       themeSwitchContinuity,
       settingsNightStyle,
+      navStyles,
       scrollReset: { before: scrollBeforeSwitch, after: scrollAfterSwitch, rhythmHeadingTop },
       accessibility,
       layouts,

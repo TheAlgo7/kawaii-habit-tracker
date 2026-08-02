@@ -61,7 +61,7 @@ describe("chat endpoint", () => {
     process.env.GEMINI_API_KEY = "secret-test-key";
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ candidates: [{ content: { parts: [{ text: "Choose one small ritual." }] } }] }),
+      json: async () => ({ candidates: [{ content: { parts: [{ text: "Choose one small habit." }] } }] }),
     });
     vi.stubGlobal("fetch", fetchMock);
     const res = responseRecorder();

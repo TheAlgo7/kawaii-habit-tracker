@@ -5,7 +5,7 @@ export const STATE_KEY = "kw_state_v2";
 export const STATE_VERSION = 2;
 
 const DEFAULT_CHAT = [
-  { role: "assistant", content: "I’m here. Tell me what kind of day you have, and we’ll choose one gentle next step." },
+  { id: "chat-welcome", role: "assistant", content: "I’m here. Tell me what kind of day you have, and we’ll choose one gentle next step." },
 ];
 
 const CURRENT_THEMES = new Set(["garden-day", "garden-night", "matcha"]);
@@ -46,7 +46,11 @@ function normalizeChat(raw) {
   if (!Array.isArray(raw)) return DEFAULT_CHAT;
   const messages = raw
     .filter((message) => isRecord(message) && ["assistant", "user"].includes(message.role) && typeof message.content === "string")
-    .map((message) => ({ role: message.role, content: message.content.slice(0, 4000) }))
+    .map((message, index) => ({
+      id: typeof message.id === "string" && message.id ? message.id : `chat-legacy-${index}`,
+      role: message.role,
+      content: message.content.slice(0, 4000),
+    }))
     .slice(-40);
   return messages.length ? messages : DEFAULT_CHAT;
 }

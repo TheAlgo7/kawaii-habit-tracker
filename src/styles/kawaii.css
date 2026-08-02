@@ -72,7 +72,7 @@
     --line: oklch(84% 0.035 74);
     --line-soft: oklch(89% 0.026 76);
     --accent: oklch(53% 0.14 38);
-    --accent-text: oklch(43% 0.13 35);
+    --accent-text: oklch(39% 0.13 35);
     --accent-hover: oklch(48% 0.15 35);
     --accent-soft: oklch(91% 0.055 47);
     --on-accent: oklch(98% 0.01 82);
@@ -89,6 +89,11 @@
     --hero-panel: oklch(25% 0.035 45 / 0.72);
     --nav: oklch(98% 0.018 84 / 0.96);
     --paper-grain: oklch(35% 0.02 55 / 0.035);
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+    --motion-instant: 120ms;
+    --motion-state: 180ms;
+    --motion-scene: 360ms;
   }
 
   html[data-theme="garden-night"],
@@ -285,6 +290,11 @@
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior-y: contain;
+  }
+
+  .tab-view {
+    min-height: 100%;
+    animation: tab-view-in var(--motion-state) var(--ease-out-quart) both;
   }
 
   .today-layout,
@@ -492,6 +502,11 @@
     color: var(--sage-strong);
   }
 
+  .habit-icon {
+    transform-origin: 50% 70%;
+    transition: transform var(--motion-state) var(--ease-out-quart), filter var(--motion-state) var(--ease-out-quart);
+  }
+
   .compact-heading h2 {
     font-size: 1.55rem;
   }
@@ -635,10 +650,18 @@
     height: 0.3rem;
     border-radius: 999px;
     background: oklch(98% 0.01 82 / 0.24);
+    transform: scaleY(1);
+    transform-origin: center;
+    transition: background var(--motion-state) var(--ease-out-quart), transform var(--motion-state) var(--ease-out-quart);
   }
 
   .hero-progress-track i.is-filled {
     background: color-mix(in oklch, var(--sage), white 26%);
+    transform: scaleY(1.45);
+  }
+
+  .hero-progress.has-update .hero-progress-icon {
+    animation: seedling-notice var(--motion-scene) var(--ease-out-quint) both;
   }
 
   .today-heading .create-button span {
@@ -677,6 +700,7 @@
     min-height: 7.55rem;
     padding: 1rem 0;
     border-bottom: 1px solid var(--line-soft);
+    isolation: isolate;
   }
 
   .ritual-row > .habit-icon {
@@ -764,6 +788,7 @@
   }
 
   .completion-button {
+    position: relative;
     display: grid;
     width: 3.15rem;
     height: 3.15rem;
@@ -772,10 +797,10 @@
     border-radius: 50%;
     background: var(--surface);
     color: var(--surface);
-    transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    transition: transform var(--motion-state) var(--ease-out-quart), background var(--motion-state) var(--ease-out-quart), border-color var(--motion-state) var(--ease-out-quart), box-shadow var(--motion-state) var(--ease-out-quart);
   }
 
-  .completion-button > span {
+  .completion-button > .completion-dot {
     width: 0.58rem;
     height: 0.58rem;
     border-radius: 50%;
@@ -793,6 +818,44 @@
     box-shadow: 0 7px 18px color-mix(in oklch, var(--sage-strong), transparent 72%);
   }
 
+  .completion-flourish {
+    position: absolute;
+    inset: -0.6rem;
+    border: 2px solid color-mix(in oklch, var(--sage), transparent 28%);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .completion-flourish i {
+    position: absolute;
+    width: 0.4rem;
+    height: 0.62rem;
+    border-radius: 70% 30% 70% 30%;
+    background: var(--sage);
+    opacity: 0;
+  }
+
+  .completion-flourish i:nth-child(1) { top: -0.12rem; left: 50%; transform: translateX(-50%) rotate(22deg); }
+  .completion-flourish i:nth-child(2) { right: 0.08rem; bottom: 0.22rem; transform: rotate(72deg); }
+  .completion-flourish i:nth-child(3) { bottom: 0.12rem; left: 0.05rem; transform: rotate(-58deg); }
+
+  .ritual-row.is-celebrating .completion-flourish {
+    animation: care-ring var(--motion-scene) var(--ease-out-quart) both;
+  }
+
+  .ritual-row.is-celebrating .completion-flourish i {
+    animation: care-leaf var(--motion-scene) var(--ease-out-quart) both;
+  }
+
+  .ritual-row.is-celebrating .completion-button > svg {
+    animation: care-check var(--motion-scene) var(--ease-out-quint) both;
+  }
+
+  .ritual-row.is-celebrating > .habit-icon {
+    animation: care-icon-lift var(--motion-scene) var(--ease-out-quart) both;
+  }
+
   .inline-feedback {
     grid-column: 1 / -1;
     display: flex;
@@ -804,6 +867,7 @@
     background: var(--sage-soft);
     color: var(--sage-strong);
     font-size: 0.73rem;
+    animation: feedback-in var(--motion-state) var(--ease-out-quart) both;
   }
 
   .inline-feedback span {
@@ -868,12 +932,18 @@
     border-radius: 50%;
     background: var(--surface);
     color: var(--surface);
+    transition: background var(--motion-state) var(--ease-out-quart), border-color var(--motion-state) var(--ease-out-quart), transform var(--motion-instant) var(--ease-out-quart);
   }
 
   .extra-row.is-done .extra-toggle,
   .challenge-check.is-checked {
     border-color: var(--sage-strong);
     background: var(--sage-strong);
+  }
+
+  .extra-row.is-done .extra-toggle > svg,
+  .challenge-check.is-checked > svg {
+    animation: state-check-in var(--motion-state) var(--ease-out-quint) both;
   }
 
   .quiet-empty {
@@ -940,21 +1010,26 @@
     transition: color 160ms ease, background 160ms ease, transform 160ms ease;
   }
 
+  .bottom-nav button svg {
+    transition: transform var(--motion-state) var(--ease-out-quart), color var(--motion-state) var(--ease-out-quart);
+  }
+
   .bottom-nav button:hover {
     color: var(--ink);
   }
 
   .bottom-nav button.is-active {
     background: var(--accent-soft);
-    color: var(--accent);
+    color: var(--ink);
   }
 
   .bottom-nav button.is-active span {
-    color: var(--accent-text);
+    color: inherit;
   }
 
   .bottom-nav button.is-active svg {
-    transform: translateY(-1px);
+    color: var(--accent);
+    transform: translateY(-1px) scale(1.04);
   }
 
   .global-toast {
@@ -974,6 +1049,12 @@
     box-shadow: var(--shadow);
     color: var(--sage-strong);
     font-size: 0.78rem;
+    animation: toast-in 220ms var(--ease-out-quart) both;
+  }
+
+  .global-toast.is-unlock > svg {
+    color: var(--gold);
+    animation: unlock-mark var(--motion-scene) var(--ease-out-quint) both;
   }
 
   /* Rhythm */
@@ -1134,9 +1215,14 @@
   .mini-track span,
   .garden-level-track span {
     display: block;
+    width: 100%;
     height: 100%;
     border-radius: inherit;
     background: var(--sage-strong);
+    transform: scaleX(var(--progress, 0));
+    transform-origin: left center;
+    animation: progress-grow-in var(--motion-scene) var(--ease-out-quint) backwards;
+    transition: transform 240ms var(--ease-out-quart), background var(--motion-state) var(--ease-out-quart);
   }
 
   .rhythm-day[data-state="tiny"] .rhythm-day__track span,
@@ -1529,8 +1615,13 @@
   .garden-week-chart i {
     display: block;
     width: min(100%, 1.05rem);
+    height: 100%;
     border-radius: 999px 999px 0.3rem 0.3rem;
     background: var(--sage);
+    transform: scaleY(var(--bar, 0.08));
+    transform-origin: center bottom;
+    animation: chart-grow-in var(--motion-scene) var(--ease-out-quint) backwards;
+    transition: transform 260ms var(--ease-out-quart), background var(--motion-state) var(--ease-out-quart);
   }
 
   .garden-week-chart .is-today i {
@@ -1643,6 +1734,12 @@
     background: #f6ebd7;
     object-fit: contain;
     filter: drop-shadow(0 8px 16px oklch(25% 0.03 35 / 0.13));
+    transform-origin: center bottom;
+    animation: companion-arrive 220ms var(--ease-out-quart) both;
+  }
+
+  .companion-panel.is-thinking .companion-scene img {
+    animation: companion-listen 900ms var(--ease-out-quart) infinite alternate;
   }
 
   .companion-scene h2 {
@@ -1707,6 +1804,7 @@
     color: var(--ink-soft);
     font-size: 0.78rem;
     white-space: pre-wrap;
+    animation: bubble-in var(--motion-state) var(--ease-out-quart) both;
   }
 
   .bubble.user {
@@ -1715,6 +1813,23 @@
     background: var(--accent-soft);
     color: var(--ink);
   }
+
+  .thinking-bubble {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.24rem;
+  }
+
+  .thinking-bubble > i {
+    width: 0.3rem;
+    height: 0.3rem;
+    border-radius: 50%;
+    background: var(--sage-strong);
+    animation: thinking-dot 720ms var(--ease-out-quart) infinite alternate;
+  }
+
+  .thinking-bubble > i:nth-of-type(2) { animation-delay: 120ms; }
+  .thinking-bubble > i:nth-of-type(3) { animation-delay: 240ms; }
 
   .chat-form {
     display: grid;
@@ -1767,7 +1882,7 @@
     background: var(--surface-raised);
     color: var(--ink);
     font-size: max(0.84rem, 16px);
-    transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
   }
 
   textarea {
@@ -1804,7 +1919,7 @@
     padding-top: env(safe-area-inset-top);
     background: oklch(12% 0.025 28 / 0.52);
     backdrop-filter: blur(4px);
-    animation: veil-in 160ms ease both;
+    animation: veil-in 160ms var(--ease-out-quart) both;
   }
 
   .entry-modal,
@@ -1819,7 +1934,7 @@
     outline: none;
     background: var(--canvas);
     box-shadow: var(--shadow);
-    animation: sheet-in 220ms cubic-bezier(0.2, 0.82, 0.2, 1);
+    animation: sheet-in 220ms var(--ease-out-quart) both;
   }
 
   .entry-modal form,
@@ -1898,11 +2013,17 @@
     border: 1px solid transparent;
     border-radius: 0.68rem;
     background: transparent;
+    transition: background var(--motion-state) var(--ease-out-quart), border-color var(--motion-state) var(--ease-out-quart), transform var(--motion-instant) var(--ease-out-quart);
   }
 
   .icon-choice-grid button.is-selected {
     border-color: var(--accent);
     background: var(--accent-soft);
+    transform: translateY(-1px);
+  }
+
+  .icon-choice-grid button.is-selected .habit-icon {
+    animation: icon-choice-in var(--motion-state) var(--ease-out-quint) both;
   }
 
   .color-choice-row,
@@ -1950,12 +2071,14 @@
     color: var(--ink-soft);
     font-size: 0.68rem;
     font-weight: 720;
+    transition: background var(--motion-state) var(--ease-out-quart), box-shadow var(--motion-state) var(--ease-out-quart), color var(--motion-state) var(--ease-out-quart), transform var(--motion-instant) var(--ease-out-quart);
   }
 
   .segmented-control button.is-selected {
     background: var(--surface-raised);
     box-shadow: var(--shadow-soft);
     color: var(--accent);
+    transform: translateY(-1px);
   }
 
   .day-choice-row {
@@ -2123,6 +2246,7 @@
     background: var(--surface);
     color: var(--ink);
     text-align: left;
+    transition: border-color var(--motion-state) var(--ease-out-quart), box-shadow var(--motion-state) var(--ease-out-quart), transform var(--motion-instant) var(--ease-out-quart);
   }
 
   .settings-theme > span,
@@ -2175,11 +2299,17 @@
   .theme-choice.is-selected {
     border-color: var(--accent);
     box-shadow: 0 0 0 2px var(--accent-soft);
+    transform: translateY(-1px);
   }
 
   .settings-theme.is-selected i {
     border-color: var(--accent);
     background: var(--accent);
+  }
+
+  .settings-theme.is-selected i svg,
+  .theme-choice.is-selected .theme-preview {
+    animation: state-check-in var(--motion-state) var(--ease-out-quint) both;
   }
 
   .theme-garden-night .theme-preview,
@@ -2370,10 +2500,14 @@
     height: 0.23rem;
     border-radius: 999px;
     background: var(--line);
+    transform: scaleX(0.86);
+    transform-origin: left center;
+    transition: background var(--motion-state) var(--ease-out-quart), transform var(--motion-state) var(--ease-out-quart);
   }
 
   .step-progress span.is-active {
     background: var(--accent);
+    transform: scaleX(1);
   }
 
   .onboarding-body {
@@ -2390,7 +2524,7 @@
   .onboarding-step {
     display: grid;
     gap: 0.9rem;
-    animation: content-in 220ms ease both;
+    animation: content-in 220ms var(--ease-out-quart) both;
   }
 
   .onboarding-step h1[tabindex="-1"]:focus {
@@ -2438,12 +2572,14 @@
     background: var(--surface);
     color: var(--ink);
     text-align: left;
+    transition: background var(--motion-state) var(--ease-out-quart), border-color var(--motion-state) var(--ease-out-quart), transform var(--motion-instant) var(--ease-out-quart), opacity var(--motion-state) var(--ease-out-quart);
   }
 
   .preset-grid button.is-selected,
   .choice-list button.is-selected {
     border-color: var(--accent);
     background: var(--accent-soft);
+    transform: translateY(-1px);
   }
 
   .preset-grid button:disabled {
@@ -2480,6 +2616,11 @@
   .choice-list button.is-selected i {
     border-color: var(--accent);
     background: var(--accent);
+  }
+
+  .preset-grid button.is-selected i svg,
+  .choice-list button.is-selected i svg {
+    animation: state-check-in var(--motion-state) var(--ease-out-quint) both;
   }
 
   .selection-count {
@@ -2550,6 +2691,7 @@
     background: var(--sage-soft);
     color: var(--sage-strong);
     box-shadow: var(--shadow-soft);
+    animation: success-seal-in var(--motion-scene) var(--ease-out-quint) both;
   }
 
   .onboarding-actions {
@@ -2561,12 +2703,92 @@
     border-top: 1px solid var(--line-soft);
   }
 
+  @keyframes tab-view-in {
+    from { transform: translateY(0.25rem); }
+  }
+
+  @keyframes progress-grow-in {
+    from { transform: scaleX(0); }
+  }
+
+  @keyframes chart-grow-in {
+    from { transform: scaleY(0.02); }
+  }
+
+  @keyframes seedling-notice {
+    0% { opacity: 0.65; transform: scale(0.84) rotate(-6deg); }
+    65% { opacity: 1; transform: translateY(-0.12rem) rotate(3deg); }
+    100% { transform: none; }
+  }
+
+  @keyframes care-ring {
+    0% { opacity: 0.75; transform: scale(0.68); }
+    100% { opacity: 0; transform: scale(1.45); }
+  }
+
+  @keyframes care-leaf {
+    0% { opacity: 0; }
+    35% { opacity: 0.9; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes care-check {
+    from { opacity: 0.5; transform: scale(0.72); }
+  }
+
+  @keyframes care-icon-lift {
+    0%, 100% { transform: translateY(0); }
+    55% { transform: translateY(-0.2rem); filter: drop-shadow(0 0.3rem 0.35rem color-mix(in oklch, var(--sage), transparent 72%)); }
+  }
+
+  @keyframes feedback-in {
+    from { opacity: 0; transform: translateY(-0.25rem); }
+  }
+
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(0.5rem); }
+  }
+
+  @keyframes unlock-mark {
+    from { opacity: 0.55; transform: scale(0.72) rotate(-8deg); }
+  }
+
+  @keyframes state-check-in {
+    from { opacity: 0.45; transform: scale(0.66); }
+  }
+
+  @keyframes icon-choice-in {
+    from { opacity: 0.7; transform: scale(0.86) rotate(-2deg); }
+  }
+
+  @keyframes success-seal-in {
+    from { opacity: 0; transform: scale(0.72) rotate(-5deg); }
+  }
+
+  @keyframes companion-arrive {
+    from { opacity: 0.6; transform: translateY(0.3rem) scale(0.98); }
+  }
+
+  @keyframes companion-listen {
+    from { transform: translateY(0) rotate(0); }
+    to { transform: translateY(-0.12rem) rotate(-1deg); }
+  }
+
+  @keyframes bubble-in {
+    from { opacity: 0.2; transform: translateY(0.25rem); }
+  }
+
+  @keyframes thinking-dot {
+    from { opacity: 0.32; transform: translateY(0); }
+    to { opacity: 1; transform: translateY(-0.14rem); }
+  }
+
   @keyframes veil-in {
     from { opacity: 0; }
   }
 
   @keyframes sheet-in {
-    from { opacity: 0; transform: translateY(1.5rem); }
+    from { transform: translateY(1.5rem); }
   }
 
   @keyframes content-in {

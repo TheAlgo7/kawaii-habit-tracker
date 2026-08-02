@@ -12,9 +12,9 @@ Users open the app in short daily moments, often while tired, distracted, discou
 
 ## Product Purpose
 
-The product turns tiny acts of care into visible growth for a companion and a small personal world. It combines the speed and clarity of a focused habit tracker with the emotional attachment of a character companion. A successful session takes seconds: understand today, complete or rest a ritual, see an immediate reaction, and trust that history is safely preserved.
+The product turns tiny acts of care into visible growth for a companion and a small personal world. It combines the speed and clarity of a focused habit tracker with the emotional attachment of a character companion. A successful session takes seconds: understand today, complete or rest a habit, see an immediate reaction, and trust that history is safely preserved.
 
-Success means users return because the ritual feels warm and worthwhile, not because the product threatens them with loss. The launch product stays private, offline-first, account-free, and focused on reliable personal tracking rather than social competition, subscriptions, or a complex game economy.
+Success means users return because the habit feels warm and worthwhile, not because the product threatens them with loss. The launch product stays private, offline-first, account-free, and focused on reliable personal tracking rather than social competition, subscriptions, or a complex game economy.
 
 ## Brand Personality
 

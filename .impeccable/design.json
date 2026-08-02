@@ -111,7 +111,7 @@
       "kind": "button",
       "refersTo": "button-primary",
       "description": "The single warm, verb-led action in a section or dialog.",
-      "html": "<button class=\"ds-btn-primary\">Create ritual</button>",
+      "html": "<button class=\"ds-btn-primary\">Create habit</button>",
       "css": ".ds-btn-primary { min-height: 44px; padding: 11px 17px; border: 0; border-radius: 999px; background: oklch(53% 0.14 38); color: oklch(98.5% 0.015 82); font: 760 14px/1 Inter, system-ui, sans-serif; box-shadow: 0 6px 16px oklch(53% 0.14 38 / .28); transition: background 160ms ease, transform 160ms ease; } .ds-btn-primary:hover { background: oklch(48% 0.15 35); } .ds-btn-primary:active { transform: scale(.97); } .ds-btn-primary:focus-visible { outline: 3px solid oklch(65% 0.12 40); outline-offset: 3px; }"
     },
     {
@@ -127,7 +127,7 @@
       "kind": "input",
       "refersTo": "field",
       "description": "A warm paper field with a precise semantic focus ring.",
-      "html": "<label class=\"ds-field\"><span>Ritual name</span><input placeholder=\"Drink water\"></label>",
+      "html": "<label class=\"ds-field\"><span>Habit name</span><input placeholder=\"Drink water\"></label>",
       "css": ".ds-field { display: grid; gap: 6px; color: oklch(30% 0.045 18); font: 740 12px/1.4 Inter, system-ui, sans-serif; } .ds-field input { box-sizing: border-box; width: 100%; min-height: 46px; padding: 11px 12px; border: 1px solid oklch(84% 0.035 74); border-radius: 11px; outline: 0; background: oklch(98.5% 0.015 82); color: oklch(30% 0.045 18); font: 16px/1.4 Inter, system-ui, sans-serif; } .ds-field input:focus { border-color: oklch(62% 0.14 38); box-shadow: 0 0 0 3px oklch(91% 0.055 47); }"
     },
     {
@@ -139,7 +139,7 @@
       "css": ".ds-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 7px; border: 1px solid oklch(84% 0.035 74); border-radius: 14px; background: oklch(98.5% 0.015 82); box-shadow: 0 8px 24px oklch(32% 0.035 40 / .09); } .ds-nav button { min-height: 48px; border: 0; border-radius: 12px; background: transparent; color: oklch(48% 0.025 55); font: 760 11px/1 Inter, system-ui, sans-serif; } .ds-nav button:hover { color: oklch(30% 0.045 18); } .ds-nav button.is-active { background: oklch(91% 0.055 47); color: oklch(43% 0.13 35); } .ds-nav button:focus-visible { outline: 3px solid oklch(65% 0.12 40); outline-offset: 1px; }"
     },
     {
-      "name": "Ritual Row",
+      "name": "Habit Row",
       "kind": "custom",
       "description": "The signature open habit row with a botanical mark, tiny version, rhythm, and completion circle.",
       "html": "<article class=\"ds-ritual\"><span class=\"ds-ritual-icon\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3S6.5 9.3 6.5 14a5.5 5.5 0 0 0 11 0C17.5 9.3 12 3 12 3Z\"/></svg></span><div><strong>Drink water</strong><small>One glass is enough</small><span class=\"ds-rhythm\" aria-label=\"Six open days and one cared day\"><i></i><i></i><i></i><i></i><i></i><i></i><i class=\"is-cared\"></i></span></div><button aria-label=\"Complete Drink water\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m6 12 4 4 8-9\"/></svg></button></article>",
