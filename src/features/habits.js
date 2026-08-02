@@ -4,11 +4,40 @@ import { offsetDate } from "./date";
 export const HABIT_CATEGORIES = ["mind", "body", "home", "study", "work", "social", "custom"];
 
 export const SKIP_REASONS = [
-  { id: "rest", label: "Rest day", emoji: "🛌" },
-  { id: "sick", label: "Sick day", emoji: "🤒" },
-  { id: "travel", label: "Travel", emoji: "✈️" },
-  { id: "toomuch", label: "Too much today", emoji: "💗" },
+  { id: "rest", label: "Rest day", icon: "rest" },
+  { id: "sick", label: "Sick day", icon: "heart" },
+  { id: "travel", label: "Travel", icon: "arrowRight" },
+  { id: "toomuch", label: "Too much today", icon: "leaf" },
 ];
+
+const ICON_HINTS = [
+  [/water|hydrate|drink/, "water"],
+  [/read|book|study|learn/, "book"],
+  [/stretch|move|walk|run|exercise|workout|yoga/, "stretch"],
+  [/sleep|bed|night|phone down/, "moon"],
+  [/meditat|breath|mindful/, "breathe"],
+  [/journal|write|reflect/, "journal"],
+  [/tidy|clean|home|room/, "home"],
+  [/plant|garden|fresh|food|fruit/, "plant"],
+  [/friend|call|message|reach|social/, "heart"],
+  [/music/, "music"],
+];
+
+export function inferHabitIcon(raw = {}) {
+  if (raw.icon) return raw.icon;
+  const haystack = `${raw.name || ""} ${raw.tinyVersion || ""}`.toLowerCase();
+  const hinted = ICON_HINTS.find(([pattern]) => pattern.test(haystack));
+  if (hinted) return hinted[1];
+  return {
+    mind: "breathe",
+    body: "stretch",
+    home: "home",
+    study: "book",
+    work: "task",
+    social: "heart",
+    custom: "flower",
+  }[raw.category] || "flower";
+}
 
 // One shape for habits everywhere. New fields default gently so old data and
 // quick-added habits still behave. completedDates = full completions; tinyDates
@@ -17,12 +46,14 @@ export function normalizeHabit(raw, index = 0) {
   return {
     id: raw.id ?? Date.now() + index,
     name: raw.name ?? "Untitled",
-    emoji: raw.emoji || "🌸",
-    color: raw.color || "#ff6fa8",
+    icon: inferHabitIcon(raw),
+    emoji: raw.emoji || "",
+    color: raw.color || "#c96648",
     type: raw.type || "build",
     frequency: normalizeFrequency(raw.frequency),
     tinyVersion: raw.tinyVersion || "",
     category: HABIT_CATEGORIES.includes(raw.category) ? raw.category : "custom",
+    timeOfDay: ["morning", "anytime", "evening"].includes(raw.timeOfDay) ? raw.timeOfDay : "anytime",
     difficulty: raw.difficulty || "tiny",
     reminder: raw.reminder || "none",
     createdAt: raw.createdAt || new Date().toISOString(),

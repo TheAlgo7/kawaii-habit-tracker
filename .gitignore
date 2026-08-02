@@ -19,10 +19,12 @@ dist-ssr
 coverage
 playwright-report
 test-results
+docs/assets/verify-*.png
 
 # HD icon masters (50MB+ each), kept locally only, too large for git.
 # Regenerate the shipped icons any time with: node scripts/make-icons.mjs
 design/*.png
+!design/app-icon-master.png
 
 # Editor directories and files
 .vscode/*

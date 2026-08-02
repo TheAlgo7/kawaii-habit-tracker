@@ -4,22 +4,22 @@ import { daysBetween, offsetDate } from "./date";
 // economy. Everything is derived from real completion history, so the world can
 // never disagree with what the user actually did. unlockAt is a "trust" cost.
 export const DECOR = [
-  { id: "sprout", emoji: "🌱", name: "First sprout", unlockAt: 0 },
-  { id: "sakura", emoji: "🌸", name: "Sakura bud", unlockAt: 4 },
-  { id: "lamp", emoji: "💡", name: "Warm lamp", unlockAt: 8 },
-  { id: "books", emoji: "📚", name: "Tiny library", unlockAt: 14 },
-  { id: "plant", emoji: "🪴", name: "Potted plant", unlockAt: 20 },
-  { id: "music", emoji: "🎵", name: "Soft music", unlockAt: 28 },
-  { id: "tulips", emoji: "🌷", name: "Tulip patch", unlockAt: 36 },
-  { id: "butterfly", emoji: "🦋", name: "Butterfly", unlockAt: 46 },
-  { id: "lantern", emoji: "🏮", name: "Paper lantern", unlockAt: 58 },
-  { id: "moon", emoji: "🌙", name: "Moonlight", unlockAt: 72 },
-  { id: "tea", emoji: "🍵", name: "Tea corner", unlockAt: 88 },
-  { id: "tree", emoji: "🌳", name: "Little tree", unlockAt: 106 },
-  { id: "shrine", emoji: "⛩️", name: "Tiny shrine", unlockAt: 126 },
-  { id: "rainbow", emoji: "🌈", name: "Rainbow", unlockAt: 148 },
-  { id: "stars", emoji: "✨", name: "Stardust", unlockAt: 172 },
-  { id: "home", emoji: "🏡", name: "Cozy home", unlockAt: 200 },
+  { id: "sprout", icon: "seedling", name: "First sprout", unlockAt: 0 },
+  { id: "sakura", icon: "flower", name: "Sakura bud", unlockAt: 4 },
+  { id: "lamp", icon: "lamp", name: "Warm lamp", unlockAt: 8 },
+  { id: "books", icon: "book", name: "Tiny library", unlockAt: 14 },
+  { id: "plant", icon: "plant", name: "Potted plant", unlockAt: 20 },
+  { id: "music", icon: "music", name: "Soft music", unlockAt: 28 },
+  { id: "tulips", icon: "flower", name: "Tulip patch", unlockAt: 36 },
+  { id: "butterfly", icon: "butterfly", name: "Butterfly", unlockAt: 46 },
+  { id: "lantern", icon: "lamp", name: "Paper lantern", unlockAt: 58 },
+  { id: "moon", icon: "moon", name: "Moonlight", unlockAt: 72 },
+  { id: "tea", icon: "tea", name: "Tea corner", unlockAt: 88 },
+  { id: "tree", icon: "tree", name: "Little tree", unlockAt: 106 },
+  { id: "shrine", icon: "home", name: "Tiny shrine", unlockAt: 126 },
+  { id: "rainbow", icon: "sun", name: "After-rain light", unlockAt: 148 },
+  { id: "stars", icon: "sparkles", name: "Stardust", unlockAt: 172 },
+  { id: "home", icon: "home", name: "Cozy home", unlockAt: 200 },
 ];
 
 const LEVELS = [

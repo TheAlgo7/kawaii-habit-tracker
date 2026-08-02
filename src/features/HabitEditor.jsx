@@ -1,111 +1,169 @@
 import { useState } from "react";
+import { HabitIcon } from "../components/HabitIcon";
+import { KawaiiIcon } from "../components/KawaiiIcon";
 import { Modal } from "./Modal";
 import { HABIT_COLORS } from "./seed";
 import { HABIT_CATEGORIES, SKIP_REASONS, frequencyLabel, habitStatus, normalizeFrequency } from "./habits";
 
-const EMOJI_QUICK = ["🌸", "💧", "📖", "🧘", "🏃", "🥗", "🌙", "✏️", "🧹", "💌", "☀️", "🎵"];
+const ICON_CHOICES = ["water", "book", "stretch", "breathe", "journal", "home", "moon", "plant", "heart", "music", "sun", "flower"];
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-// Create or edit a habit. `habit` null => create mode.
 export function HabitEditor({ habit, onClose, onSave }) {
   const editing = Boolean(habit);
   const [name, setName] = useState(habit?.name || "");
-  const [emoji, setEmoji] = useState(habit?.emoji || "🌸");
+  const [icon, setIcon] = useState(habit?.icon || "flower");
   const [color, setColor] = useState(habit?.color || HABIT_COLORS[0]);
   const [tinyVersion, setTinyVersion] = useState(habit?.tinyVersion || "");
   const [category, setCategory] = useState(habit?.category || "custom");
+  const [timeOfDay, setTimeOfDay] = useState(habit?.timeOfDay || "anytime");
+  const [error, setError] = useState("");
   const initialFreq = normalizeFrequency(habit?.frequency);
   const [freqKind, setFreqKind] = useState(initialFreq.kind);
   const [days, setDays] = useState(initialFreq.days);
 
-  function toggleDay(d) {
+  function toggleDay(day) {
     setDays((current) =>
-      current.includes(d) ? current.filter((x) => x !== d) : [...current, d].sort((a, b) => a - b),
+      current.includes(day)
+        ? current.length === 1 ? current : current.filter((item) => item !== day)
+        : [...current, day].sort((a, b) => a - b),
     );
   }
 
   function submit(event) {
     event.preventDefault();
-    if (!name.trim()) return;
-    const frequency =
-      freqKind === "days" ? { kind: "days", days: days.length ? days : [1, 2, 3, 4, 5] } : { kind: freqKind };
+    if (!name.trim()) {
+      setError("Please give this ritual a name.");
+      return;
+    }
+    const frequency = freqKind === "days"
+      ? { kind: "days", days: days.length ? days : [1, 2, 3, 4, 5] }
+      : { kind: freqKind };
     onSave({
       name: name.trim(),
-      emoji: emoji.trim() || "🌸",
+      icon,
       color,
       tinyVersion: tinyVersion.trim(),
       category,
+      timeOfDay,
       frequency,
     });
   }
 
   return (
-    <Modal title={editing ? "Edit habit" : "New care ritual"} onClose={onClose} className="entry-modal habit-editor">
+    <Modal title={editing ? "Edit ritual" : "Create ritual"} onClose={onClose} className="entry-modal habit-editor">
       <form onSubmit={submit}>
-        <h2>{editing ? "Edit habit" : "New care ritual"}</h2>
+        <header className="modal-heading">
+          <div>
+            <p className="section-kicker">Make it kind enough to repeat</p>
+            <h2>{editing ? "Edit ritual" : "Create a ritual"}</h2>
+          </div>
+          <button className="icon-button" type="button" onClick={onClose} aria-label="Close ritual editor">
+            <KawaiiIcon name="close" />
+          </button>
+        </header>
 
-        <label>
-          Name
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Drink water" autoComplete="off" />
+        <div className="editor-preview">
+          <HabitIcon name={icon} color={color} />
+          <div><strong>{name || "Your ritual"}</strong><span>{tinyVersion || "Its smallest honest version"}</span></div>
+        </div>
+
+        <label className="field">
+          <span>Name</span>
+          <input
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+              setError("");
+            }}
+            onBlur={() => !name.trim() && setError("Please give this ritual a name.")}
+            placeholder="Drink water"
+            autoComplete="off"
+            aria-describedby={error ? "habit-name-error" : undefined}
+          />
+          {error && <small className="field-error" id="habit-name-error">{error}</small>}
         </label>
 
-        <label>
-          Tiny version <span className="field-hint">the version that counts on hard days</span>
-          <input value={tinyVersion} onChange={(e) => setTinyVersion(e.target.value)} placeholder="One glass of water" autoComplete="off" />
+        <label className="field">
+          <span>Tiny version <small>what counts on a difficult day</small></span>
+          <input value={tinyVersion} onChange={(event) => setTinyVersion(event.target.value)} placeholder="One glass is enough" autoComplete="off" />
         </label>
 
         <fieldset className="editor-group">
-          <legend>Emoji</legend>
-          <div className="emoji-row">
-            <input className="emoji-input" value={emoji} onChange={(e) => setEmoji(e.target.value)} aria-label="Habit emoji" maxLength={4} />
-            {EMOJI_QUICK.map((e) => (
-              <button type="button" key={e} className={emoji === e ? "on" : ""} onClick={() => setEmoji(e)} aria-label={`Use ${e}`}>
-                {e}
+          <legend>Illustrated icon</legend>
+          <div className="icon-choice-grid">
+            {ICON_CHOICES.map((choice) => (
+              <button
+                type="button"
+                key={choice}
+                className={icon === choice ? "is-selected" : ""}
+                onClick={() => setIcon(choice)}
+                aria-label={`Use ${choice} icon`}
+                aria-pressed={icon === choice}
+              >
+                <HabitIcon name={choice} color={color} />
               </button>
             ))}
           </div>
         </fieldset>
 
         <fieldset className="editor-group">
-          <legend>Colour</legend>
-          <div className="color-row">
-            {HABIT_COLORS.map((c) => (
+          <legend>Accent</legend>
+          <div className="color-choice-row">
+            {HABIT_COLORS.map((choice) => (
               <button
                 type="button"
-                key={c}
-                className={`color-dot${color === c ? " on" : ""}`}
-                style={{ background: c }}
-                onClick={() => setColor(c)}
-                aria-label={`Colour ${c}`}
-                aria-pressed={color === c}
-              />
+                key={choice}
+                className={color === choice ? "is-selected" : ""}
+                style={{ "--swatch": choice }}
+                onClick={() => setColor(choice)}
+                aria-label={`Use accent ${choice}`}
+                aria-pressed={color === choice}
+              >
+                {color === choice && <KawaiiIcon name="check" size={15} />}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="editor-group">
+          <legend>Part of day</legend>
+          <div className="segmented-control">
+            {[
+              ["morning", "sun", "Morning"],
+              ["anytime", "leaf", "Anytime"],
+              ["evening", "moon", "Evening"],
+            ].map(([id, glyph, label]) => (
+              <button key={id} type="button" className={timeOfDay === id ? "is-selected" : ""} onClick={() => setTimeOfDay(id)} aria-pressed={timeOfDay === id}>
+                <KawaiiIcon name={glyph} size={17} /> {label}
+              </button>
             ))}
           </div>
         </fieldset>
 
         <fieldset className="editor-group">
           <legend>How often</legend>
-          <div className="seg">
+          <div className="segmented-control">
             {[
               ["daily", "Every day"],
               ["weekdays", "Weekdays"],
               ["days", "Custom"],
             ].map(([id, label]) => (
-              <button key={id} type="button" className={freqKind === id ? "on" : ""} onClick={() => setFreqKind(id)} aria-pressed={freqKind === id}>
+              <button key={id} type="button" className={freqKind === id ? "is-selected" : ""} onClick={() => setFreqKind(id)} aria-pressed={freqKind === id}>
                 {label}
               </button>
             ))}
           </div>
           {freqKind === "days" && (
-            <div className="day-row">
-              {DAY_LABELS.map((label, d) => (
+            <div className="day-choice-row">
+              {DAY_LABELS.map((label, day) => (
                 <button
-                  key={d}
+                  key={DAY_NAMES[day]}
                   type="button"
-                  className={`day-dot${days.includes(d) ? " on" : ""}`}
-                  onClick={() => toggleDay(d)}
-                  aria-pressed={days.includes(d)}
-                  aria-label={["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d]}
+                  className={days.includes(day) ? "is-selected" : ""}
+                  onClick={() => toggleDay(day)}
+                  aria-pressed={days.includes(day)}
+                  aria-label={DAY_NAMES[day]}
                 >
                   {label}
                 </button>
@@ -114,79 +172,71 @@ export function HabitEditor({ habit, onClose, onSave }) {
           )}
         </fieldset>
 
-        <label>
-          Category
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            {HABIT_CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {c[0].toUpperCase() + c.slice(1)}
-              </option>
+        <label className="field">
+          <span>Area</span>
+          <select value={category} onChange={(event) => setCategory(event.target.value)}>
+            {HABIT_CATEGORIES.map((choice) => (
+              <option key={choice} value={choice}>{choice[0].toUpperCase() + choice.slice(1)}</option>
             ))}
           </select>
         </label>
 
         <div className="modal-actions">
-          <button type="button" onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit">{editing ? "Save" : "Add"}</button>
+          <button type="button" className="secondary-button" onClick={onClose}>Keep browsing</button>
+          <button type="submit" className="primary-button">{editing ? "Save ritual" : "Create ritual"}</button>
         </div>
       </form>
     </Modal>
   );
 }
 
-// The per-row action menu.
 export function HabitMenu({ habit, todayStr, onClose, onComplete, onTiny, onSkip, onNote, onEdit, onArchive, onResetToday }) {
   const status = habitStatus(habit, todayStr);
   const note = habit.notesByDate?.[todayStr];
   return (
     <Modal title={habit.name} onClose={onClose} className="entry-modal action-sheet">
-      <h2>
-        <span aria-hidden="true">{habit.emoji}</span> {habit.name}
-      </h2>
-      {habit.tinyVersion && <p className="sheet-tiny">Tiny: {habit.tinyVersion}</p>}
+      <header className="sheet-heading">
+        <HabitIcon name={habit.icon} color={habit.color} />
+        <div><h2>{habit.name}</h2>{habit.tinyVersion && <p>{habit.tinyVersion}</p>}</div>
+        <button className="icon-button" type="button" onClick={onClose} aria-label="Close ritual options"><KawaiiIcon name="close" /></button>
+      </header>
       <div className="sheet-actions">
-        {status !== "done" && (
-          <button type="button" onClick={onComplete}>✓ Mark done</button>
-        )}
-        {habit.tinyVersion && status !== "tiny" && (
-          <button type="button" onClick={onTiny}>🌱 Did the tiny version</button>
-        )}
-        {(status === "done" || status === "tiny") && (
-          <button type="button" onClick={onResetToday}>↺ Reset today</button>
-        )}
-        <button type="button" onClick={onSkip}>🛌 Skip / rest today</button>
-        <button type="button" onClick={onNote}>📝 {note ? "Edit note" : "Add note"}</button>
-        <button type="button" onClick={onEdit}>✎ Edit habit</button>
-        <button type="button" className="sheet-danger" onClick={onArchive}>🗑 Archive</button>
+        {status !== "done" && <SheetAction icon="check" label="Mark fully cared for" onClick={onComplete} />}
+        {habit.tinyVersion && status !== "tiny" && <SheetAction icon="leaf" label="I did the tiny version" onClick={onTiny} />}
+        {(status === "done" || status === "tiny") && <SheetAction icon="back" label="Open today again" onClick={onResetToday} />}
+        <SheetAction icon="rest" label="Take a rest day" onClick={onSkip} />
+        <SheetAction icon="note" label={note ? "Edit today’s note" : "Add a note for today"} onClick={onNote} />
+        <SheetAction icon="edit" label="Edit ritual" onClick={onEdit} />
+        <SheetAction icon="archive" label="Archive ritual" onClick={onArchive} danger />
       </div>
     </Modal>
   );
 }
 
+function SheetAction({ icon, label, onClick, danger = false }) {
+  return <button type="button" className={danger ? "is-danger" : ""} onClick={onClick}><KawaiiIcon name={icon} size={20} /><span>{label}</span><KawaiiIcon name="arrowRight" size={16} /></button>;
+}
+
 export function SkipSheet({ onClose, onSkip }) {
   const [custom, setCustom] = useState("");
   return (
-    <Modal title="Skip today" onClose={onClose} className="entry-modal action-sheet">
-      <h2>It's okay to rest 💗</h2>
-      <p className="sheet-tiny">Skipping with a reason keeps your streak safe, no guilt.</p>
+    <Modal title="Rest today" onClose={onClose} className="entry-modal action-sheet">
+      <header className="modal-heading">
+        <div><p className="section-kicker">Rest protects the rhythm</p><h2>What kind of day is this?</h2></div>
+        <button className="icon-button" type="button" onClick={onClose} aria-label="Close rest options"><KawaiiIcon name="close" /></button>
+      </header>
+      <p className="sheet-intro">A recorded rest day will never break your consistency.</p>
       <div className="sheet-actions">
-        {SKIP_REASONS.map((r) => (
-          <button key={r.id} type="button" onClick={() => onSkip(r.label)}>
-            <span aria-hidden="true">{r.emoji}</span> {r.label}
+        {SKIP_REASONS.map((reason) => (
+          <button key={reason.id} type="button" onClick={() => onSkip(reason.label)}>
+            <KawaiiIcon name={reason.icon} size={20} /><span>{reason.label}</span><KawaiiIcon name="arrowRight" size={16} />
           </button>
         ))}
       </div>
-      <form
-        className="note-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (custom.trim()) onSkip(custom.trim());
-        }}
-      >
-        <input value={custom} onChange={(e) => setCustom(e.target.value)} placeholder="Another reason…" aria-label="Custom skip reason" />
-        <button type="submit">Skip</button>
+      <form className="inline-form" onSubmit={(event) => { event.preventDefault(); if (custom.trim()) onSkip(custom.trim()); }}>
+        <label className="sr-only" htmlFor="custom-rest-reason">Another reason</label>
+        <input id="custom-rest-reason" value={custom} onChange={(event) => setCustom(event.target.value)} placeholder="Another reason" />
+        <button className="primary-button" type="submit" disabled={!custom.trim()}>Save rest day</button>
       </form>
     </Modal>
   );
@@ -195,29 +245,20 @@ export function SkipSheet({ onClose, onSkip }) {
 export function NotePrompt({ habit, todayStr, onClose, onSave }) {
   const [text, setText] = useState(habit.notesByDate?.[todayStr] || "");
   return (
-    <Modal title="Add a note" onClose={onClose} className="entry-modal">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSave(text);
-        }}
-      >
-        <h2>Note for today</h2>
-        <label>
-          {habit.name} · {frequencyLabel(habit.frequency)}
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            rows={3}
-            placeholder="How did it go? Anything to remember?"
-            autoFocus
-          />
+    <Modal title="Note for today" onClose={onClose} className="entry-modal">
+      <form onSubmit={(event) => { event.preventDefault(); onSave(text); }}>
+        <header className="modal-heading">
+          <div><p className="section-kicker">A small memory, just for you</p><h2>Note for today</h2></div>
+          <button className="icon-button" type="button" onClick={onClose} aria-label="Close note"><KawaiiIcon name="close" /></button>
+        </header>
+        <label className="field">
+          <span>{habit.name} <small>{frequencyLabel(habit.frequency)}</small></span>
+          <textarea value={text} onChange={(event) => setText(event.target.value)} rows={4} maxLength={500} placeholder="What helped? What would you like to remember?" autoFocus />
+          <small className="character-count">{text.length} / 500</small>
         </label>
         <div className="modal-actions">
-          <button type="button" onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit">Save note</button>
+          <button type="button" className="secondary-button" onClick={onClose}>Keep browsing</button>
+          <button type="submit" className="primary-button">Save note</button>
         </div>
       </form>
     </Modal>

@@ -3,41 +3,103 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Kawaii Habits 🌸</title>
+    <title>Kawaii Habit Tracker</title>
+    <meta
+      name="description"
+      content="A gentle, private habit companion where tiny acts of care grow a pocket garden."
+    />
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#FF85A2" />
+    <meta id="app-theme-color" name="theme-color" content="#C96648" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="application-name" content="Kawaii Habits" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Kawaii Habits" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+    <script>
+      (() => {
+        const themeColors = {
+          'garden-day': '#C96648',
+          'garden-night': '#2B2232',
+          matcha: '#66785D',
+        };
+        const legacyThemes = {
+          'midnight-sakura': 'garden-night',
+          kawaii: 'garden-day',
+          sky: 'garden-day',
+        };
+        let theme = 'garden-day';
+
+        try {
+          const stored = JSON.parse(localStorage.getItem('kw_state_v2'));
+          const requestedTheme = stored?.preferences?.theme;
+          theme = legacyThemes[requestedTheme] || requestedTheme || theme;
+        } catch {
+          // Keep the calm day theme if storage is unavailable or malformed.
+        }
+
+        if (!themeColors[theme]) theme = 'garden-day';
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme === 'garden-night' ? 'dark' : 'light';
+        document.querySelector('#app-theme-color')?.setAttribute('content', themeColors[theme]);
+      })();
+    </script>
 
     <!-- Icons -->
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
+      const runtimeThemeColors = {
+        'garden-day': '#C96648',
+        'garden-night': '#2B2232',
+        matcha: '#66785D',
+      };
+
+      const syncBrowserTheme = () => {
+        const theme = document.documentElement.dataset.theme || 'garden-day';
+        document.documentElement.style.colorScheme = theme === 'garden-night' ? 'dark' : 'light';
+        document
+          .querySelector('#app-theme-color')
+          ?.setAttribute('content', runtimeThemeColors[theme] || runtimeThemeColors['garden-day']);
+      };
+
+      new MutationObserver(syncBrowserTheme).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      });
+
       if ('serviceWorker' in navigator) {
         function showUpdateToast(worker) {
-          const bar = document.createElement('div');
+          if (document.querySelector('#app-update-notice')) return;
+
+          const bar = document.createElement('aside');
+          bar.id = 'app-update-notice';
+          bar.className = 'app-update-notice';
           bar.setAttribute('role', 'status');
-          bar.style.cssText =
-            'position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:9999;background:linear-gradient(145deg,#ff6fa8,#ff93bd);color:#3a0f22;font-weight:800;font-family:Quicksand,system-ui,sans-serif;padding:12px 18px;border-radius:16px;box-shadow:0 10px 30px rgba(255,111,168,.5);cursor:pointer';
-          bar.textContent = '✨ A fresh version is ready, tap to update';
-          bar.onclick = () => { worker.postMessage({ type: 'SKIP_WAITING' }); bar.remove(); };
+          bar.setAttribute('aria-live', 'polite');
+          bar.innerHTML = `
+            <span class="app-update-notice__copy">A fresh version is ready.</span>
+            <button class="app-update-notice__action" type="button">Update now</button>
+          `;
+          bar.querySelector('button').addEventListener('click', () => {
+            worker.postMessage({ type: 'SKIP_WAITING' });
+            bar.remove();
+          });
           document.body.appendChild(bar);
         }
+
         window.addEventListener('load', async () => {
           try {
             const reg = await navigator.serviceWorker.register('/sw.js');
+            if (reg.waiting && navigator.serviceWorker.controller) showUpdateToast(reg.waiting);
             reg.addEventListener('updatefound', () => {
               const sw = reg.installing;
               if (!sw) return;
@@ -45,7 +107,10 @@
                 if (sw.state === 'installed' && navigator.serviceWorker.controller) showUpdateToast(sw);
               });
             });
-          } catch {}
+          } catch {
+            // The app remains fully usable when service workers are unavailable.
+          }
+
           let refreshing = false;
           navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (refreshing) return;

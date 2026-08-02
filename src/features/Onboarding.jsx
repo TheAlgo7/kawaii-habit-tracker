@@ -1,55 +1,59 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { HabitIcon } from "../components/HabitIcon";
+import { KawaiiIcon } from "../components/KawaiiIcon";
 import { today } from "./date";
 import { normalizeHabit, toggleTiny } from "./habits";
-import { HABIT_PRESETS, REMINDER_STYLES, THEMES } from "./presets";
+import { HABIT_PRESETS, THEMES } from "./presets";
 
-const STEPS = ["welcome", "naming", "pick", "tiny", "reminder", "theme", "first"];
+const STEPS = ["welcome", "naming", "pick", "tiny", "theme", "first"];
+const THEME_ICONS = { "garden-day": "sun", "garden-night": "moon", matcha: "leaf" };
 
 export function Onboarding({ onFinish }) {
   const [step, setStep] = useState(0);
   const [userName, setUserName] = useState("");
-  const [nekoName, setNekoName] = useState("Neko-chan");
-  const [worldName, setWorldName] = useState("Kawaii");
-  const [picked, setPicked] = useState([]); // preset indexes
-  const [tinies, setTinies] = useState({}); // index -> tiny string
-  const [reminderStyle, setReminderStyle] = useState("none");
-  const [theme, setTheme] = useState("midnight-sakura");
+  const [nekoName, setNekoName] = useState("Neko");
+  const [worldName, setWorldName] = useState("Mori Garden");
+  const [picked, setPicked] = useState([]);
+  const [tinies, setTinies] = useState({});
+  const [theme, setTheme] = useState("garden-day");
   const [habits, setHabits] = useState([]);
   const [firstDone, setFirstDone] = useState(false);
+  const headingRef = useRef(null);
 
   const stepName = STEPS[step];
-  const canPickMore = picked.length < 3;
-
   const selectedPresets = useMemo(
-    () => picked.map((i) => ({ ...HABIT_PRESETS[i], tinyVersion: tinies[i] ?? HABIT_PRESETS[i].tinyVersion })),
+    () => picked.map((index) => ({ ...HABIT_PRESETS[index], tinyVersion: tinies[index] ?? HABIT_PRESETS[index].tinyVersion })),
     [picked, tinies],
   );
+
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, [step, firstDone]);
 
   function togglePick(index) {
     setPicked((current) =>
       current.includes(index)
-        ? current.filter((i) => i !== index)
-        : canPickMore
+        ? current.filter((item) => item !== index)
+        : current.length < 3
           ? [...current, index]
           : current,
     );
   }
 
   function next() {
-    // Entering the "first check-in" step: build the real habit objects once.
     if (stepName === "theme") {
-      setHabits(selectedPresets.map((preset, i) => normalizeHabit(preset, i)));
+      setHabits(selectedPresets.map((preset, index) => normalizeHabit(preset, index)));
     }
-    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    setStep((current) => Math.min(current + 1, STEPS.length - 1));
   }
 
   function back() {
-    setStep((s) => Math.max(s - 1, 0));
+    setStep((current) => Math.max(current - 1, 0));
   }
 
   function completeFirst(id) {
     const day = today();
-    setHabits((current) => current.map((h) => (h.id === id ? toggleTiny(h, day) : h)));
+    setHabits((current) => current.map((habit) => (habit.id === id ? toggleTiny(habit, day) : habit)));
     setFirstDone(true);
   }
 
@@ -57,14 +61,12 @@ export function Onboarding({ onFinish }) {
     onFinish({
       profile: {
         userName: userName.trim(),
-        nekoName: nekoName.trim() || "Neko-chan",
-        worldName: worldName.trim() || "Kawaii",
+        nekoName: nekoName.trim() || "Neko",
+        worldName: worldName.trim() || "Mori Garden",
         onboardedAt: new Date().toISOString(),
       },
       preferences: {
         theme,
-        reminderStyle,
-        remindersEnabled: reminderStyle !== "none",
       },
       habits,
     });
@@ -73,181 +75,188 @@ export function Onboarding({ onFinish }) {
   const nextDisabled = stepName === "pick" && picked.length === 0;
 
   return (
-    <div className="onb" role="dialog" aria-modal="true" aria-label="Welcome to Kawaii Habits">
-      <div className="onb-card">
-        <div className="onb-dots" aria-hidden="true">
-          {STEPS.map((s, i) => (
-            <span key={s} className={i <= step ? "on" : ""} />
-          ))}
+    <main className="onboarding" data-onboarding-theme={theme}>
+      <section className="onboarding-shell" role="dialog" aria-modal="true" aria-label="Welcome to Kawaii Habits">
+        <div className="onboarding-art" aria-hidden="true">
+          <img
+            src={theme === "garden-night" ? "/scene-garden-night.webp" : "/scene-garden-day.webp"}
+            alt=""
+            width="1280"
+            height="853"
+          />
+          <div className="onboarding-art-copy">
+            <KawaiiIcon name="leaf" size={24} />
+            <span>Tiny steps, root deep.</span>
+          </div>
         </div>
 
-        <div className="onb-body">
-          {stepName === "welcome" && (
-            <div className="onb-step onb-center">
-              <img className="onb-neko" src="/neko-cat-happy.webp" alt="" width="160" height="160" />
-              <h1>Meet {nekoName}</h1>
-              <p>Build tiny care rituals. Your little world grows every time you show up, no streaks to fear, no guilt for resting.</p>
-            </div>
-          )}
+        <div className="onboarding-content">
+          <div
+            className="step-progress"
+            role="progressbar"
+            aria-label="Onboarding progress"
+            aria-valuemin="1"
+            aria-valuemax={STEPS.length}
+            aria-valuenow={step + 1}
+            aria-valuetext={`Step ${step + 1} of ${STEPS.length}`}
+          >
+            {STEPS.map((name, index) => (
+              <span key={name} className={index <= step ? "is-active" : ""} aria-hidden="true" />
+            ))}
+          </div>
 
-          {stepName === "naming" && (
-            <div className="onb-step">
-              <h1>Let's introduce ourselves</h1>
-              <label className="onb-field">
-                Your name <span className="onb-opt">(optional)</span>
-                <input value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="What should Neko call you?" />
-              </label>
-              <label className="onb-field">
-                Name your companion
-                <input value={nekoName} onChange={(e) => setNekoName(e.target.value)} placeholder="Neko-chan" />
-              </label>
-              <label className="onb-field">
-                Name your little world
-                <input value={worldName} onChange={(e) => setWorldName(e.target.value)} placeholder="Kawaii" />
-              </label>
-            </div>
-          )}
-
-          {stepName === "pick" && (
-            <div className="onb-step">
-              <h1>Pick 1-3 tiny rituals</h1>
-              <p className="onb-sub">You can add or change these anytime. Start small.</p>
-              <div className="onb-grid">
-                {HABIT_PRESETS.map((preset, i) => {
-                  const on = picked.includes(i);
-                  return (
-                    <button
-                      key={preset.name}
-                      type="button"
-                      className={`onb-chip${on ? " on" : ""}`}
-                      aria-pressed={on}
-                      aria-label={on ? `${preset.name}, selected` : `Select ${preset.name} ritual`}
-                      disabled={!on && !canPickMore}
-                      onClick={() => togglePick(i)}
-                    >
-                      <span aria-hidden="true">{preset.emoji}</span>
-                      {preset.name}
-                    </button>
-                  );
-                })}
+          <div className="onboarding-body">
+            {stepName === "welcome" && (
+              <div className="onboarding-step welcome-step">
+                <p className="section-kicker">A habit companion for imperfect days</p>
+                <h1 ref={headingRef} tabIndex="-1">Care for yourself. Grow a little world.</h1>
+                <p>Choose tiny rituals, mark what you can, and watch Neko’s garden respond. Rest never counts against you.</p>
+                <div className="welcome-promises">
+                  <span><KawaiiIcon name="check" size={18} /> Private and offline</span>
+                  <span><KawaiiIcon name="leaf" size={18} /> Tiny versions count</span>
+                  <span><KawaiiIcon name="heart" size={18} /> No guilt mechanics</span>
+                </div>
               </div>
-              {picked.length >= 3 && (
-                <p className="onb-hint" role="status">
-                  3 selected, unselect one to choose another.
-                </p>
-              )}
-            </div>
-          )}
+            )}
 
-          {stepName === "tiny" && (
-            <div className="onb-step">
-              <h1>What's the tiny version?</h1>
-              <p className="onb-sub">The version so small it counts even on your worst day.</p>
-              {picked.map((i) => (
-                <label className="onb-field" key={HABIT_PRESETS[i].name}>
-                  <span aria-hidden="true">{HABIT_PRESETS[i].emoji}</span> {HABIT_PRESETS[i].name}
-                  <input
-                    value={tinies[i] ?? HABIT_PRESETS[i].tinyVersion}
-                    onChange={(e) => setTinies((c) => ({ ...c, [i]: e.target.value }))}
-                  />
+            {stepName === "naming" && (
+              <div className="onboarding-step">
+                <p className="section-kicker">Make this place yours</p>
+                <h1 ref={headingRef} tabIndex="-1">Who lives in your garden?</h1>
+                <label className="field">
+                  <span>Your name <small>optional</small></span>
+                  <input value={userName} onChange={(event) => setUserName(event.target.value)} placeholder="What should Neko call you?" />
                 </label>
-              ))}
-            </div>
-          )}
-
-          {stepName === "reminder" && (
-            <div className="onb-step">
-              <h1>A gentle nudge?</h1>
-              <p className="onb-sub">Pick a tone you like. Scheduled reminders are coming soon, for now this just saves your preference.</p>
-              <div className="onb-options">
-                {REMINDER_STYLES.map((r) => (
-                  <button
-                    key={r.id}
-                    type="button"
-                    className={`onb-option${reminderStyle === r.id ? " on" : ""}`}
-                    aria-pressed={reminderStyle === r.id}
-                    onClick={() => setReminderStyle(r.id)}
-                  >
-                    <span aria-hidden="true">{r.emoji}</span> {r.label}
-                  </button>
-                ))}
+                <label className="field">
+                  <span>Companion name</span>
+                  <input value={nekoName} onChange={(event) => setNekoName(event.target.value)} placeholder="Neko" />
+                </label>
+                <label className="field">
+                  <span>Garden name</span>
+                  <input value={worldName} onChange={(event) => setWorldName(event.target.value)} placeholder="Mori Garden" />
+                </label>
               </div>
-            </div>
-          )}
+            )}
 
-          {stepName === "theme" && (
-            <div className="onb-step">
-              <h1>Choose your world's mood</h1>
-              <div className="onb-options">
-                {THEMES.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    className={`onb-option${theme === t.id ? " on" : ""}`}
-                    aria-pressed={theme === t.id}
-                    onClick={() => setTheme(t.id)}
-                  >
-                    <span className="onb-swatch" style={{ background: t.swatch }} aria-hidden="true" />
-                    {t.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {stepName === "first" && (
-            <div className="onb-step onb-center">
-              {firstDone ? (
-                <>
-                  <img className="onb-neko" src="/neko-cat-blissful.webp" alt="" width="160" height="160" />
-                  <h1>The world just brightened ✨</h1>
-                  <p>That's the whole loop, {userName || "friend"}. One tiny thing, and {nekoName} feels it. Welcome home.</p>
-                </>
-              ) : (
-                <>
-                  <img className="onb-neko" src="/neko-cat-happy.webp" alt="" width="140" height="140" />
-                  <h1>Let's do one tiny thing now</h1>
-                  <p className="onb-sub">Tap a ritual to do its tiny version. First wins are the best wins.</p>
-                  <div className="onb-firstlist">
-                    {habits.map((h) => (
+            {stepName === "pick" && (
+              <div className="onboarding-step">
+                <p className="section-kicker">Begin with less</p>
+                <h1 ref={headingRef} tabIndex="-1">Pick one to three rituals</h1>
+                <p>Choose only what deserves space in an ordinary day. You can change everything later.</p>
+                <div className="preset-grid">
+                  {HABIT_PRESETS.map((preset, index) => {
+                    const selected = picked.includes(index);
+                    return (
                       <button
-                        key={h.id}
+                        key={preset.name}
                         type="button"
-                        className="onb-firstrow"
-                        aria-label={`Complete tiny version: ${h.tinyVersion || h.name}`}
-                        onClick={() => completeFirst(h.id)}
+                        className={selected ? "is-selected" : ""}
+                        aria-pressed={selected}
+                        disabled={!selected && picked.length >= 3}
+                        onClick={() => togglePick(index)}
                       >
-                        <span className="round-check" style={{ "--row-color": h.color }} aria-hidden="true" />
-                        <span>{h.tinyVersion || h.name}</span>
-                        <em aria-hidden="true">{h.emoji}</em>
+                        <HabitIcon name={preset.icon} color={preset.color} />
+                        <span>{preset.name}<small>{preset.tinyVersion}</small></span>
+                        <i aria-hidden="true">{selected && <KawaiiIcon name="check" size={16} />}</i>
                       </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </div>
+                    );
+                  })}
+                </div>
+                <p className="selection-count" role="status">{picked.length} of 3 selected</p>
+              </div>
+            )}
 
-        <div className="onb-actions">
-          {step > 0 ? (
-            <button type="button" className="onb-back" onClick={back}>
-              Back
-            </button>
-          ) : (
-            <span />
-          )}
-          {stepName === "first" ? (
-            <button type="button" className="onb-next" onClick={finish}>
-              {firstDone ? "Enter your world →" : "Skip for now →"}
-            </button>
-          ) : (
-            <button type="button" className="onb-next" onClick={next} disabled={nextDisabled}>
-              {stepName === "welcome" ? "Begin →" : "Next →"}
-            </button>
-          )}
+            {stepName === "tiny" && (
+              <div className="onboarding-step">
+                <p className="section-kicker">Design for the difficult day</p>
+                <h1 ref={headingRef} tabIndex="-1">What is the tiny version?</h1>
+                <p>The smallest honest version still moves the ritual forward.</p>
+                <div className="tiny-fields">
+                  {picked.map((index) => (
+                    <label className="tiny-field" key={HABIT_PRESETS[index].name}>
+                      <HabitIcon name={HABIT_PRESETS[index].icon} color={HABIT_PRESETS[index].color} />
+                      <span>{HABIT_PRESETS[index].name}</span>
+                      <input
+                        value={tinies[index] ?? HABIT_PRESETS[index].tinyVersion}
+                        onChange={(event) => setTinies((current) => ({ ...current, [index]: event.target.value }))}
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {stepName === "theme" && (
+              <div className="onboarding-step">
+                <p className="section-kicker">Set the atmosphere</p>
+                <h1 ref={headingRef} tabIndex="-1">Choose your garden’s light</h1>
+                <div className="theme-choice-grid">
+                  {THEMES.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`theme-choice theme-${option.id}${theme === option.id ? " is-selected" : ""}`}
+                      aria-pressed={theme === option.id}
+                      onClick={() => setTheme(option.id)}
+                    >
+                      <span className="theme-preview" aria-hidden="true"><KawaiiIcon name={THEME_ICONS[option.id]} /></span>
+                      <strong>{option.name}</strong>
+                      <small>{option.description}</small>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {stepName === "first" && (
+              <div className="onboarding-step first-step">
+                {firstDone ? (
+                  <>
+                    <span className="success-seal" aria-hidden="true"><KawaiiIcon name="flower" size={40} /></span>
+                    <p className="section-kicker">Your first root</p>
+                    <h1 ref={headingRef} tabIndex="-1">The garden noticed.</h1>
+                    <p>That is the whole loop, {userName || "friend"}. One tiny thing, cared for honestly.</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="section-kicker">Try the real loop</p>
+                    <h1 ref={headingRef} tabIndex="-1">Do one tiny thing now</h1>
+                    <p>Choose a ritual below. Its tiny version counts as a complete, gentle win.</p>
+                    <div className="first-ritual-list">
+                      {habits.map((habit) => (
+                        <button key={habit.id} type="button" onClick={() => completeFirst(habit.id)}>
+                          <HabitIcon name={habit.icon} color={habit.color} />
+                          <span><strong>{habit.name}</strong><small>{habit.tinyVersion}</small></span>
+                          <KawaiiIcon name="circle" size={30} />
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          <footer className="onboarding-actions">
+            {step > 0 ? (
+              <button type="button" className="secondary-button" onClick={back}>
+                <KawaiiIcon name="back" size={18} /> Back
+              </button>
+            ) : <span />}
+            {stepName === "first" ? (
+              <button type="button" className="primary-button" onClick={finish}>
+                {firstDone ? "Enter your garden" : "Settle in for now"}
+                <KawaiiIcon name="arrowRight" size={18} />
+              </button>
+            ) : (
+              <button type="button" className="primary-button" onClick={next} disabled={nextDisabled}>
+                {stepName === "welcome" ? "Begin gently" : "Continue"}
+                <KawaiiIcon name="arrowRight" size={18} />
+              </button>
+            )}
+          </footer>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

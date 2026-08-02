@@ -1,12 +1,18 @@
 {
   "name": "Kawaii Habit Tracker",
   "short_name": "Kawaii Habits",
-  "description": "A cute habit tracker with Neko-chan, your kawaii companion that grows when you take care of yourself",
+  "description": "A gentle, private habit companion where tiny acts of care grow a pocket garden.",
+  "lang": "en",
+  "dir": "ltr",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#FFF4F7",
-  "theme_color": "#FF85A2",
-  "orientation": "portrait",
+  "background_color": "#F3E3CA",
+  "theme_color": "#C96648",
+  "orientation": "any",
+  "categories": ["lifestyle", "health", "productivity"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-192.png",
@@ -25,6 +31,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/today-phone.webp",
+      "sizes": "390x844",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Today in the Sunlit Garden theme"
+    },
+    {
+      "src": "/screenshots/today-tablet.webp",
+      "sizes": "834x1112",
+      "type": "image/webp",
+      "form_factor": "wide",
+      "label": "Tablet two-page garden and agenda layout"
     }
   ]
 }

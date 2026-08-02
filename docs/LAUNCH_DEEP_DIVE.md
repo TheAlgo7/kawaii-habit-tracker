@@ -1,4 +1,6 @@
-# Kawaii Habit Tracker Launch Deep Dive
+# Kawaii Habit Tracker Pre-1.1 Launch Deep Dive
+
+> **Historical audit:** This document describes the prototype before the Sunlit Storybook Garden redesign. It is preserved as decision history, not current implementation guidance. Use `README.md`, `PRODUCT.md`, and `DESIGN.md` for the version 1.1 product.
 
 Date: 2026-06-04
 

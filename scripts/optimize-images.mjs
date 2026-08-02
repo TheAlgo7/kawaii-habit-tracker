@@ -12,12 +12,16 @@ const srcDir = join(base, "..", "design");
 const outDir = join(base, "..", "public");
 
 const TARGETS = [
-  { file: "neko-cat-blissful.png", maxWidth: 512, quality: 80 },
-  { file: "neko-cat-happy.png", maxWidth: 512, quality: 80 },
-  { file: "neko-cat-normal.png", maxWidth: 512, quality: 80 },
-  { file: "neko-cat-sad.png", maxWidth: 512, quality: 80 },
-  { file: "neko-cat-sleepy.png", maxWidth: 512, quality: 80 },
-  { file: "background-transparent-sky.png", maxWidth: 900, quality: 76 },
+  { file: "scene-garden-day.png", maxWidth: 1280, quality: 82 },
+  { file: "scene-garden-night.png", maxWidth: 1280, quality: 82 },
+];
+
+const NEKO_MOODS = [
+  { file: "neko-cat-normal.webp", column: 0, row: 0 },
+  { file: "neko-cat-happy.webp", column: 1, row: 0 },
+  { file: "neko-cat-blissful.webp", column: 1, row: 0 },
+  { file: "neko-cat-sleepy.webp", column: 0, row: 1 },
+  { file: "neko-cat-sad.webp", column: 1, row: 1 },
 ];
 
 const kb = (n) => `${(n / 1024).toFixed(0)} KB`;
@@ -35,6 +39,22 @@ for (const { file, maxWidth, quality } of TARGETS) {
 
   await writeFile(out, webp);
   console.log(`${file.padEnd(34)} ${kb(before).padStart(9)} png  ->  ${kb(webp.length).padStart(9)} webp`);
+}
+
+const moodSheet = join(srcDir, "neko-mood-sheet.png");
+const sheet = sharp(await readFile(moodSheet));
+const metadata = await sheet.metadata();
+const cellWidth = Math.floor(metadata.width / 2);
+const cellHeight = Math.floor(metadata.height / 2);
+
+for (const { file, column, row } of NEKO_MOODS) {
+  const webp = await sharp(moodSheet)
+    .extract({ left: column * cellWidth, top: row * cellHeight, width: cellWidth, height: cellHeight })
+    .resize({ width: 512 })
+    .webp({ quality: 84, effort: 6 })
+    .toBuffer();
+  await writeFile(join(outDir, file), webp);
+  console.log(`${file.padEnd(34)} generated mood -> ${kb(webp.length).padStart(9)} webp`);
 }
 
 console.log("\nDone. WebP variants written to /public.");

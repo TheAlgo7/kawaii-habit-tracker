@@ -1,18 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { KawaiiIcon } from "../components/KawaiiIcon";
+import { TodayPanel } from "./TodayPanel";
+import { RhythmPanel } from "./RhythmPanel";
 import { formatToday, today } from "./date";
-import { getLocalReply, getMood, moodAssets, moodLayout, moodMessages } from "./neko";
+import { getLocalReply, getMood, isCrisisMessage, moodAssets, moodMessages } from "./neko";
 import {
   habitStatus,
-  habitStreak,
   isDoneOn,
-  isScheduledOn,
   normalizeHabit,
   setNote,
   setSkip,
   toggleComplete,
   toggleTiny,
 } from "./habits";
-import { computeTrust, computeWorld, daysSinceLastCare, nextDecor } from "./world";
+import { computeTrust, computeWorld, nextDecor } from "./world";
 import { useAppState } from "./useAppState";
 import { Onboarding } from "./Onboarding";
 import { HabitEditor, HabitMenu, NotePrompt, SkipSheet } from "./HabitEditor";
@@ -20,157 +21,269 @@ import { WorldPanel } from "./WorldPanel";
 import { Settings } from "./Settings";
 import { Modal } from "./Modal";
 
-const navItems = [
-  ["home", "🏠", "Home"],
-  ["tasks", "☑️", "To-Dos"],
-  ["world", "🌱", "World"],
-  ["neko", "🐱", "Neko"],
-];
-
-const PRAISE = [
-  "Done! The world feels a little warmer 🌸",
-  "Lovely. That counted, however small ✨",
-  "Nyaa~ that's the loop. One kind thing at a time 💗",
-  "A gentle win. Neko noticed 🐱",
+const NAV_ITEMS = [
+  ["today", "today", "Today"],
+  ["rhythm", "rhythm", "Rhythm"],
+  ["garden", "garden", "Garden"],
+  ["neko", "neko", "Neko"],
 ];
 
 function nextId() {
   return Date.now() + Math.floor(Math.random() * 1000);
 }
 
-function statusOrder(status) {
-  return { due: 0, tiny: 1, done: 2, skipped: 3, off: 4 }[status] ?? 5;
-}
-
 export function KawaiiApp() {
   const [state, { update }] = useAppState();
-  const todayStr = today();
+  const [todayStr, setTodayStr] = useState(today);
   const date = formatToday();
-
-  const [activeTab, setActiveTab] = useState("home");
-  const [modal, setModal] = useState(null); // { type, habit }
-  const [feedback, setFeedback] = useState("");
+  const [activeTab, setActiveTab] = useState("today");
+  const [modal, setModal] = useState(null);
+  const [feedback, setFeedback] = useState(null);
   const feedbackTimer = useRef(null);
 
-  const { nekoName, worldName } = state.profile;
   const allHabits = state.habits;
-  const activeHabits = useMemo(() => allHabits.filter((h) => !h.archivedAt), [allHabits]);
+  const activeHabits = useMemo(() => allHabits.filter((habit) => !habit.archivedAt), [allHabits]);
   const world = useMemo(() => computeWorld(allHabits, todayStr), [allHabits, todayStr]);
-  const mood = getMood(activeHabits, todayStr);
-
-  const scheduled = activeHabits.filter((h) => isScheduledOn(h, todayStr));
-  const completed = scheduled.filter((h) => isDoneOn(h, todayStr)).length;
-  const progress = scheduled.length ? Math.round((completed / scheduled.length) * 100) : 0;
-  const bestStreak = activeHabits.reduce((max, h) => Math.max(max, habitStreak(h, todayStr)), 0);
-  const gap = daysSinceLastCare(activeHabits, todayStr);
-  const showRecovery = activeHabits.length > 0 && completed === 0 && gap !== null && gap >= 2;
 
   useEffect(() => () => clearTimeout(feedbackTimer.current), []);
 
-  function flash(message) {
-    if (!message) return;
-    setFeedback(message);
+  useEffect(() => {
+    let midnightTimer;
+
+    function refreshDate() {
+      setTodayStr(today());
+    }
+
+    function scheduleMidnightRefresh() {
+      clearTimeout(midnightTimer);
+      const now = new Date();
+      const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
+      midnightTimer = setTimeout(() => {
+        refreshDate();
+        scheduleMidnightRefresh();
+      }, nextMidnight.getTime() - now.getTime());
+    }
+
+    function onVisibilityChange() {
+      if (document.visibilityState === "visible") refreshDate();
+    }
+
+    scheduleMidnightRefresh();
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      clearTimeout(midnightTimer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
+
+  function flash(message, options = {}) {
     clearTimeout(feedbackTimer.current);
-    feedbackTimer.current = setTimeout(() => setFeedback(""), 4000);
+    if (!message) {
+      setFeedback(null);
+      return;
+    }
+    setFeedback({ message, ...options });
+    feedbackTimer.current = setTimeout(() => setFeedback(null), options.persist ? 8000 : 5200);
   }
 
-  // Apply a pure habit mutation and surface a world-growth message if a
-  // completion just crossed a decor unlock threshold.
+  function undoFeedback() {
+    if (!feedback?.restore) return;
+    update((current) => ({ ...current, ...feedback.restore }));
+    clearTimeout(feedbackTimer.current);
+    setFeedback(null);
+  }
+
   function applyHabit(id, mutator, message) {
-    const before = computeTrust(allHabits);
-    const after = computeTrust(allHabits.map((h) => (h.id === id ? mutator(h) : h)));
+    const previousHabits = allHabits;
+    const nextHabits = allHabits.map((habit) => (habit.id === id ? mutator(habit) : habit));
+    const before = computeTrust(previousHabits);
+    const after = computeTrust(nextHabits);
     const upcoming = nextDecor(before);
-    update((s) => ({ ...s, habits: s.habits.map((h) => (h.id === id ? mutator(h) : h)) }));
+    update((current) => ({ ...current, habits: nextHabits }));
+
     if (upcoming && after > before && after >= upcoming.unlockAt) {
-      flash(`${upcoming.emoji} You unlocked ${upcoming.name}! Your world grew.`);
+      flash(`You unlocked ${upcoming.name}. Your garden grew.`, {
+        habitId: id,
+        restore: { habits: previousHabits },
+      });
+    } else if (message) {
+      flash(message, { habitId: id, restore: { habits: previousHabits } });
     } else {
-      flash(message);
+      setFeedback(null);
     }
   }
 
-  function completeHabit(h) {
-    const wasDone = h.completedDates.includes(todayStr);
-    applyHabit(h.id, (hh) => toggleComplete(hh, todayStr), wasDone ? null : PRAISE[Math.floor(Math.random() * PRAISE.length)]);
+  function completeHabit(habit) {
+    const status = habitStatus(habit, todayStr);
+    applyHabit(
+      habit.id,
+      (current) => toggleComplete(current, todayStr),
+      status === "done"
+        ? "Completion reopened."
+        : status === "tiny"
+          ? "The full version is cared for."
+          : "Lovely. One gentle thing is cared for.",
+    );
   }
-  function tinyHabit(h) {
-    const wasTiny = h.tinyDates.includes(todayStr);
-    applyHabit(h.id, (hh) => toggleTiny(hh, todayStr), wasTiny ? null : "Tiny still counts 🌱 Neko's proud.");
-    setModal(null);
-  }
-  function skipHabit(h, reason) {
-    applyHabit(h.id, (hh) => setSkip(hh, todayStr, reason), "Rest is care too 💗 Your streak is safe.");
-    setModal(null);
-  }
-  function noteHabit(h, text) {
-    update((s) => ({ ...s, habits: s.habits.map((x) => (x.id === h.id ? setNote(x, todayStr, text) : x)) }));
-    setModal(null);
-  }
-  function resetToday(h) {
-    update((s) => ({
-      ...s,
-      habits: s.habits.map((x) => {
-        if (x.id !== h.id) return x;
-        const skips = { ...x.skipsByDate };
+
+  function toggleHabitFromToday(habit) {
+    const status = habitStatus(habit, todayStr);
+    if (status !== "done" && status !== "tiny") {
+      completeHabit(habit);
+      return;
+    }
+
+    applyHabit(
+      habit.id,
+      (current) => {
+        const skips = { ...current.skipsByDate };
         delete skips[todayStr];
         return {
-          ...x,
-          completedDates: x.completedDates.filter((d) => d !== todayStr),
-          tinyDates: x.tinyDates.filter((d) => d !== todayStr),
+          ...current,
+          completedDates: current.completedDates.filter((dateKey) => dateKey !== todayStr),
+          tinyDates: current.tinyDates.filter((dateKey) => dateKey !== todayStr),
           skipsByDate: skips,
         };
-      }),
+      },
+      "Completion reopened.",
+    );
+  }
+
+  function tinyHabit(habit) {
+    applyHabit(habit.id, (current) => toggleTiny(current, todayStr), "Tiny still counts. Neko noticed.");
+    setModal(null);
+  }
+
+  function skipHabit(habit, reason) {
+    applyHabit(habit.id, (current) => setSkip(current, todayStr, reason), "Rest is part of the rhythm.");
+    setModal(null);
+  }
+
+  function noteHabit(habit, text) {
+    const previousHabits = allHabits;
+    const nextHabits = allHabits.map((item) => (item.id === habit.id ? setNote(item, todayStr, text) : item));
+    update((current) => ({ ...current, habits: nextHabits }));
+    setModal(null);
+    flash("Today’s note is saved.", { habitId: habit.id, restore: { habits: previousHabits } });
+  }
+
+  function resetToday(habit) {
+    const previousHabits = allHabits;
+    const nextHabits = allHabits.map((item) => {
+      if (item.id !== habit.id) return item;
+      const skips = { ...item.skipsByDate };
+      delete skips[todayStr];
+      return {
+        ...item,
+        completedDates: item.completedDates.filter((dateKey) => dateKey !== todayStr),
+        tinyDates: item.tinyDates.filter((dateKey) => dateKey !== todayStr),
+        skipsByDate: skips,
+      };
+    });
+    update((current) => ({ ...current, habits: nextHabits }));
+    setModal(null);
+    flash("Today is open again.", { habitId: habit.id, restore: { habits: previousHabits } });
+  }
+
+  function archiveHabit(habit) {
+    const previousHabits = allHabits;
+    update((current) => ({
+      ...current,
+      habits: current.habits.map((item) =>
+        item.id === habit.id ? { ...item, archivedAt: new Date().toISOString() } : item,
+      ),
     }));
     setModal(null);
+    flash(`${habit.name} moved to the archive.`, { restore: { habits: previousHabits } });
   }
-  function archiveHabit(h) {
-    update((s) => ({ ...s, habits: s.habits.map((x) => (x.id === h.id ? { ...x, archivedAt: new Date().toISOString() } : x)) }));
-    setModal(null);
-    flash(`${h.name} archived. You can always start it again 🌿`);
-  }
+
   function saveHabit(partial) {
     if (modal?.habit) {
-      update((s) => ({ ...s, habits: s.habits.map((x) => (x.id === modal.habit.id ? { ...x, ...partial } : x)) }));
+      update((current) => ({
+        ...current,
+        habits: current.habits.map((item) => (item.id === modal.habit.id ? normalizeHabit({ ...item, ...partial }) : item)),
+      }));
+      flash("Ritual updated.");
     } else {
-      update((s) => ({ ...s, habits: [...s.habits, normalizeHabit({ ...partial, id: nextId(), order: s.habits.length })] }));
+      update((current) => ({
+        ...current,
+        habits: [
+          ...current.habits,
+          normalizeHabit({ ...partial, id: nextId(), order: current.habits.length }),
+        ],
+      }));
+      flash("A new ritual is ready for you.");
     }
     setModal(null);
   }
 
   function addTask(task) {
-    update((s) => ({ ...s, tasks: [...s.tasks, { ...task, id: nextId(), done: false }] }));
+    update((current) => ({
+      ...current,
+      tasks: [...current.tasks, { ...task, id: nextId(), icon: task.icon || "task", done: false }],
+    }));
     setModal(null);
+    flash("To-do added.");
   }
+
   function toggleTask(id) {
-    update((s) => ({ ...s, tasks: s.tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)) }));
+    const previousTasks = state.tasks;
+    update((current) => ({
+      ...current,
+      tasks: current.tasks.map((task) => (task.id === id ? { ...task, done: !task.done } : task)),
+    }));
+    flash("To-do updated.", { restore: { tasks: previousTasks } });
   }
-  function deleteTask(id) {
-    update((s) => ({ ...s, tasks: s.tasks.filter((t) => t.id !== id) }));
+
+  function deleteTask(task) {
+    const previousTasks = state.tasks;
+    update((current) => ({ ...current, tasks: current.tasks.filter((item) => item.id !== task.id) }));
+    flash(`${task.name} deleted.`, { restore: { tasks: previousTasks } });
   }
 
   function addChallenge(challenge) {
-    update((s) => ({ ...s, challenges: [...s.challenges, { ...challenge, id: nextId(), startDate: todayStr, completedDates: [], archivedAt: null }] }));
+    update((current) => ({
+      ...current,
+      challenges: [
+        ...current.challenges,
+        { ...challenge, id: nextId(), icon: challenge.icon || "plant", startDate: todayStr, completedDates: [], archivedAt: null },
+      ],
+    }));
     setModal(null);
+    flash("A longer goal was planted.");
   }
+
   function toggleChallenge(id) {
-    update((s) => ({
-      ...s,
-      challenges: s.challenges.map((c) => {
-        if (c.id !== id) return c;
-        const checked = c.completedDates.includes(todayStr);
-        return { ...c, completedDates: checked ? c.completedDates.filter((d) => d !== todayStr) : [...c.completedDates, todayStr] };
+    update((current) => ({
+      ...current,
+      challenges: current.challenges.map((challenge) => {
+        if (challenge.id !== id) return challenge;
+        const checked = challenge.completedDates.includes(todayStr);
+        return {
+          ...challenge,
+          completedDates: checked
+            ? challenge.completedDates.filter((dateKey) => dateKey !== todayStr)
+            : [...challenge.completedDates, todayStr],
+        };
       }),
     }));
   }
+
   function archiveChallenge(id) {
-    update((s) => ({ ...s, challenges: s.challenges.map((c) => (c.id === id ? { ...c, archivedAt: new Date().toISOString() } : c)) }));
-    flash("Challenge complete, beautifully done 🏆");
+    update((current) => ({
+      ...current,
+      challenges: current.challenges.map((challenge) =>
+        challenge.id === id ? { ...challenge, archivedAt: new Date().toISOString() } : challenge,
+      ),
+    }));
+    flash("Challenge completed and archived.");
   }
 
   function finishOnboarding(result) {
-    update((s) => ({
-      ...s,
-      profile: { ...s.profile, ...result.profile },
-      preferences: { ...s.preferences, ...result.preferences },
+    update((current) => ({
+      ...current,
+      profile: { ...current.profile, ...result.profile },
+      preferences: { ...current.preferences, ...result.preferences },
       habits: result.habits,
     }));
   }
@@ -180,59 +293,100 @@ export function KawaiiApp() {
   }
 
   return (
-    <main className="kw-shell">
-      <div className="sakura sakura-a" />
-      <div className="sakura sakura-b" />
-      <section className="phone-frame" aria-label="Kawaii Habit Tracker">
-        <Header date={date} mood={mood} worldName={worldName} onOpenSettings={() => setModal({ type: "settings" })} />
-
-        <div className="screen-scroll">
-          {activeTab === "home" && (
-            <HomePanel
-              nekoName={nekoName}
-              mood={mood}
-              habits={scheduled.concat(activeHabits.filter((h) => !isScheduledOn(h, todayStr)))}
-              todayStr={todayStr}
-              completed={completed}
-              total={scheduled.length}
-              progress={progress}
-              bestStreak={bestStreak}
-              feedback={feedback}
-              showRecovery={showRecovery}
-              onRecovery={() => flash("It's okay to start the smallest version today 💗")}
-              onComplete={completeHabit}
-              onMenu={(h) => setModal({ type: "menu", habit: h })}
-              onAdd={() => setModal({ type: "habit" })}
-            />
-          )}
-          {activeTab === "tasks" && <TasksPanel tasks={state.tasks} onAdd={() => setModal({ type: "task" })} onToggle={toggleTask} onDelete={(task) => setModal({ type: "taskDelete", task })} />}
-          {activeTab === "world" && (
-            <WorldPanel
-              world={world}
-              worldName={worldName}
-              habits={activeHabits}
-              challenges={state.challenges}
-              onAddChallenge={() => setModal({ type: "challenge" })}
-              onToggleChallenge={toggleChallenge}
-              onArchiveChallenge={archiveChallenge}
-              todayStr={todayStr}
-            />
-          )}
-          {activeTab === "neko" && (
-            <NekoPanel
-              nekoName={nekoName}
-              userName={state.profile.userName}
+    <main className="app-root">
+      <a className="skip-link" href="#main-content">Skip to main content</a>
+      <section className="app-frame" aria-label="Kawaii Habit Tracker">
+        <div className="app-scroll" id="main-content" tabIndex="-1">
+          {activeTab === "today" && (
+            <TodayPanel
               habits={activeHabits}
               tasks={state.tasks}
-              challenges={state.challenges}
-              messages={state.chat}
-              setMessages={(updater) => update((s) => ({ ...s, chat: (typeof updater === "function" ? updater(s.chat) : updater).slice(-40) }))}
+              todayStr={todayStr}
+              theme={state.preferences.theme}
+              userName={state.profile.userName}
+              worldName={state.profile.worldName}
+              feedback={feedback}
+              onUndo={undoFeedback}
+              onComplete={toggleHabitFromToday}
+              onMenu={(habit) => setModal({ type: "menu", habit })}
+              onAddHabit={() => setModal({ type: "habit" })}
+              onToggleTask={toggleTask}
+              onAddTask={() => setModal({ type: "task" })}
+              onDeleteTask={deleteTask}
+              onOpenSettings={() => setModal({ type: "settings" })}
             />
+          )}
+
+          {activeTab === "rhythm" && (
+            <>
+              <InteriorHeader
+                title="Your rhythm"
+                subtitle={`${date.weekday}, ${date.date}`}
+                icon="rhythm"
+                onOpenSettings={() => setModal({ type: "settings" })}
+              />
+              <RhythmPanel habits={allHabits} todayStr={todayStr} onEditHabit={(habit) => setModal({ type: "edit", habit })} />
+            </>
+          )}
+
+          {activeTab === "garden" && (
+            <>
+              <InteriorHeader
+                title={state.profile.worldName || "Your garden"}
+                subtitle="A world grown from ordinary care"
+                icon="garden"
+                onOpenSettings={() => setModal({ type: "settings" })}
+              />
+              <WorldPanel
+                world={world}
+                worldName={state.profile.worldName}
+                habits={activeHabits}
+                challenges={state.challenges}
+                theme={state.preferences.theme}
+                onAddChallenge={() => setModal({ type: "challenge" })}
+                onToggleChallenge={toggleChallenge}
+                onArchiveChallenge={archiveChallenge}
+                todayStr={todayStr}
+              />
+            </>
+          )}
+
+          {activeTab === "neko" && (
+            <>
+              <InteriorHeader
+                title={state.profile.nekoName || "Neko"}
+                subtitle="A gentle companion, never a judge"
+                icon="neko"
+                onOpenSettings={() => setModal({ type: "settings" })}
+              />
+              <NekoPanel
+                nekoName={state.profile.nekoName}
+                userName={state.profile.userName}
+                habits={activeHabits}
+                tasks={state.tasks}
+                challenges={state.challenges}
+                messages={state.chat}
+                setMessages={(updater) =>
+                  update((current) => ({
+                    ...current,
+                    chat: (typeof updater === "function" ? updater(current.chat) : updater).slice(-40),
+                  }))
+                }
+              />
+            </>
           )}
         </div>
 
         <BottomNav activeTab={activeTab} onChange={setActiveTab} />
       </section>
+
+      {feedback && !feedback.habitId && (
+        <div className="global-toast" role="status">
+          <KawaiiIcon name="leaf" size={18} />
+          <span>{feedback.message}</span>
+          {feedback.restore && <button type="button" onClick={undoFeedback}>Undo</button>}
+        </div>
+      )}
 
       {modal?.type === "habit" && <HabitEditor habit={null} onClose={() => setModal(null)} onSave={saveHabit} />}
       {modal?.type === "edit" && <HabitEditor habit={modal.habit} onClose={() => setModal(null)} onSave={saveHabit} />}
@@ -253,203 +407,74 @@ export function KawaiiApp() {
           onResetToday={() => resetToday(modal.habit)}
         />
       )}
-      {modal?.type === "skip" && <SkipSheet habit={modal.habit} onClose={() => setModal(null)} onSkip={(reason) => skipHabit(modal.habit, reason)} />}
-      {modal?.type === "note" && <NotePrompt habit={modal.habit} todayStr={todayStr} onClose={() => setModal(null)} onSave={(text) => noteHabit(modal.habit, text)} />}
+      {modal?.type === "skip" && (
+        <SkipSheet habit={modal.habit} onClose={() => setModal(null)} onSkip={(reason) => skipHabit(modal.habit, reason)} />
+      )}
+      {modal?.type === "note" && (
+        <NotePrompt habit={modal.habit} todayStr={todayStr} onClose={() => setModal(null)} onSave={(text) => noteHabit(modal.habit, text)} />
+      )}
       {modal?.type === "task" && (
         <EntryModal
-          title="New to-do"
+          title="Create to-do"
           fields={[
-            ["name", "To-do", "Reply to emails"],
-            ["emoji", "Emoji", "✓"],
-            ["category", "Category", "Personal"],
+            ["name", "To-do", "Reply to a message"],
+            ["category", "Area", "Personal"],
           ]}
-          transform={(d) => ({ name: d.name, emoji: d.emoji || "✓", category: d.category || "Personal" })}
+          transform={(data) => ({ name: data.name, icon: "task", category: data.category || "Personal" })}
           onClose={() => setModal(null)}
           onSave={addTask}
         />
       )}
       {modal?.type === "challenge" && (
         <EntryModal
-          title="New growth challenge"
+          title="Plant a longer goal"
           fields={[
-            ["name", "Challenge", "No junk food"],
-            ["emoji", "Emoji", "🌱"],
-            ["targetDays", "Days", "30"],
+            ["name", "Goal", "Eat something fresh"],
+            ["targetDays", "Care days", "30"],
           ]}
-          transform={(d) => ({ name: d.name, emoji: d.emoji || "🌱", targetDays: Math.max(1, Number(d.targetDays) || 30) })}
+          transform={(data) => ({ name: data.name, icon: "plant", targetDays: Math.max(1, Number(data.targetDays) || 30) })}
           onClose={() => setModal(null)}
           onSave={addChallenge}
         />
-      )}
-      {modal?.type === "taskDelete" && (
-        <Modal title="Remove to-do" onClose={() => setModal(null)} className="entry-modal action-sheet">
-          <h2>Remove this to-do?</h2>
-          <p className="sheet-tiny">“{modal.task.name}” will be removed from your list.</p>
-          <div className="modal-actions">
-            <button type="button" onClick={() => setModal(null)}>
-              Keep it
-            </button>
-            <button
-              type="button"
-              className="sheet-danger"
-              onClick={() => {
-                deleteTask(modal.task.id);
-                setModal(null);
-              }}
-            >
-              Remove
-            </button>
-          </div>
-        </Modal>
       )}
       {modal?.type === "settings" && <Settings state={state} onUpdate={update} onClose={() => setModal(null)} />}
     </main>
   );
 }
 
-function Header({ date, mood, onOpenSettings, worldName }) {
+function InteriorHeader({ title, subtitle, icon, onOpenSettings }) {
   return (
-    <header className="app-header">
-      <div className="title-block">
-        <span className="title-world">{worldName || "Kawaii"}</span>
-        <small>
-          {date.weekday}, {date.date} 🌸
-        </small>
+    <header className="interior-header">
+      <div className="interior-title">
+        <span aria-hidden="true"><KawaiiIcon name={icon} /></span>
+        <div>
+          <h1>{title}</h1>
+          <p>{subtitle}</p>
+        </div>
       </div>
-      <button className="settings-gear" onClick={onOpenSettings} type="button" aria-label="Open settings">
-        ⚙
+      <button className="icon-button" type="button" onClick={onOpenSettings} aria-label="Open settings">
+        <KawaiiIcon name="settings" />
       </button>
-      <img className="avatar" src={moodAssets[mood]} alt="" />
     </header>
   );
 }
 
-function HomePanel({ bestStreak, completed, feedback, habits, mood, nekoName, onAdd, onComplete, onMenu, onRecovery, progress, showRecovery, todayStr, total }) {
+function BottomNav({ activeTab, onChange }) {
   return (
-    <>
-      <section className="hero-card">
-        <img className="hero-bg" src="/background-transparent-sky.webp" alt="" />
-        <div className="hero-scene" aria-hidden="true">
-          <span className="tree left" />
-          <span className="tree right" />
-          <span className="petal p1">🌸</span>
-          <span className="petal p2">✦</span>
-          <span className="petal p3">🌸</span>
-          <span className="petal p4">✧</span>
-          <span className="petal p5">🌸</span>
-        </div>
-        <div className="companion-copy">
-          <h1>{nekoName || "Neko-chan"} ✨</h1>
-          <p>Your kawaii habit companion~</p>
-        </div>
-        <div className="neko-stage" style={moodLayout[mood]}>
-          <NekoImage mood={mood} />
-        </div>
-        <div className="speech-card">{moodMessages[mood]} 🌸</div>
-        <div className="stats-row">
-          <strong>
-            {completed}/{total || 0}
-            <span>done today</span>
-          </strong>
-          <strong>
-            {progress}%
-            <span>complete</span>
-          </strong>
-        </div>
-        <div className="progress-track" aria-label={`${progress}% complete`}>
-          <span style={{ width: `${progress}%` }} />
-        </div>
-        <p className="streak-line">⭐ Best streak: {bestStreak || 0} day{bestStreak === 1 ? "" : "s"}. Gently does it 🔥</p>
-      </section>
-
-      <p className="sr-feedback" role="status" aria-live="polite">
-        {feedback}
-      </p>
-      {feedback && (
-        <div className="feedback-toast" aria-hidden="true">
-          {feedback}
-        </div>
-      )}
-
-      {showRecovery && (
-        <button type="button" className="recovery-chip" onClick={onRecovery}>
-          💗 Need a softer day? Start tiny.
+    <nav className="bottom-nav" aria-label="Primary navigation">
+      {NAV_ITEMS.map(([key, icon, label]) => (
+        <button
+          className={activeTab === key ? "is-active" : ""}
+          key={key}
+          onClick={() => onChange(key)}
+          type="button"
+          aria-current={activeTab === key ? "page" : undefined}
+        >
+          <KawaiiIcon name={icon} size={24} />
+          <span>{label}</span>
         </button>
-      )}
-
-      <PanelTitle title="Today's care" actionLabel="+" onAction={onAdd} />
-      {habits.length === 0 ? (
-        <EmptyState emoji="🌱" text="No rituals yet. Tap + to plant your first tiny habit." />
-      ) : (
-        <div className="list-stack">
-          {[...habits]
-            .sort((a, b) => statusOrder(habitStatus(a, todayStr)) - statusOrder(habitStatus(b, todayStr)))
-            .map((habit) => (
-              <HabitRow key={habit.id} habit={habit} todayStr={todayStr} onComplete={() => onComplete(habit)} onMenu={() => onMenu(habit)} />
-            ))}
-        </div>
-      )}
-    </>
-  );
-}
-
-function HabitRow({ habit, onComplete, onMenu, todayStr }) {
-  const status = habitStatus(habit, todayStr);
-  const streak = habitStreak(habit, todayStr);
-  const mark = status === "done" ? "✓" : status === "tiny" ? "🌱" : status === "skipped" ? "🛌" : "";
-  const label =
-    status === "off" ? "Not today" : status === "skipped" ? "Resting" : streak > 0 ? `🔥 ${streak}` : habit.emoji;
-  return (
-    <div className={`habit-row status-${status}`}>
-      <button className="habit-main" type="button" onClick={onComplete} disabled={status === "off"} aria-label={`Mark ${habit.name} done`}>
-        <span className="round-check" style={{ "--row-color": habit.color }} aria-hidden="true">
-          {mark}
-        </span>
-        <span className="habit-text">
-          <span className="habit-name">{habit.name}</span>
-          {habit.tinyVersion && <small className="habit-tiny">🌱 {habit.tinyVersion}</small>}
-        </span>
-        <em className="habit-flag" aria-hidden="true">
-          {label}
-        </em>
-      </button>
-      <button className="habit-menu" type="button" onClick={onMenu} aria-label={`Options for ${habit.name}`}>
-        ⋯
-      </button>
-    </div>
-  );
-}
-
-function TasksPanel({ onAdd, onDelete, onToggle, tasks }) {
-  const pending = tasks.filter((t) => !t.done).length;
-  return (
-    <>
-      <section className="quiet-card">
-        <h1>To-Dos</h1>
-        <p>{pending ? `${pending} thing${pending === 1 ? " needs" : "s need"} attention.` : "All clear. Your list can breathe."}</p>
-      </section>
-      <PanelTitle title="To-do list" actionLabel="+" onAction={onAdd} />
-      {tasks.length === 0 ? (
-        <EmptyState emoji="☑️" text="Nothing here. To-dos are separate from your daily care rituals." />
-      ) : (
-        <div className="list-stack">
-          {tasks.map((task) => (
-            <div className={`habit-row${task.done ? " status-done" : ""}`} key={task.id}>
-              <button className="habit-main" type="button" onClick={() => onToggle(task.id)} aria-label={`Toggle ${task.name}`}>
-                <span className="round-check" aria-hidden="true">{task.done ? "✓" : ""}</span>
-                <span className="habit-text">
-                  <span className="habit-name">{task.name}</span>
-                </span>
-                <em className="habit-flag" aria-hidden="true">{task.emoji}</em>
-              </button>
-              <button className="habit-menu" type="button" onClick={() => onDelete(task)} aria-label={`Delete ${task.name}`}>
-                ✕
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </>
+      ))}
+    </nav>
   );
 }
 
@@ -457,7 +482,23 @@ function NekoPanel({ challenges, habits, messages, nekoName, setMessages, tasks,
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
-  const quickActions = ["Plan my tiny day", "Make today easier", "I missed a few days", "Celebrate my wins"];
+  const mood = getMood(habits, today());
+  const moodAlt = {
+    blissful: "Neko sitting happily",
+    happy: "Neko sitting happily",
+    recovered: "Neko sitting happily",
+    sleepy: "Neko resting sleepily",
+    sad: "Neko sitting quietly",
+    lonely: "Neko sitting quietly",
+    content: "Neko sitting calmly",
+    welcome: "Neko sitting calmly",
+  }[mood];
+  const quickActions = [
+    ["sun", "Plan one tiny day"],
+    ["leaf", "Make today easier"],
+    ["heart", "Help me come back"],
+    ["sparkles", "Reflect on my wins"],
+  ];
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -471,23 +512,20 @@ function NekoPanel({ challenges, habits, messages, nekoName, setMessages, tasks,
     setLoading(true);
 
     try {
-      const todayStr = today();
       const context = {
-        doneCount: habits.filter((h) => isDoneOn(h, todayStr)).length,
+        doneCount: habits.filter((habit) => isDoneOn(habit, today())).length,
         totalHabits: habits.length,
-        pendingTodos: tasks.filter((t) => !t.done).length,
-        // Progress is real check-ins, matching the World screen, never
-        // calendar time. A challenge is "12/30 days done", not "Day 12/30".
+        pendingTodos: tasks.filter((task) => !task.done).length,
         activeChallenges: challenges
-          .filter((c) => !c.archivedAt)
-          .map((c) => ({
-            name: c.name,
-            emoji: c.emoji,
-            targetDays: c.targetDays,
-            doneDays: c.completedDates.length,
+          .filter((challenge) => !challenge.archivedAt)
+          .map((challenge) => ({
+            name: challenge.name,
+            targetDays: challenge.targetDays,
+            doneDays: (challenge.completedDates || []).length,
           })),
         userName,
       };
+      if (isCrisisMessage(text)) throw new Error("local-safety");
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -498,36 +536,44 @@ function NekoPanel({ challenges, habits, messages, nekoName, setMessages, tasks,
       if (!data.reply) throw new Error("empty");
       setMessages((current) => [...current, { role: "assistant", content: data.reply }]);
     } catch {
-      setMessages((current) => [...current, { role: "assistant", content: getLocalReply(text, habits, tasks, challenges, userName) }]);
+      setMessages((current) => [
+        ...current,
+        { role: "assistant", content: getLocalReply(text, habits, tasks, challenges, userName) },
+      ]);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <section className="chat-panel">
-      <div className="chat-intro">
-        <img src={moodAssets.happy} alt="" width="48" height="48" loading="lazy" />
-        <span>
-          <strong>{nekoName || "Neko-chan"}</strong>
-          <small>Your soft little coach</small>
-        </span>
+    <section className="companion-panel">
+      <div className="companion-scene">
+        <img src={moodAssets[mood]} alt={moodAlt} width="240" height="240" />
+        <div>
+          <p className="section-kicker">A quiet place to pause</p>
+          <h2>What would feel kind right now?</h2>
+          <p>{moodMessages[mood]}</p>
+        </div>
       </div>
-      <div className="quick-actions">
-        {quickActions.map((action) => (
-          <button key={action} onClick={() => send(action)} type="button">
+
+      <div className="companion-quick-actions" aria-label="Conversation starters">
+        {quickActions.map(([icon, action]) => (
+          <button key={action} onClick={() => send(action)} type="button" disabled={loading}>
+            <KawaiiIcon name={icon} size={20} />
             {action}
           </button>
         ))}
       </div>
-      <div className="chat-log" ref={scrollRef}>
+
+      <div className="chat-log" ref={scrollRef} aria-live="polite" aria-busy={loading}>
         {messages.map((message, index) => (
           <div className={`bubble ${message.role}`} key={`${message.role}-${index}`}>
             {message.content}
           </div>
         ))}
-        {loading && <div className="bubble assistant">{nekoName || "Neko"} is thinking...</div>}
+        {loading && <div className="bubble assistant">{nekoName || "Neko"} is thinking about one gentle next step.</div>}
       </div>
+
       <form
         className="chat-form"
         onSubmit={(event) => {
@@ -535,65 +581,19 @@ function NekoPanel({ challenges, habits, messages, nekoName, setMessages, tasks,
           send();
         }}
       >
-        <input aria-label={`Message ${nekoName || "Neko"}`} onChange={(event) => setInput(event.target.value)} placeholder={`Talk to ${nekoName || "Neko-chan"}...`} value={input} />
-        <button type="submit" aria-label="Send message">➤</button>
+        <label className="sr-only" htmlFor="neko-message">Message {nekoName || "Neko"}</label>
+        <input
+          id="neko-message"
+          onChange={(event) => setInput(event.target.value)}
+          placeholder={`Talk to ${nekoName || "Neko"}`}
+          value={input}
+          maxLength="500"
+        />
+        <button type="submit" aria-label="Send message" disabled={!input.trim() || loading}>
+          <KawaiiIcon name="send" size={20} />
+        </button>
       </form>
     </section>
-  );
-}
-
-function NekoImage({ mood }) {
-  return (
-    <img
-      className={`neko-hero mood-${mood}`}
-      key={mood}
-      src={moodAssets[mood] || moodAssets.content}
-      alt="Neko companion"
-      width="240"
-      height="240"
-    />
-  );
-}
-
-function EmptyState({ emoji, text }) {
-  return (
-    <div className="empty-state">
-      <span aria-hidden="true">{emoji}</span>
-      <p>{text}</p>
-    </div>
-  );
-}
-
-function PanelTitle({ actionLabel, onAction, title }) {
-  return (
-    <div className="panel-title">
-      <h2>{title}</h2>
-      {onAction && (
-        <button aria-label={`Add ${title}`} onClick={onAction} type="button">
-          {actionLabel}
-        </button>
-      )}
-    </div>
-  );
-}
-
-function BottomNav({ activeTab, onChange }) {
-  return (
-    <nav className="bottom-nav" aria-label="Primary">
-      {navItems.map(([key, icon, label]) => (
-        <button
-          className={activeTab === key ? "active" : ""}
-          key={key}
-          onClick={() => onChange(key)}
-          type="button"
-          aria-label={label}
-          aria-current={activeTab === key ? "page" : undefined}
-        >
-          <span aria-hidden="true">{icon}</span>
-          {label}
-        </button>
-      ))}
-    </nav>
   );
 }
 
@@ -607,33 +607,49 @@ function EntryModal({ fields, onClose, onSave, title, transform }) {
     [fields],
   );
   const [form, setForm] = useState(initial);
+  const [error, setError] = useState("");
 
   function submit(event) {
     event.preventDefault();
-    if (!form.name?.trim()) return;
+    if (!form.name?.trim()) {
+      setError("Please enter a name.");
+      return;
+    }
     onSave(transform({ ...form, name: form.name.trim() }));
   }
 
   return (
-    <Modal title={title} onClose={onClose}>
+    <Modal title={title} onClose={onClose} className="entry-modal">
       <form onSubmit={submit}>
-        <h2>{title}</h2>
+        <header className="modal-heading">
+          <div>
+            <p className="section-kicker">Keep it small and specific</p>
+            <h2>{title}</h2>
+          </div>
+          <button className="icon-button" type="button" onClick={onClose} aria-label={`Close ${title}`}>
+            <KawaiiIcon name="close" />
+          </button>
+        </header>
         {fields.map(([key, label, placeholder]) => (
           <label key={key}>
             {label}
             <input
-              onChange={(event) => setForm((current) => ({ ...current, [key]: event.target.value }))}
+              aria-describedby={key === "name" && error ? "entry-name-error" : undefined}
+              onBlur={() => key === "name" && !form.name.trim() && setError("Please enter a name.")}
+              onChange={(event) => {
+                setForm((current) => ({ ...current, [key]: event.target.value }));
+                if (key === "name") setError("");
+              }}
               placeholder={placeholder}
               type={key === "targetDays" ? "number" : "text"}
               value={form[key]}
             />
+            {key === "name" && error && <small className="field-error" id="entry-name-error">{error}</small>}
           </label>
         ))}
         <div className="modal-actions">
-          <button onClick={onClose} type="button">
-            Cancel
-          </button>
-          <button type="submit">Save</button>
+          <button className="secondary-button" onClick={onClose} type="button">Keep browsing</button>
+          <button className="primary-button" type="submit">{title}</button>
         </div>
       </form>
     </Modal>

@@ -1,27 +1,36 @@
-// Bumped to v7: the activate handler deletes every cache that isn't this one,
-// which purges the old v6 entries (including the now-removed multi-MB PNGs).
-const CACHE_NAME = 'kawaii-habits-v7';
+// The cache name changes whenever the shipped shell or visual assets change.
+const CACHE_NAME = 'kawaii-habits-v11';
 
-// Shell + the optimized WebP art, so the first offline load still has Neko.
-const PRECACHE_URLS = [
+const SHELL_URLS = [
   '/',
   '/index.html',
   '/manifest.json',
+];
+
+// Keep both approved garden moods and the companion expressions available offline.
+const STATIC_ASSET_URLS = [
   '/icon-192.png',
   '/icon-512.png',
+  '/icon-maskable.png',
   '/apple-touch-icon.png',
   '/favicon-48.png',
+  '/scene-garden-day.webp',
+  '/scene-garden-night.webp',
+  '/screenshots/today-phone.webp',
+  '/screenshots/today-tablet.webp',
   '/neko-cat-happy.webp',
   '/neko-cat-normal.webp',
   '/neko-cat-blissful.webp',
   '/neko-cat-sleepy.webp',
   '/neko-cat-sad.webp',
-  '/background-transparent-sky.webp',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS).catch(() => {}))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await cache.addAll(SHELL_URLS);
+      await Promise.allSettled(STATIC_ASSET_URLS.map((url) => cache.add(url)));
+    })
   );
 });
 
