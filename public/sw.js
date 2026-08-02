@@ -1,10 +1,10 @@
 // The cache name changes whenever the shipped shell or visual assets change.
-const CACHE_NAME = 'kawaii-habits-v13';
+const CACHE_NAME = 'kawaii-habits-v14';
 
 const SHELL_URLS = [
   '/',
   '/index.html',
-  '/manifest.json?v=1.1.0',
+  '/manifest.json',
 ];
 
 // Keep both approved garden moods and the companion expressions available offline.
@@ -54,6 +54,21 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return; // ignore the chat API / fonts / CDNs
+
+  // Keep the install identity URL stable, but always ask the network for its
+  // latest metadata so Android can detect versioned launcher-icon URLs.
+  if (url.pathname === '/manifest.json') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
 
   // Navigations: network-first so users get fresh HTML, fall back to the cached
   // shell when offline.

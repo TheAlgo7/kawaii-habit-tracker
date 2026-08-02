@@ -260,9 +260,10 @@ async function verifyPwa(page, context, profileName) {
   assert(metadata.manifest, `${profileName}: manifest link is missing`);
   assert(metadata.appleTouchIcon, `${profileName}: Apple touch icon is missing`);
   assert(metadata.appleTouchSizes === "180x180", `${profileName}: Apple touch icon size is incorrect`);
+  const manifestUrl = new URL(metadata.manifest);
   assert(
-    metadata.manifest.includes(`v=${appVersion}`),
-    `${profileName}: manifest URL is not versioned for installed-app updates`
+    manifestUrl.pathname === "/manifest.json" && manifestUrl.search === "",
+    `${profileName}: manifest URL must stay stable for installed-app updates`
   );
   assert(
     metadata.appleTouchIcon.includes(`-${iconReleaseTag}.png`),
@@ -343,8 +344,8 @@ async function verifyPwa(page, context, profileName) {
 
   const serviceWorkerSource = fs.readFileSync(path.resolve(__dirname, "../public/sw.js"), "utf8");
   assert(
-    serviceWorkerSource.includes(`/manifest.json?v=${appVersion}`),
-    `${profileName}: service-worker manifest precache URL is stale`
+    serviceWorkerSource.includes("'/manifest.json'"),
+    `${profileName}: stable manifest URL is missing from the service-worker precache`
   );
   for (const icon of manifest.icons) {
     assert(serviceWorkerSource.includes(icon.src), `${profileName}: ${icon.src} is missing from the offline cache`);
@@ -508,6 +509,7 @@ async function verifyProfile(profile) {
   const browser = await profile.browserType.launch(profile.launchOptions);
   const context = await browser.newContext({ ...profile.contextOptions, bypassCSP: true });
   await context.addInitScript(() => localStorage.clear());
+  await context.addInitScript({ path: axePath });
   const page = await context.newPage();
   const consoleErrors = [];
   const pageErrors = [];
@@ -526,8 +528,6 @@ async function verifyProfile(profile) {
     await page.waitForFunction(() =>
       [...document.images].every((image) => image.complete && image.naturalWidth > 0)
     );
-    await page.addScriptTag({ path: axePath });
-
     const bodyText = (await page.locator("body").innerText()).trim();
     assert(bodyText.length > 0, `${profile.name}: blank page`);
     assert(
@@ -625,7 +625,18 @@ async function verifyProfile(profile) {
     await moonlitButton.focus();
     await moonlitButton.press("Enter");
     await page.waitForFunction(() => document.documentElement.dataset.theme === "garden-night");
-    await page.waitForTimeout(250);
+    await page.waitForFunction(() => {
+      const panel = document.querySelector(".settings-panel");
+      if (!panel) return false;
+
+      const panelStyle = getComputedStyle(panel);
+      const probe = document.createElement("i");
+      probe.style.cssText = `position:fixed;visibility:hidden;background-color:${panelStyle.getPropertyValue("--canvas")}`;
+      document.body.append(probe);
+      const expectedBackground = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+      return panelStyle.backgroundColor === expectedBackground;
+    });
     assert((await moonlitButton.getAttribute("aria-pressed")) === "true", `${profile.name}: night theme was not selected`);
     const themeSwitchContinuity = await moonlitButton.evaluate((button) => {
       const after = button.closest(".settings-scroll")?.scrollTop || 0;
