@@ -13,24 +13,38 @@ export const SKIP_REASONS = [
 const ICON_HINTS = [
   [/water|hydrate|drink/, "water"],
   [/read|book|study|learn/, "book"],
-  [/stretch|move|walk|run|exercise|workout|yoga/, "stretch"],
+  [/walk|steps|stroll/, "walk"],
+  [/stretch|move|run|exercise|workout|yoga/, "move"],
   [/sleep|bed|night|phone down/, "moon"],
-  [/meditat|breath|mindful/, "breathe"],
+  [/meditat|mindful/, "meditate"],
+  [/breath/, "breathe"],
   [/journal|write|reflect/, "journal"],
-  [/tidy|clean|home|room/, "home"],
-  [/plant|garden|fresh|food|fruit/, "plant"],
+  [/tidy|clean|declutter|put away/, "tidy"],
+  [/fresh|food|fruit|vegetable|eat/, "fresh"],
+  [/home|room/, "home"],
+  [/plant|garden/, "plant"],
   [/friend|call|message|reach|social/, "heart"],
   [/music/, "music"],
 ];
 
+function migrateLegacyIcon(raw) {
+  const icon = raw.icon;
+  const haystack = `${raw.name || ""} ${raw.tinyVersion || ""}`.toLowerCase();
+  if (icon === "stretch") return /walk|steps|stroll/.test(haystack) ? "walk" : "move";
+  if (icon === "breathe" && /meditat|mindful/.test(haystack)) return "meditate";
+  if (icon === "home" && /tidy|clean|declutter|put away/.test(haystack)) return "tidy";
+  if (icon === "plant" && /fresh|food|fruit|vegetable|eat/.test(haystack)) return "fresh";
+  return icon;
+}
+
 export function inferHabitIcon(raw = {}) {
-  if (raw.icon) return raw.icon;
+  if (raw.icon) return migrateLegacyIcon(raw);
   const haystack = `${raw.name || ""} ${raw.tinyVersion || ""}`.toLowerCase();
   const hinted = ICON_HINTS.find(([pattern]) => pattern.test(haystack));
   if (hinted) return hinted[1];
   return {
     mind: "breathe",
-    body: "stretch",
+    body: "move",
     home: "home",
     study: "book",
     work: "task",

@@ -1,12 +1,11 @@
 import { useRef, useState } from "react";
 import { KawaiiIcon } from "../components/KawaiiIcon";
+import { ThemeArtwork } from "../components/ThemeArtwork";
 import { Modal } from "./Modal";
 import { defaultState, exportState, importState } from "./appState";
 import { THEMES } from "./presets";
 
 const APP_VERSION = "1.1.0";
-const THEME_ICONS = { "garden-day": "sun", "garden-night": "moon", matcha: "leaf" };
-
 export function Settings({ state, onUpdate, onClose }) {
   const { profile, preferences } = state;
   const [importError, setImportError] = useState("");
@@ -86,7 +85,7 @@ export function Settings({ state, onUpdate, onClose }) {
                 aria-pressed={preferences.theme === theme.id}
                 onClick={() => setPrefs({ theme: theme.id })}
               >
-                <span aria-hidden="true"><KawaiiIcon name={THEME_ICONS[theme.id]} /></span>
+                <span aria-hidden="true"><ThemeArtwork theme={theme.id} /></span>
                 <strong>{theme.name}</strong>
                 <small>{theme.description}</small>
                 <i aria-hidden="true">{preferences.theme === theme.id && <KawaiiIcon name="check" size={15} />}</i>

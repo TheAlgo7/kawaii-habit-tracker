@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HabitIcon } from "../components/HabitIcon";
 import { KawaiiIcon } from "../components/KawaiiIcon";
+import { ThemeArtwork } from "../components/ThemeArtwork";
 import { today } from "./date";
 import { normalizeHabit, toggleTiny } from "./habits";
 import { HABIT_PRESETS, THEMES } from "./presets";
 
 const STEPS = ["welcome", "naming", "pick", "tiny", "theme", "first"];
-const THEME_ICONS = { "garden-day": "sun", "garden-night": "moon", matcha: "leaf" };
-
 export function Onboarding({ onFinish }) {
   const [step, setStep] = useState(0);
   const [userName, setUserName] = useState("");
@@ -19,6 +18,7 @@ export function Onboarding({ onFinish }) {
   const [habits, setHabits] = useState([]);
   const [firstDone, setFirstDone] = useState(false);
   const headingRef = useRef(null);
+  const bodyRef = useRef(null);
 
   const stepName = STEPS[step];
   const selectedPresets = useMemo(
@@ -27,7 +27,8 @@ export function Onboarding({ onFinish }) {
   );
 
   useEffect(() => {
-    headingRef.current?.focus();
+    if (bodyRef.current) bodyRef.current.scrollTop = 0;
+    headingRef.current?.focus({ preventScroll: true });
   }, [step, firstDone]);
 
   function togglePick(index) {
@@ -105,7 +106,7 @@ export function Onboarding({ onFinish }) {
             ))}
           </div>
 
-          <div className="onboarding-body">
+          <div className="onboarding-body" ref={bodyRef}>
             {stepName === "welcome" && (
               <div className="onboarding-step welcome-step">
                 <p className="section-kicker">A habit companion for imperfect days</p>
@@ -199,7 +200,7 @@ export function Onboarding({ onFinish }) {
                       aria-pressed={theme === option.id}
                       onClick={() => setTheme(option.id)}
                     >
-                      <span className="theme-preview" aria-hidden="true"><KawaiiIcon name={THEME_ICONS[option.id]} /></span>
+                      <span className="theme-preview" aria-hidden="true"><ThemeArtwork theme={option.id} /></span>
                       <strong>{option.name}</strong>
                       <small>{option.description}</small>
                     </button>

@@ -2116,7 +2116,7 @@
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.68rem;
-    min-height: 4.7rem;
+    min-height: 4.9rem;
     padding: 0.7rem;
     border: 1px solid var(--line);
     border-radius: 0.85rem;
@@ -2128,12 +2128,21 @@
   .settings-theme > span,
   .theme-preview {
     display: grid;
-    width: 2.7rem;
-    height: 2.7rem;
+    width: 3rem;
+    height: 3rem;
     place-items: center;
     border-radius: 43% 57% 56% 44%;
     background: var(--accent-soft);
     color: var(--accent);
+  }
+
+  .theme-artwork {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
   }
 
   .settings-theme strong,
@@ -2291,16 +2300,20 @@
 
   /* Onboarding */
   .onboarding {
-    min-height: 100dvh;
+    height: 100dvh;
+    min-height: 100svh;
     padding: 0;
-    overflow: auto;
+    overflow: hidden;
     background: var(--canvas-deep);
     color: var(--ink);
   }
 
   .onboarding-shell {
     display: grid;
-    min-height: 100dvh;
+    height: 100%;
+    min-height: 0;
+    grid-template-rows: minmax(15rem, 36dvh) minmax(0, 1fr);
+    overflow: hidden;
     background: var(--canvas);
   }
 
@@ -2341,8 +2354,9 @@
 
   .onboarding-content {
     display: grid;
-    min-height: 32rem;
+    min-height: 0;
     grid-template-rows: auto minmax(0, 1fr) auto;
+    overflow: hidden;
     padding: 1rem 1rem max(1rem, env(safe-area-inset-bottom));
   }
 
@@ -2364,7 +2378,12 @@
 
   .onboarding-body {
     display: grid;
+    min-height: 0;
     align-items: start;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-padding-block: 1.35rem;
+    -webkit-overflow-scrolling: touch;
     padding: 1.35rem 0;
   }
 
@@ -2558,7 +2577,8 @@
 @layer responsive {
   @media (max-width: 519px) and (max-height: 700px) {
     .onboarding-shell {
-      min-height: 100dvh;
+      height: 100%;
+      min-height: 0;
       grid-template-rows: 10rem minmax(0, 1fr);
     }
 
@@ -2571,7 +2591,7 @@
     }
 
     .onboarding-content {
-      min-height: calc(100dvh - 10rem);
+      min-height: 0;
       padding-top: 0.75rem;
     }
 
@@ -2804,14 +2824,18 @@
 
     .onboarding {
       display: grid;
+      height: calc(100dvh - 2rem);
+      min-height: 0;
       place-items: center;
-      padding: 1rem;
+      padding: 0;
     }
 
     .onboarding-shell {
       width: min(68rem, 100%);
-      min-height: min(47rem, calc(100dvh - 2rem));
+      height: min(47rem, 100%);
+      min-height: 0;
       grid-template-columns: minmax(18rem, 0.82fr) minmax(27rem, 1.18fr);
+      grid-template-rows: minmax(0, 1fr);
       border: 1px solid var(--line);
       border-radius: 1.35rem;
       box-shadow: var(--shadow);
@@ -2823,7 +2847,7 @@
     }
 
     .onboarding-content {
-      min-height: 44rem;
+      min-height: 0;
       padding: 1.5rem 1.8rem;
     }
 

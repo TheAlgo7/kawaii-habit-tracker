@@ -5,7 +5,24 @@ import { Modal } from "./Modal";
 import { HABIT_COLORS } from "./seed";
 import { HABIT_CATEGORIES, SKIP_REASONS, frequencyLabel, habitStatus, normalizeFrequency } from "./habits";
 
-const ICON_CHOICES = ["water", "book", "stretch", "breathe", "journal", "home", "moon", "plant", "heart", "music", "sun", "flower"];
+const ICON_CHOICES = [
+  "water",
+  "book",
+  "move",
+  "walk",
+  "meditate",
+  "breathe",
+  "journal",
+  "tidy",
+  "home",
+  "moon",
+  "fresh",
+  "plant",
+  "heart",
+  "music",
+  "sun",
+  "flower",
+];
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
