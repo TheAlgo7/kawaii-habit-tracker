@@ -1,19 +1,19 @@
 // The cache name changes whenever the shipped shell or visual assets change.
-const CACHE_NAME = 'kawaii-habits-v12';
+const CACHE_NAME = 'kawaii-habits-v13';
 
 const SHELL_URLS = [
   '/',
   '/index.html',
-  '/manifest.json',
+  '/manifest.json?v=1.1.0',
 ];
 
 // Keep both approved garden moods and the companion expressions available offline.
 const STATIC_ASSET_URLS = [
-  '/icon-192.png',
-  '/icon-512.png',
-  '/icon-maskable.png',
-  '/apple-touch-icon.png',
-  '/favicon-48.png',
+  '/icon-192-v1.1.0.png',
+  '/icon-512-v1.1.0.png',
+  '/icon-maskable-v1.1.0.png',
+  '/apple-touch-icon-v1.1.0.png',
+  '/favicon-48-v1.1.0.png',
   '/scene-garden-day.webp',
   '/scene-garden-night.webp',
   '/screenshots/today-phone.webp',

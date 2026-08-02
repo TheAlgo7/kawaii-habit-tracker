@@ -15,19 +15,19 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/icon-192-v1.1.0.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/icon-512-v1.1.0.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-maskable.png",
+      "src": "/icon-maskable-v1.1.0.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

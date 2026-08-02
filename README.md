@@ -82,6 +82,12 @@ These are deterministic browser/device emulations for release gating. A final ch
 
 ## Install on a device
 
+### Updating an installed copy
+
+- App code and visual assets are delivered through a versioned service worker. When an update is ready, choose **Update now** in the in-app notice.
+- Android launcher icons use versioned manifest URLs so current Chrome/WebAPK installs can offer the operating-system **Review app update** flow.
+- iOS and iPadOS update the app itself, but Safari does not replace metadata such as an existing Home Screen icon in place. Export a backup, remove the old Home Screen app, and add it again to receive a changed launcher icon.
+
 ### Android or ChromeOS
 
 1. Open the deployed HTTPS URL in Chrome.

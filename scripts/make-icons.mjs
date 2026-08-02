@@ -8,6 +8,8 @@ import sharp from "sharp";
 const here = dirname(fileURLToPath(import.meta.url));
 const pub = join(here, "..", "public");
 const source = await readFile(join(here, "..", "design", "app-icon-master.png"));
+const { version } = JSON.parse(await readFile(join(here, "..", "package.json"), "utf8"));
+const releaseTag = `v${version}`;
 
 const OAT = "#F3D7AA";
 const PNG_OPTIONS = {
@@ -44,17 +46,17 @@ async function render(size, contentScale = 1) {
 }
 
 const jobs = [
-  ["icon-192.png", 192, 1],
-  ["icon-512.png", 512, 1],
-  ["icon-maskable.png", 512, 0.82],
-  ["apple-touch-icon.png", 180, 1],
-  ["favicon-48.png", 48, 1],
+  [["icon-192.png", `icon-192-${releaseTag}.png`], 192, 1],
+  [["icon-512.png", `icon-512-${releaseTag}.png`], 512, 1],
+  [["icon-maskable.png", `icon-maskable-${releaseTag}.png`], 512, 0.82],
+  [["apple-touch-icon.png", `apple-touch-icon-${releaseTag}.png`], 180, 1],
+  [["favicon-48.png", `favicon-48-${releaseTag}.png`], 48, 1],
 ];
 
-for (const [name, size, contentScale] of jobs) {
+for (const [names, size, contentScale] of jobs) {
   const out = await render(size, contentScale);
-  await writeFile(join(pub, name), out);
-  console.log(`${name.padEnd(22)} ${size}x${size}  ${(out.length / 1024).toFixed(1)} KB`);
+  await Promise.all(names.map((name) => writeFile(join(pub, name), out)));
+  console.log(`${names.join(", ")}  ${size}x${size}  ${(out.length / 1024).toFixed(1)} KB each`);
 }
 
 console.log("\nIcons written to /public.");

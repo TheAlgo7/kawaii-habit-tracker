@@ -10,7 +10,7 @@
     />
 
     <!-- PWA -->
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="/manifest.json?v=1.1.0" />
     <meta id="app-theme-color" name="theme-color" content="#C96648" />
     <meta name="color-scheme" content="light dark" />
     <meta name="application-name" content="Kawaii Habits" />
@@ -49,9 +49,9 @@
     </script>
 
     <!-- Icons -->
-    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48-v1.1.0.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192-v1.1.0.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-v1.1.0.png" />
   </head>
   <body>
     <div id="root"></div>
@@ -97,8 +97,15 @@
         }
 
         window.addEventListener('load', async () => {
+          let refreshing = false;
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshing) return;
+            refreshing = true;
+            window.location.reload();
+          });
+
           try {
-            const reg = await navigator.serviceWorker.register('/sw.js');
+            const reg = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
             if (reg.waiting && navigator.serviceWorker.controller) showUpdateToast(reg.waiting);
             reg.addEventListener('updatefound', () => {
               const sw = reg.installing;
@@ -107,16 +114,10 @@
                 if (sw.state === 'installed' && navigator.serviceWorker.controller) showUpdateToast(sw);
               });
             });
+            await reg.update();
           } catch {
             // The app remains fully usable when service workers are unavailable.
           }
-
-          let refreshing = false;
-          navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (refreshing) return;
-            refreshing = true;
-            window.location.reload();
-          });
         });
       }
     </script>

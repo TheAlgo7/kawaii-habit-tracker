@@ -7,6 +7,8 @@ const axePath = require.resolve("axe-core/axe.min.js");
 const baseUrl = process.env.KAWAII_VERIFY_URL || "http://127.0.0.1:4173";
 const chromePath = process.env.CHROME_PATH || "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const outputDir = path.resolve(__dirname, "../docs/assets");
+const { version: appVersion } = require("../package.json");
+const iconReleaseTag = `v${appVersion}`;
 
 fs.mkdirSync(outputDir, { recursive: true });
 
@@ -230,6 +232,7 @@ async function verifyPwa(page, context, profileName) {
     manifest: document.querySelector('link[rel="manifest"]')?.href || "",
     appleTouchIcon: document.querySelector('link[rel="apple-touch-icon"]')?.href || "",
     appleTouchSizes: document.querySelector('link[rel="apple-touch-icon"]')?.sizes?.value || "",
+    favicon: document.querySelector('link[rel="icon"][sizes="48x48"]')?.href || "",
     themeColor: document.querySelector('meta[name="theme-color"]')?.content || "",
   }));
 
@@ -237,6 +240,15 @@ async function verifyPwa(page, context, profileName) {
   assert(metadata.manifest, `${profileName}: manifest link is missing`);
   assert(metadata.appleTouchIcon, `${profileName}: Apple touch icon is missing`);
   assert(metadata.appleTouchSizes === "180x180", `${profileName}: Apple touch icon size is incorrect`);
+  assert(
+    metadata.manifest.includes(`v=${appVersion}`),
+    `${profileName}: manifest URL is not versioned for installed-app updates`
+  );
+  assert(
+    metadata.appleTouchIcon.includes(`-${iconReleaseTag}.png`),
+    `${profileName}: Apple touch icon URL is not versioned`
+  );
+  assert(metadata.favicon.includes(`-${iconReleaseTag}.png`), `${profileName}: favicon URL is not versioned`);
 
   const manifestResponse = await context.request.get(metadata.manifest);
   assert(manifestResponse.ok(), `${profileName}: manifest request failed`);
@@ -255,16 +267,67 @@ async function verifyPwa(page, context, profileName) {
     manifest.icons.some((icon) => icon.sizes === "512x512" && icon.purpose === "maskable"),
     `${profileName}: Android maskable icon is missing`
   );
+  assert(
+    manifest.icons.every((icon) => icon.src.includes(`-${iconReleaseTag}.png`)),
+    `${profileName}: manifest icon URLs must change when launcher artwork changes`
+  );
 
   const iconChecks = [];
   for (const icon of manifest.icons) {
     const response = await context.request.get(new URL(icon.src, baseUrl).href);
-    iconChecks.push({ src: icon.src, status: response.status(), contentType: response.headers()["content-type"] });
+    const localPath = path.resolve(__dirname, "../public", new URL(icon.src, baseUrl).pathname.replace(/^\//, ""));
+    const [expectedWidth, expectedHeight] = icon.sizes.split("x").map(Number);
+    const image = await sharp(localPath).metadata();
+    const stats = await sharp(localPath).stats();
+    const alpha = stats.channels[3];
+    const opaque = !alpha || alpha.min === 255;
+    iconChecks.push({
+      src: icon.src,
+      status: response.status(),
+      contentType: response.headers()["content-type"],
+      declared: icon.sizes,
+      actual: `${image.width}x${image.height}`,
+      opaque,
+    });
     assert(response.ok(), `${profileName}: ${icon.src} failed to load`);
     assert(
       response.headers()["content-type"]?.includes("image/png"),
       `${profileName}: ${icon.src} is not served as PNG`
     );
+    assert(
+      image.width === expectedWidth && image.height === expectedHeight,
+      `${profileName}: ${icon.src} dimensions do not match its manifest declaration`
+    );
+    assert(opaque, `${profileName}: ${icon.src} contains transparent launcher pixels`);
+  }
+
+  const linkedIconChecks = [];
+  for (const linkedIcon of [
+    { label: "Apple touch icon", url: metadata.appleTouchIcon, size: 180 },
+    { label: "favicon", url: metadata.favicon, size: 48 },
+  ]) {
+    const response = await context.request.get(linkedIcon.url);
+    const pathname = new URL(linkedIcon.url).pathname.replace(/^\//, "");
+    const image = await sharp(path.resolve(__dirname, "../public", pathname)).metadata();
+    linkedIconChecks.push({ label: linkedIcon.label, status: response.status(), actual: `${image.width}x${image.height}` });
+    assert(response.ok(), `${profileName}: ${linkedIcon.label} failed to load`);
+    assert(
+      response.headers()["content-type"]?.includes("image/png"),
+      `${profileName}: ${linkedIcon.label} is not served as PNG`
+    );
+    assert(
+      image.width === linkedIcon.size && image.height === linkedIcon.size,
+      `${profileName}: ${linkedIcon.label} has incorrect dimensions`
+    );
+  }
+
+  const serviceWorkerSource = fs.readFileSync(path.resolve(__dirname, "../public/sw.js"), "utf8");
+  assert(
+    serviceWorkerSource.includes(`/manifest.json?v=${appVersion}`),
+    `${profileName}: service-worker manifest precache URL is stale`
+  );
+  for (const icon of manifest.icons) {
+    assert(serviceWorkerSource.includes(icon.src), `${profileName}: ${icon.src} is missing from the offline cache`);
   }
 
   const screenshotChecks = [];
@@ -302,6 +365,7 @@ async function verifyPwa(page, context, profileName) {
     metadata,
     manifest: { display: manifest.display, orientation: manifest.orientation },
     iconChecks,
+    linkedIconChecks,
     screenshotChecks,
     serviceWorker,
   };

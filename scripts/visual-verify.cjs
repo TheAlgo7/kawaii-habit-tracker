@@ -45,7 +45,7 @@ function verifyPrecacheAssets() {
   const urls = [...serviceWorker.matchAll(/'\/(.*?)'/g)]
     .map((match) => match[1])
     .filter((url) => url && url !== "index.html");
-  const missing = urls.filter((url) => !fs.existsSync(path.join(publicDir, url)));
+  const missing = urls.filter((url) => !fs.existsSync(path.join(publicDir, url.split(/[?#]/)[0])));
   if (missing.length) throw new Error(`Missing service-worker assets: ${missing.join(", ")}`);
   return urls.length;
 }
