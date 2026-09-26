@@ -15,9 +15,11 @@ function dateParts(dateKey) {
   return new Date(year, month - 1, day);
 }
 
-function dayGreeting(theme) {
-  if (theme === "garden-night") return "Good evening";
+// By the clock, not the theme: Moonlit Nook used to say "Good evening" at
+// breakfast. Before 5 AM it is still the night before.
+function dayGreeting() {
   const hour = new Date().getHours();
+  if (hour < 5) return "Good evening";
   if (hour < 12) return "Good morning";
   if (hour < 18) return "Good afternoon";
   return "Good evening";
@@ -69,7 +71,7 @@ export function TodayPanel({
           <div>
             <p className="hero-kicker">{worldName || "Your little garden"}</p>
             <h1 id="today-greeting">
-              {dayGreeting(theme)}{userName ? `, ${userName}` : ""}
+              {dayGreeting()}{userName ? `, ${userName}` : ""}
             </h1>
           </div>
           <button className="icon-button hero-settings" type="button" onClick={onOpenSettings} aria-label="Open settings">
