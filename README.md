@@ -1,25 +1,50 @@
-<div align="center">
-
-# Kawaii Habit Tracker
-
-### A sunlit pocket garden for gentle, imperfect routines
-
-[![React](https://img.shields.io/badge/React-19-C96648?style=flat-square&logo=react&logoColor=white&labelColor=38272B)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-8-C96648?style=flat-square&logo=vite&logoColor=white&labelColor=38272B)](https://vite.dev)
-[![PWA](https://img.shields.io/badge/PWA-Installable-7B9B6D?style=flat-square&labelColor=38272B)](https://kawaii-habit-tracker.vercel.app)
-[![Tests](https://img.shields.io/badge/tests-passing-7B9B6D?style=flat-square&labelColor=38272B)](#verification)
-
-</div>
-
 <p align="center">
-  <img src="./docs/assets/hero.png" width="390" alt="Kawaii Habit Tracker Today screen in the Sunlit Garden theme" />
+  <img src="docs/readme/hero.png" alt="Kawaii Habit Tracker: a pocket garden for gentle, imperfect routines" width="100%">
 </p>
 
-Kawaii Habit Tracker is a private, phone-first habit companion for Android, iPhone, and tablet browsers. Tiny versions count, planned rest never becomes failure, and ordinary care grows a small illustrated world. The default Sunlit Garden theme follows the warm watercolor direction; Moonlit Nook offers the same product under lantern light.
+<p align="center">
+  <strong>A habit tracker where tiny versions count and rest days are planned, not failed.</strong><br>
+  Ordinary care grows a small illustrated garden, with a cat called Neko for company.
+</p>
 
-> **Status:** Version 1.1.0 is a verified release candidate. The repository builds as an installable offline-first PWA. A public deployment may lag behind the current branch.
+<p align="center">
+  <a href="https://kawaii-habit-tracker.vercel.app"><strong>Open the app</strong></a>
+  &nbsp;·&nbsp;
+  <a href="#features">Features</a>
+  &nbsp;·&nbsp;
+  <a href="#run-locally">Run locally</a>
+  &nbsp;·&nbsp;
+  <a href="#verification">Verification</a>
+</p>
 
-## What is included
+<p align="center">
+  <img alt="React 19" src="https://img.shields.io/badge/React-19-C96648?style=flat-square&labelColor=38272B">
+  <img alt="Vite" src="https://img.shields.io/badge/Vite-8-C96648?style=flat-square&labelColor=38272B">
+  <img alt="Installable PWA" src="https://img.shields.io/badge/PWA-offline-7B9B6D?style=flat-square&labelColor=38272B">
+  <img alt="Tests passing" src="https://img.shields.io/badge/tests-passing-7B9B6D?style=flat-square&labelColor=38272B">
+</p>
+
+## Why this one
+
+Most habit apps run on streaks, and a streak turns one missed day into a reason to quit. This one is built the other way round. The smallest honest version of a habit counts as doing it. A rest day you planned is protected, not a break in anything. The week is shown as a rhythm, and the reward for showing up is a garden that keeps growing, not a number that resets.
+
+Everything lives on the phone. There is no account and no tracker, and the app works offline once installed.
+
+Version 1.1.0 is a verified release candidate; the public launch is on hold.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/readme/today.png" width="160" alt="Today"><br><sub>Today, in Sunlit Garden</sub></td>
+    <td align="center"><img src="docs/readme/rhythm.png" width="160" alt="Rhythm"><br><sub>A softer view of the week</sub></td>
+    <td align="center"><img src="docs/readme/garden.png" width="160" alt="Garden"><br><sub>The garden and its keepsakes</sub></td>
+    <td align="center"><img src="docs/readme/neko.png" width="160" alt="Neko"><br><sub>Neko, never a judge</sub></td>
+    <td align="center"><img src="docs/readme/night.png" width="160" alt="Moonlit Nook"><br><sub>Moonlit Nook</sub></td>
+  </tr>
+</table>
+
+## Features
 
 - **Fast Today loop:** habits grouped by morning, anytime, and evening, with seven-day context and one-tap completion.
 - **Tiny and rest states:** mark the smallest honest version, record a rest day, attach a note, or reopen today without losing history.
@@ -78,6 +103,8 @@ Then run the suite in a second terminal:
 npm run verify:devices
 ```
 
+The screenshots at the top of this README come from `python scripts/readme-shots.py`, which onboards a demo user on the live app and gives her three weeks of history.
+
 These are deterministic browser/device emulations for release gating. A final check on physical iPhone and Galaxy hardware is still recommended for operating-system install prompts, status-bar insets, and keyboard behavior.
 
 ## Install on a device
@@ -119,6 +146,8 @@ Product and visual decisions are recorded in [PRODUCT.md](./PRODUCT.md), [DESIGN
 
 Habit data, notes, names, and chat history stay on the current device unless the user exports a backup. AI chat is optional and degrades to a local response when the API is unavailable. Messages suggesting immediate self-harm or harm to others are routed to a local crisis-support response before any network request.
 
----
+## Licence
 
-Built by [The Algothrim](https://thealgothrim.com).
+Copyright © 2026 Gaurav Kumar, [The Algothrim](https://thealgothrim.com). All rights reserved.
+
+The code is public to read and learn from. It is not licensed for reuse.
